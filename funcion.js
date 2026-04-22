@@ -310,8 +310,7 @@ async function enviarCodigoAdminSuperior() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                usuarioSolicitante: nombreUsuario,
-                nombreSolicitante: nombreVisible
+                usuario: nombreUsuario
             })
         });
 
