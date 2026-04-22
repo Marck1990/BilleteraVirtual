@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billetera Virtual Escolar</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+
+<body>
+    <main class="aplicacion">
+
+        <!-- bloque pantalla de inicio -->
+        <section id="pantallaInicio" class="pantalla">
+            <div class="contenedor-inicio">
+
+                <article class="panel-izquierdo">
+                    <h1 class="titulo-app">Billetera Virtual Escolar</h1>
+                    <p class="subtitulo-app">simulación educativa de consumo responsable</p>
+
+                    <div class="tarjeta-acceso">
+                        <h2 class="titulo-seccion">ingreso al sistema</h2>
+
+                        <label for="inputUsuarioIngreso" class="etiqueta-control">usuario</label>
+                        <input type="text" id="inputUsuarioIngreso" class="input-control"
+                            placeholder="ejemplo: equipo1 o docente1">
+
+                        <label for="inputContrasenaIngreso" class="etiqueta-control">contraseña</label>
+                        <input type="password" id="inputContrasenaIngreso" class="input-control"
+                            placeholder="ingresar contraseña">
+
+                        <div class="acciones-formulario">
+                            <button id="botonIngresarSistema" class="boton">ingresar</button>
+                            <button id="botonIrRegistro" class="boton boton-secundario">registrarse</button>
+                        </div>
+
+                        <p id="mensajeInicio" class="mensaje"></p>
+                    </div>
+
+                    <div class="acciones-inferiores">
+                        <button id="botonRecuperarAcceso" class="enlace-boton">recuperar acceso</button>
+                        <button id="botonSoporte" class="enlace-boton">soporte</button>
+                    </div>
+                </article>
+
+                <article class="panel-derecho">
+                    <div class="contenedor-qr">
+                        <div class="codigo-qr">qr</div>
+                    </div>
+
+                    <p class="texto-panel">
+                        app educativa para trabajar con saldo escolar ficticio y compras simuladas
+                    </p>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- bloque pantalla de registro -->
+        <section id="pantallaRegistro" class="pantalla oculto">
+            <div class="contenedor-secundario">
+                <article class="tarjeta-formulario">
+                    <h2 class="titulo-seccion">registro de usuario</h2>
+
+                    <label for="selectTipoRegistro" class="etiqueta-control">tipo de cuenta</label>
+                    <select id="selectTipoRegistro" class="input-control">
+                        <option value="titular">titular</option>
+                        <option value="admin">administrador</option>
+                        <option value="adminSuperior">admin superior</option>
+                    </select>
+
+                    <label for="inputUsuarioRegistro" class="etiqueta-control">usuario</label>
+                    <input type="text" id="inputUsuarioRegistro" class="input-control"
+                        placeholder="ejemplo: equipo1 o docente1">
+
+                    <label for="inputNombreRegistro" class="etiqueta-control">nombre visible</label>
+                    <input type="text" id="inputNombreRegistro" class="input-control"
+                        placeholder="ejemplo: equipo 1a o profesor juan">
+
+                    <div id="bloqueCursoRegistro">
+                        <label for="inputCursoRegistro" class="etiqueta-control">curso o grupo</label>
+                        <input type="text" id="inputCursoRegistro" class="input-control"
+                            placeholder="ejemplo: 2do 3">
+                    </div>
+
+                    <label for="inputContrasenaRegistro" class="etiqueta-control">contraseña</label>
+                    <input type="password" id="inputContrasenaRegistro" class="input-control"
+                        placeholder="crear contraseña">
+
+                    <!-- bloque admin superior envio de codigo -->
+                    <div id="bloqueAdminSuperiorCodigo" class="oculto">
+                        <p class="texto-ayuda">
+                            para registrar un admin superior, el sistema debe enviar un código al correo autorizado configurado en el backend
+                        </p>
+
+                        <div class="acciones-formulario">
+                            <button id="botonEnviarCodigoAdminSuperior" type="button" class="boton boton-advertencia">
+                                enviar código de validación
+                            </button>
+                        </div>
+
+                        <label for="inputCodigoAdminSuperior" class="etiqueta-control">código de validación</label>
+                        <input type="text" id="inputCodigoAdminSuperior" class="input-control"
+                            placeholder="ingresar código recibido">
+
+                        <p id="mensajeAdminSuperiorRegistro" class="mensaje"></p>
+                    </div>
+
+                    <div class="acciones-formulario">
+                        <button id="botonRegistrarCuenta" class="boton">guardar registro</button>
+                        <button id="botonVolverInicioDesdeRegistro" class="boton boton-secundario">volver</button>
+                    </div>
+
+                    <p id="mensajeRegistro" class="mensaje"></p>
+                </article>
+            </div>
+        </section>
+
+        <!-- bloque pantalla billetera titular -->
+        <section id="pantallaBilletera" class="pantalla oculto">
+            <div class="contenedor-principal">
+
+                <header class="encabezado-billetera">
+                    <div>
+                        <h2 class="titulo-seccion">billetera virtual escolar</h2>
+                        <p id="textoUsuarioActual" class="texto-suave">sin usuario activo</p>
+                    </div>
+
+                    <div class="acciones-encabezado">
+                        <button id="botonSalirSistema" class="boton boton-secundario">salir</button>
+                    </div>
+                </header>
+
+                <article class="tarjeta resumen-billetera">
+                    <p class="rotulo">titular actual</p>
+                    <p id="nombreTitular" class="nombre-titular">equipo ganador</p>
+
+                    <p class="rotulo">curso o grupo</p>
+                    <p id="cursoTitular" class="texto-normal">sin curso</p>
+
+                    <p class="rotulo">saldo disponible</p>
+                    <p id="saldoDisponible" class="saldo-disponible">$ 0</p>
+
+                    <p id="estadoTitular" class="mensaje"></p>
+                    <p id="mensajeCompra" class="mensaje"></p>
+                </article>
+
+                <div class="grid-billetera">
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">catálogo de productos</h3>
+                        <div id="listaProductos" class="lista-productos"></div>
+                    </article>
+
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">carrito</h3>
+                        <div id="listaCarrito" class="lista-carrito"></div>
+
+                        <div class="pie-carrito">
+                            <p class="total-carrito">total: <span id="totalCarrito">$ 0</span></p>
+
+                            <div class="acciones-formulario">
+                                <button id="botonConfirmarCompra" class="boton">confirmar compra</button>
+                                <button id="botonVaciarCarrito" class="boton boton-secundario">vaciar carrito</button>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <article class="tarjeta">
+                    <h3 class="subtitulo-seccion">historial de movimientos</h3>
+                    <div id="listaHistorial" class="lista-historial"></div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- bloque pantalla administrador comun -->
+        <section id="pantallaAdmin" class="pantalla oculto">
+            <div class="contenedor-principal">
+
+                <header class="encabezado-billetera">
+                    <div>
+                        <h2 class="titulo-seccion">panel administrador</h2>
+                        <p id="textoAdminActual" class="texto-suave">sin administrador activo</p>
+                    </div>
+
+                    <div class="acciones-encabezado">
+                        <button id="botonSalirAdmin" class="boton boton-secundario">cerrar sesión</button>
+                    </div>
+                </header>
+
+                <div class="grid-admin">
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">usuarios registrados</h3>
+                        <div id="listaUsuariosAdmin" class="lista-usuarios-admin"></div>
+                    </article>
+
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">agregar producto</h3>
+
+                        <label for="inputNombreProducto" class="etiqueta-control">nombre del producto</label>
+                        <input type="text" id="inputNombreProducto" class="input-control" placeholder="ejemplo: pera">
+
+                        <label for="inputPrecioProducto" class="etiqueta-control">precio</label>
+                        <input type="number" id="inputPrecioProducto" class="input-control" placeholder="ejemplo: 45">
+
+                        <button id="botonAgregarProducto" class="boton">agregar producto</button>
+                    </article>
+
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">quitar productos</h3>
+                        <div id="listaProductosAdmin" class="lista-productos-admin"></div>
+                    </article>
+                </div>
+
+                <article class="tarjeta">
+                    <h3 class="subtitulo-seccion">historial completo</h3>
+                    <div id="listaHistorialAdmin" class="lista-historial"></div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- bloque pantalla admin superior -->
+        <section id="pantallaAdminSuperior" class="pantalla oculto">
+            <div class="contenedor-principal">
+
+                <header class="encabezado-billetera">
+                    <div>
+                        <h2 class="titulo-seccion">panel admin superior</h2>
+                        <p id="textoAdminSuperiorActual" class="texto-suave">sin admin superior activo</p>
+                    </div>
+
+                    <div class="acciones-encabezado">
+                        <button id="botonSalirAdminSuperior" class="boton boton-secundario">cerrar sesión</button>
+                    </div>
+                </header>
+
+                <div class="grid-admin">
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">administradores registrados</h3>
+                        <div id="listaAdministradoresAdminSuperior" class="lista-administradores-admin-superior"></div>
+                    </article>
+
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">configuración general</h3>
+
+                        <label for="inputSaldoInicialSistema" class="etiqueta-control">saldo inicial por defecto</label>
+                        <input type="number" id="inputSaldoInicialSistema" class="input-control" placeholder="ejemplo: 100">
+
+                        <div class="acciones-formulario">
+                            <button id="botonGuardarSaldoInicialSistema" class="boton">guardar saldo inicial</button>
+                            <button id="botonAlternarRegistroPublico" class="boton boton-advertencia">alternar registro público</button>
+                        </div>
+
+                        <p id="mensajeAdminSuperiorPanel" class="mensaje"></p>
+                    </article>
+                </div>
+
+                <article class="tarjeta">
+                    <h3 class="subtitulo-seccion">historial global del sistema</h3>
+                    <div id="listaHistorialGlobalAdminSuperior" class="lista-historial"></div>
+                </article>
+
+                <article class="tarjeta">
+                    <h3 class="subtitulo-seccion">estadísticas generales</h3>
+                    <div id="panelEstadisticasAdminSuperior" class="panel-estadisticas-admin-superior"></div>
+                </article>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script src="funcion.js"></script>
+</body>
+
+</html>
