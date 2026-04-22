@@ -278,11 +278,16 @@ function guardarCodigoAdminSuperiorLocal(nombreUsuario, codigo) {
     localStorage.setItem(
         "adminSuperiorTemporal",
         JSON.stringify({
-            usuario: nombreUsuario,
+            usuario: String(nombreUsuario).trim(),
             codigo: String(codigo).trim()
         })
     );
 }
+
+
+
+
+
 
 function obtenerCodigoAdminSuperiorLocal() {
     const datosGuardados = localStorage.getItem("adminSuperiorTemporal");
@@ -293,6 +298,9 @@ function obtenerCodigoAdminSuperiorLocal() {
 
     return JSON.parse(datosGuardados);
 }
+
+
+
 
 function limpiarCodigoAdminSuperiorLocal() {
     localStorage.removeItem("adminSuperiorTemporal");
@@ -393,15 +401,24 @@ async function validarCodigoAdminSuperiorConBackend(nombreUsuario, codigoIngresa
     const datosTemporales = obtenerCodigoAdminSuperiorLocal();
 
     if (datosTemporales === null) {
-        throw new Error("primero debés solicitar el código de validación");
+        throw new Error("no hay código guardado en localStorage");
     }
 
-    if (datosTemporales.usuario.trim() !== nombreUsuario.trim()) {
-        throw new Error("el código fue generado para otro usuario");
+    const usuarioGuardado = String(datosTemporales.usuario).trim();
+    const codigoGuardado = String(datosTemporales.codigo).trim();
+    const usuarioActual = String(nombreUsuario).trim();
+    const codigoActual = String(codigoIngresado).trim();
+
+    if (usuarioGuardado !== usuarioActual) {
+        throw new Error(
+            "usuario distinto. guardado: [" + usuarioGuardado + "] actual: [" + usuarioActual + "]"
+        );
     }
 
-    if (String(datosTemporales.codigo).trim() !== String(codigoIngresado).trim()) {
-        throw new Error("código inválido");
+    if (codigoGuardado !== codigoActual) {
+        throw new Error(
+            "código distinto. guardado: [" + codigoGuardado + "] ingresado: [" + codigoActual + "]"
+        );
     }
 
     return {
