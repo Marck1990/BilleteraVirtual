@@ -122,13 +122,11 @@ const mensajeAdminSuperiorPanel = document.querySelector("#mensajeAdminSuperiorP
 const listaHistorialGlobalAdminSuperior = document.querySelector("#listaHistorialGlobalAdminSuperior");
 const panelEstadisticasAdminSuperior = document.querySelector("#panelEstadisticasAdminSuperior");
 
+
+
+
+
 // bloque funciones de utilidad general
-
-
-
-
-
-
 
 
 function mostrarPantalla(idPantalla) {
@@ -272,6 +270,45 @@ function existeUsuarioRepetido(nombreUsuario) {
     return false;
 }
 
+
+
+// bloque funciones de almacenamiento temporal admin superior
+
+function guardarCodigoAdminSuperiorLocal(nombreUsuario, codigo) {
+    localStorage.setItem(
+        "adminSuperiorTemporal",
+        JSON.stringify({
+            usuario: nombreUsuario,
+            codigo: String(codigo).trim()
+        })
+    );
+}
+
+function obtenerCodigoAdminSuperiorLocal() {
+    const datosGuardados = localStorage.getItem("adminSuperiorTemporal");
+
+    if (datosGuardados === null) {
+        return null;
+    }
+
+    return JSON.parse(datosGuardados);
+}
+
+function limpiarCodigoAdminSuperiorLocal() {
+    localStorage.removeItem("adminSuperiorTemporal");
+}
+
+
+
+
+
+
+
+
+
+
+
+
 // bloque funciones de interfaz de registro
 
 function actualizarFormularioRegistro() {
@@ -359,11 +396,11 @@ async function validarCodigoAdminSuperiorConBackend(nombreUsuario, codigoIngresa
         throw new Error("primero debés solicitar el código de validación");
     }
 
-    if (datosTemporales.usuario !== nombreUsuario) {
+    if (datosTemporales.usuario.trim() !== nombreUsuario.trim()) {
         throw new Error("el código fue generado para otro usuario");
     }
 
-    if (datosTemporales.codigo !== codigoIngresado) {
+    if (String(datosTemporales.codigo).trim() !== String(codigoIngresado).trim()) {
         throw new Error("código inválido");
     }
 
