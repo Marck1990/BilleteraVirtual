@@ -26,6 +26,10 @@ export default async function handler(req, res) {
 
         global.codigoAdminSuperior = codigo;
 
+        /* bloque logs iniciales */
+        console.log("usuario recibido:", usuario);
+        console.log("codigo generado:", codigo);
+
         const respuestaEmail = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
             method: "POST",
             headers: {
@@ -45,6 +49,10 @@ export default async function handler(req, res) {
 
         const textoRespuesta = await respuestaEmail.text();
 
+        /* bloque logs respuesta emailjs */
+        console.log("status emailjs:", respuestaEmail.status);
+        console.log("respuesta emailjs:", textoRespuesta);
+
         if (!respuestaEmail.ok) {
             return res.status(500).json({
                 ok: false,
@@ -60,6 +68,9 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
+
+        console.log("error catch:", error.message);
+
         return res.status(500).json({
             ok: false,
             mensaje: "error al enviar codigo",
