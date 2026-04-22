@@ -24,8 +24,6 @@ export default async function handler(req, res) {
 
         const codigo = Math.floor(100000 + Math.random() * 900000).toString();
 
-        global.codigoAdminSuperior = codigo;
-
         /* bloque logs iniciales */
         console.log("usuario recibido:", usuario);
         console.log("codigo generado:", codigo);
@@ -64,7 +62,8 @@ export default async function handler(req, res) {
         return res.status(200).json({
             ok: true,
             mensaje: "codigo enviado correctamente",
-            detalle: textoRespuesta
+            detalle: textoRespuesta,
+            codigo: codigo
         });
 
     } catch (error) {

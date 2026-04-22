@@ -124,6 +124,13 @@ const panelEstadisticasAdminSuperior = document.querySelector("#panelEstadistica
 
 // bloque funciones de utilidad general
 
+
+
+
+
+
+
+
 function mostrarPantalla(idPantalla) {
     pantallaInicio.classList.add("oculto");
     pantallaRegistro.classList.add("oculto");
@@ -288,6 +295,7 @@ function actualizarFormularioRegistro() {
 
 // bloque funciones backend admin superior
 
+
 // bloque funciones backend admin superior
 
 async function enviarCodigoAdminSuperior() {
@@ -322,6 +330,8 @@ async function enviarCodigoAdminSuperior() {
             throw new Error(datos.detalle || datos.mensaje || "no se pudo enviar el código");
         }
 
+        guardarCodigoAdminSuperiorLocal(nombreUsuario, datos.codigo);
+
         codigoAdminSuperiorEnviado = true;
         mostrarMensaje(
             mensajeAdminSuperiorRegistro,
@@ -343,26 +353,24 @@ async function enviarCodigoAdminSuperior() {
 
 
 async function validarCodigoAdminSuperiorConBackend(nombreUsuario, codigoIngresado) {
-    const respuesta = await fetch(URL_VALIDAR_CODIGO_ADMIN_SUPERIOR, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            usuarioSolicitante: nombreUsuario,
-            codigo: codigoIngresado
-        })
-    });
+    const datosTemporales = obtenerCodigoAdminSuperiorLocal();
 
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-        throw new Error(datos.mensaje || "código inválido");
+    if (datosTemporales === null) {
+        throw new Error("primero debés solicitar el código de validación");
     }
 
-    return datos;
-}
+    if (datosTemporales.usuario !== nombreUsuario) {
+        throw new Error("el código fue generado para otro usuario");
+    }
 
+    if (datosTemporales.codigo !== codigoIngresado) {
+        throw new Error("código inválido");
+    }
+
+    return {
+        ok: true
+    };
+}
 // bloque funciones de render de titular
 
 function renderizarResumenBilletera() {
@@ -709,6 +717,7 @@ function volverAInicio() {
     limpiarMensajesPrincipales();
     inputCodigoAdminSuperior.value = "";
     codigoAdminSuperiorEnviado = false;
+    limpiarCodigoAdminSuperiorLocal();
     mostrarPantalla("#pantallaInicio");
 }
 
@@ -834,6 +843,7 @@ async function registrarCuenta() {
             siguienteIdAdmin++;
             codigoAdminSuperiorEnviado = false;
             inputCodigoAdminSuperior.value = "";
+            limpiarCodigoAdminSuperiorLocal();
             limpiarMensaje(mensajeAdminSuperiorRegistro);
         } catch (error) {
             mostrarMensaje(mensajeRegistro, error.message, "var(--color-error)");
