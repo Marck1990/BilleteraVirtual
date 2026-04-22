@@ -288,6 +288,8 @@ function actualizarFormularioRegistro() {
 
 // bloque funciones backend admin superior
 
+// bloque funciones backend admin superior
+
 async function enviarCodigoAdminSuperior() {
     const nombreUsuario = inputUsuarioRegistro.value.trim();
     const nombreVisible = inputNombreRegistro.value.trim();
@@ -317,7 +319,7 @@ async function enviarCodigoAdminSuperior() {
         const datos = await respuesta.json();
 
         if (!respuesta.ok) {
-            throw new Error(datos.mensaje || "no se pudo enviar el código");
+            throw new Error(datos.detalle || datos.mensaje || "no se pudo enviar el código");
         }
 
         codigoAdminSuperiorEnviado = true;
@@ -337,6 +339,8 @@ async function enviarCodigoAdminSuperior() {
         botonEnviarCodigoAdminSuperior.disabled = false;
     }
 }
+
+
 
 async function validarCodigoAdminSuperiorConBackend(nombreUsuario, codigoIngresado) {
     const respuesta = await fetch(URL_VALIDAR_CODIGO_ADMIN_SUPERIOR, {
