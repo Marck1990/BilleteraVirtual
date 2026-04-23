@@ -1272,3 +1272,342 @@ botonAlternarRegistroPublico.addEventListener("click", alternarRegistroPublico);
 
 actualizarFormularioRegistro();
 mostrarPantalla("#pantallaInicio");
+
+
+
+// bloque referencias del dom
+// agregar junto al resto de referencias del admin superior
+
+const listaCuentasAdminSuperior = document.querySelector("#listaCuentasAdminSuperior");
+const mensajeAccionesAdminSuperior = document.querySelector("#mensajeAccionesAdminSuperior");
+
+
+// bloque limpieza de mensajes
+// agregar estas dos lineas dentro de la funcion limpiarMensajesPrincipales()
+
+/*
+limpiarMensaje(mensajeAccionesAdminSuperior);
+*/
+
+
+// bloque funciones auxiliares para el admin superior
+
+function obtenerTodasLasCuentasDelSistema() {
+    let cuentas = [];
+
+    for (let i = 0; i < usuarios.length; i++) {
+        cuentas.push({
+            origen: "usuarios",
+            id: usuarios[i].id,
+            tipo: usuarios[i].tipo,
+            usuario: usuarios[i].usuario,
+            nombre: usuarios[i].nombre,
+            contrasena: usuarios[i].contrasena,
+            bloqueado: usuarios[i].bloqueado,
+            saldo: usuarios[i].saldo,
+            curso: usuarios[i].curso
+        });
+    }
+
+    for (let i = 0; i < administradores.length; i++) {
+        cuentas.push({
+            origen: "administradores",
+            id: administradores[i].id,
+            tipo: administradores[i].tipo,
+            usuario: administradores[i].usuario,
+            nombre: administradores[i].nombre,
+            contrasena: administradores[i].contrasena,
+            bloqueado: false,
+            saldo: 0,
+            curso: "-"
+        });
+    }
+
+    return cuentas;
+}
+
+function buscarCuentaDelSistema(origenBuscado, idBuscado) {
+    if (origenBuscado === "usuarios") {
+        return buscarUsuarioPorId(idBuscado);
+    }
+
+    if (origenBuscado === "administradores") {
+        return buscarAdministradorPorId(idBuscado);
+    }
+
+    return null;
+}
+
+function esAdministradorSuperiorPropio(origenBuscado, idBuscado) {
+    if (sesion.tipo !== "adminSuperior") {
+        return false;
+    }
+
+    if (origenBuscado !== "administradores") {
+        return false;
+    }
+
+    if (sesion.adminId !== idBuscado) {
+        return false;
+    }
+
+    return true;
+}
+
+
+// bloque render de cuentas del admin superior
+
+function renderizarCuentasAdminSuperior() {
+    listaCuentasAdminSuperior.innerHTML = "";
+
+    const cuentas = obtenerTodasLasCuentasDelSistema();
+
+    if (cuentas.length === 0) {
+        listaCuentasAdminSuperior.innerHTML = '<p class="lista-vacia">no hay cuentas registradas</p>';
+        return;
+    }
+
+    for (let i = 0; i < cuentas.length; i++) {
+        const cuenta = cuentas[i];
+        const esPropia = esAdministradorSuperiorPropio(cuenta.origen, cuenta.id);
+
+        let bloqueAcciones = "";
+
+        if (cuenta.tipo === "titular") {
+            bloqueAcciones = `
+                <div class="acciones-usuario-admin">
+                    <button class="boton boton-chico" onclick="agregarSaldoDesdeAdminSuperior(${cuenta.id})">agregar saldo</button>
+                    <button class="boton boton-chico" onclick="descontarSaldoDesdeAdminSuperior(${cuenta.id})">descontar saldo</button>
+                    <button class="boton boton-advertencia boton-chico" onclick="alternarBloqueoDesdeAdminSuperior(${cuenta.id})">${cuenta.bloqueado ? "desbloquear" : "bloquear"}</button>
+                    <button class="boton boton-secundario boton-chico" onclick="resetearContrasenaDesdeAdminSuperior('usuarios', ${cuenta.id})">resetear contraseña</button>
+                    <button class="boton boton-peligro boton-chico" onclick="eliminarCuentaDesdeAdminSuperior('usuarios', ${cuenta.id})">eliminar cuenta</button>
+                </div>
+            `;
+        } else if (cuenta.tipo === "admin") {
+            bloqueAcciones = `
+                <div class="acciones-usuario-admin">
+                    <button class="boton boton-secundario boton-chico" onclick="resetearContrasenaDesdeAdminSuperior('administradores', ${cuenta.id})">resetear contraseña</button>
+                    <button class="boton boton-peligro boton-chico" onclick="eliminarCuentaDesdeAdminSuperior('administradores', ${cuenta.id})">eliminar cuenta</button>
+                </div>
+            `;
+        } else if (cuenta.tipo === "adminSuperior") {
+            if (esPropia) {
+                bloqueAcciones = `
+                    <div class="acciones-usuario-admin">
+                        <button class="boton boton-secundario boton-chico" onclick="resetearContrasenaDesdeAdminSuperior('administradores', ${cuenta.id})">resetear mi contraseña</button>
+                    </div>
+                `;
+            } else {
+                bloqueAcciones = `
+                    <div class="acciones-usuario-admin">
+                        <span class="texto-ayuda-panel">otro admin superior protegido</span>
+                    </div>
+                `;
+            }
+        }
+
+        listaCuentasAdminSuperior.innerHTML += `
+            <div class="item-admin-superior">
+                <p class="admin-superior-nombre">${cuenta.nombre}</p>
+                <p class="admin-superior-dato">tipo: ${cuenta.tipo}</p>
+                <p class="admin-superior-dato">usuario: ${cuenta.usuario}</p>
+                <p class="admin-superior-dato">curso: ${cuenta.curso}</p>
+                <p class="admin-superior-dato">saldo: ${cuenta.tipo === "titular" ? formatearMoneda(cuenta.saldo) : "-"}</p>
+                <p class="admin-superior-dato">estado: ${cuenta.tipo === "titular" ? (cuenta.bloqueado ? "bloqueado" : "activo") : "activo"}</p>
+                ${bloqueAcciones}
+            </div>
+        `;
+    }
+}
+
+
+// bloque acciones del admin superior sobre titulares y admins
+
+function agregarSaldoDesdeAdminSuperior(idUsuario) {
+    const usuario = buscarUsuarioPorId(idUsuario);
+
+    if (usuario === null) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "usuario no encontrado", "var(--color-error)");
+        return;
+    }
+
+    const montoTexto = prompt("ingresá el monto a agregar");
+
+    if (montoTexto === null) {
+        return;
+    }
+
+    const monto = Number(montoTexto);
+
+    if (isNaN(monto) || monto <= 0) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "monto inválido", "var(--color-error)");
+        return;
+    }
+
+    usuario.saldo = usuario.saldo + monto;
+
+    registrarMovimientoUsuario(
+        usuario.id,
+        "agregar_saldo_admin_superior",
+        "el admin superior agregó saldo por " + formatearMoneda(monto),
+        monto,
+        usuario.saldo
+    );
+
+    mostrarMensaje(mensajeAccionesAdminSuperior, "saldo agregado correctamente", "var(--color-exito)");
+    renderizarTodoAdminSuperior();
+}
+
+function descontarSaldoDesdeAdminSuperior(idUsuario) {
+    const usuario = buscarUsuarioPorId(idUsuario);
+
+    if (usuario === null) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "usuario no encontrado", "var(--color-error)");
+        return;
+    }
+
+    const montoTexto = prompt("ingresá el monto a descontar");
+
+    if (montoTexto === null) {
+        return;
+    }
+
+    const monto = Number(montoTexto);
+
+    if (isNaN(monto) || monto <= 0) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "monto inválido", "var(--color-error)");
+        return;
+    }
+
+    if (monto > usuario.saldo) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "no se puede descontar más saldo del disponible", "var(--color-error)");
+        return;
+    }
+
+    usuario.saldo = usuario.saldo - monto;
+
+    registrarMovimientoUsuario(
+        usuario.id,
+        "descuento_saldo_admin_superior",
+        "el admin superior descontó saldo por " + formatearMoneda(monto),
+        -monto,
+        usuario.saldo
+    );
+
+    mostrarMensaje(mensajeAccionesAdminSuperior, "saldo descontado correctamente", "var(--color-exito)");
+    renderizarTodoAdminSuperior();
+}
+
+function alternarBloqueoDesdeAdminSuperior(idUsuario) {
+    const usuario = buscarUsuarioPorId(idUsuario);
+
+    if (usuario === null) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "usuario no encontrado", "var(--color-error)");
+        return;
+    }
+
+    usuario.bloqueado = !usuario.bloqueado;
+
+    registrarMovimientoUsuario(
+        usuario.id,
+        usuario.bloqueado ? "bloqueo_admin_superior" : "desbloqueo_admin_superior",
+        usuario.bloqueado ? "el admin superior bloqueó transacciones" : "el admin superior desbloqueó transacciones",
+        0,
+        usuario.saldo
+    );
+
+    mostrarMensaje(
+        mensajeAccionesAdminSuperior,
+        usuario.bloqueado ? "transacciones bloqueadas" : "transacciones desbloqueadas",
+        "var(--color-exito)"
+    );
+
+    renderizarTodoAdminSuperior();
+}
+
+function resetearContrasenaDesdeAdminSuperior(origen, idCuenta) {
+    const cuenta = buscarCuentaDelSistema(origen, idCuenta);
+
+    if (cuenta === null) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "cuenta no encontrada", "var(--color-error)");
+        return;
+    }
+
+    if (origen === "administradores" && cuenta.tipo === "adminSuperior" && !esAdministradorSuperiorPropio(origen, idCuenta)) {
+        mostrarMensaje(mensajeAccionesAdminSuperior, "no se puede resetear la contraseña de otro admin superior", "var(--color-error)");
+        return;
+    }
+
+    cuenta.contrasena = "1234";
+
+    mostrarMensaje(
+        mensajeAccionesAdminSuperior,
+        "contraseña reseteada correctamente a 1234",
+        "var(--color-exito)"
+    );
+
+    renderizarTodoAdminSuperior();
+}
+
+function eliminarCuentaDesdeAdminSuperior(origen, idCuenta) {
+    if (origen === "usuarios") {
+        const usuario = buscarUsuarioPorId(idCuenta);
+
+        if (usuario === null) {
+            mostrarMensaje(mensajeAccionesAdminSuperior, "usuario no encontrado", "var(--color-error)");
+            return;
+        }
+
+        for (let i = 0; i < usuarios.length; i++) {
+            if (usuarios[i].id === idCuenta) {
+                usuarios.splice(i, 1);
+                break;
+            }
+        }
+
+        mostrarMensaje(mensajeAccionesAdminSuperior, "usuario eliminado correctamente", "var(--color-exito)");
+        renderizarTodoAdminSuperior();
+        return;
+    }
+
+    if (origen === "administradores") {
+        const admin = buscarAdministradorPorId(idCuenta);
+
+        if (admin === null) {
+            mostrarMensaje(mensajeAccionesAdminSuperior, "administrador no encontrado", "var(--color-error)");
+            return;
+        }
+
+        if (admin.tipo === "adminSuperior") {
+            if (esAdministradorSuperiorPropio(origen, idCuenta)) {
+                mostrarMensaje(mensajeAccionesAdminSuperior, "no podés eliminar tu propia cuenta", "var(--color-error)");
+                return;
+            }
+
+            mostrarMensaje(mensajeAccionesAdminSuperior, "no se puede eliminar otro admin superior desde este panel", "var(--color-error)");
+            return;
+        }
+
+        for (let i = 0; i < administradores.length; i++) {
+            if (administradores[i].id === idCuenta) {
+                administradores.splice(i, 1);
+                break;
+            }
+        }
+
+        mostrarMensaje(mensajeAccionesAdminSuperior, "administrador eliminado correctamente", "var(--color-exito)");
+        renderizarTodoAdminSuperior();
+    }
+}
+
+
+// bloque render total del admin superior
+// reemplazar la funcion existente por esta
+
+function renderizarTodoAdminSuperior() {
+    renderizarAdminSuperiorActivo();
+    renderizarCuentasAdminSuperior();
+    renderizarAdministradoresAdminSuperior();
+    renderizarHistorialGlobalAdminSuperior();
+    renderizarEstadisticasAdminSuperior();
+}

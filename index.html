@@ -11,7 +11,9 @@
 <body>
     <main class="aplicacion">
 
-        <!-- bloque pantalla de inicio -->
+        <!-- =======================================================
+             BLOQUE PANTALLA DE INICIO
+        ======================================================== -->
         <section id="pantallaInicio" class="pantalla">
             <div class="contenedor-inicio">
 
@@ -57,7 +59,9 @@
             </div>
         </section>
 
-        <!-- bloque pantalla de registro -->
+        <!-- =======================================================
+             BLOQUE PANTALLA DE REGISTRO
+        ======================================================== -->
         <section id="pantallaRegistro" class="pantalla oculto">
             <div class="contenedor-secundario">
                 <article class="tarjeta-formulario">
@@ -80,18 +84,17 @@
 
                     <div id="bloqueCursoRegistro">
                         <label for="inputCursoRegistro" class="etiqueta-control">curso o grupo</label>
-                        <input type="text" id="inputCursoRegistro" class="input-control"
-                            placeholder="ejemplo: 2do 3">
+                        <input type="text" id="inputCursoRegistro" class="input-control" placeholder="ejemplo: 2do 3">
                     </div>
 
                     <label for="inputContrasenaRegistro" class="etiqueta-control">contraseña</label>
                     <input type="password" id="inputContrasenaRegistro" class="input-control"
                         placeholder="crear contraseña">
 
-                    <!-- bloque admin superior envio de codigo -->
+                    <!-- bloque validacion por codigo para admin superior -->
                     <div id="bloqueAdminSuperiorCodigo" class="oculto">
                         <p class="texto-ayuda">
-                            para registrar un admin superior, el sistema debe enviar un código al correo autorizado configurado en el backend
+                            para registrar un admin superior, el sistema debe enviar un código al correo autorizado
                         </p>
 
                         <div class="acciones-formulario">
@@ -117,7 +120,9 @@
             </div>
         </section>
 
-        <!-- bloque pantalla billetera titular -->
+        <!-- =======================================================
+             BLOQUE PANTALLA BILLETERA TITULAR
+        ======================================================== -->
         <section id="pantallaBilletera" class="pantalla oculto">
             <div class="contenedor-principal">
 
@@ -175,7 +180,9 @@
             </div>
         </section>
 
-        <!-- bloque pantalla administrador comun -->
+        <!-- =======================================================
+             BLOQUE PANTALLA ADMINISTRADOR COMUN
+        ======================================================== -->
         <section id="pantallaAdmin" class="pantalla oculto">
             <div class="contenedor-principal">
 
@@ -222,7 +229,9 @@
             </div>
         </section>
 
-        <!-- bloque pantalla admin superior -->
+        <!-- =======================================================
+             BLOQUE PANTALLA ADMIN SUPERIOR
+        ======================================================== -->
         <section id="pantallaAdminSuperior" class="pantalla oculto">
             <div class="contenedor-principal">
 
@@ -237,32 +246,49 @@
                     </div>
                 </header>
 
-                <div class="grid-admin">
-                    <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">administradores registrados</h3>
-                        <div id="listaAdministradoresAdminSuperior" class="lista-administradores-admin-superior"></div>
-                    </article>
+                <!-- bloque gestion completa de cuentas -->
+                <article class="tarjeta">
+                    <h3 class="subtitulo-seccion">gestionar cuentas del sistema</h3>
+                    <p class="texto-suave">
+                        desde aquí el admin superior puede administrar titulares, administradores y su propia cuenta
+                    </p>
 
+                    <div id="mensajeAccionesAdminSuperior" class="mensaje"></div>
+                    <div id="listaCuentasAdminSuperior" class="lista-cuentas-admin-superior"></div>
+                </article>
+
+                <!-- bloque configuracion general -->
+                <div class="grid-admin">
                     <article class="tarjeta">
                         <h3 class="subtitulo-seccion">configuración general</h3>
 
                         <label for="inputSaldoInicialSistema" class="etiqueta-control">saldo inicial por defecto</label>
-                        <input type="number" id="inputSaldoInicialSistema" class="input-control" placeholder="ejemplo: 100">
+                        <input type="number" id="inputSaldoInicialSistema" class="input-control"
+                            placeholder="ejemplo: 100">
 
                         <div class="acciones-formulario">
                             <button id="botonGuardarSaldoInicialSistema" class="boton">guardar saldo inicial</button>
-                            <button id="botonAlternarRegistroPublico" class="boton boton-advertencia">alternar registro público</button>
+                            <button id="botonAlternarRegistroPublico" class="boton boton-advertencia">
+                                alternar registro público
+                            </button>
                         </div>
 
                         <p id="mensajeAdminSuperiorPanel" class="mensaje"></p>
                     </article>
+
+                    <article class="tarjeta">
+                        <h3 class="subtitulo-seccion">administradores registrados</h3>
+                        <div id="listaAdministradoresAdminSuperior" class="lista-administradores-admin-superior"></div>
+                    </article>
                 </div>
 
+                <!-- bloque historial global -->
                 <article class="tarjeta">
                     <h3 class="subtitulo-seccion">historial global del sistema</h3>
                     <div id="listaHistorialGlobalAdminSuperior" class="lista-historial"></div>
                 </article>
 
+                <!-- bloque estadisticas generales -->
                 <article class="tarjeta">
                     <h3 class="subtitulo-seccion">estadísticas generales</h3>
                     <div id="panelEstadisticasAdminSuperior" class="panel-estadisticas-admin-superior"></div>
