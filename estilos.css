@@ -643,3 +643,23 @@ select {
     position: relative;
     z-index: 2;
 }
+
+
+/* tarjeta de identificacion  */
+
+.tarjeta-estudiantil {
+    background-image: url("img/fondo-identificacion.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    min-height: 240px;
+    border-radius: 24px;
+    padding: 30px;
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
