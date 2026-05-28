@@ -123,63 +123,128 @@
         <!-- =======================================================
              BLOQUE PANTALLA BILLETERA TITULAR
         ======================================================== -->
-        <section id="pantallaBilletera" class="pantalla oculto">
-            <div class="contenedor-principal">
+       <!-- bloque pantalla billetera titular estilo mi merienda -->
+<section id="pantallaBilletera" class="pantalla oculto">
+    <div class="layout-alumno">
 
-                <header class="encabezado-billetera">
-                    <div>
-                        <h2 class="titulo-seccion">billetera virtual escolar</h2>
-                        <p id="textoUsuarioActual" class="texto-suave">sin usuario activo</p>
-                    </div>
+        <aside class="menu-alumno">
+            <div class="marca-alumno">
+                <div class="logo-alumno">🌿</div>
+                <div>
+                    <h2>MI MERIENDA</h2>
+                    <p>Billetera Estudiantil</p>
+                </div>
+            </div>
 
-                    <div class="acciones-encabezado">
-                        <button id="botonSalirSistema" class="boton boton-secundario">salir</button>
-                    </div>
-                </header>
+            <nav class="nav-alumno">
+                <button class="nav-alumno-activo">inicio</button>
+                <button>mi tarjeta</button>
+                <button>historial de compras</button>
+                <button>catálogo</button>
+                <button>ayuda</button>
+            </nav>
 
-                <article class="tarjeta resumen-billetera">
-                    <p class="rotulo">titular actual</p>
-                    <p id="nombreTitular" class="nombre-titular">equipo ganador</p>
+            <div class="nota-alumno">
+                <p>Proyecto de billetera estudiantil para consumo responsable.</p>
+                <p>Un uso simple, educativo y comunitario.</p>
+            </div>
+        </aside>
 
-                    <p class="rotulo">curso o grupo</p>
-                    <p id="cursoTitular" class="texto-normal">sin curso</p>
+        <section class="contenido-alumno">
 
-                    <p class="rotulo">saldo disponible</p>
-                    <p id="saldoDisponible" class="saldo-disponible">$ 0</p>
-
-                    <p id="estadoTitular" class="mensaje"></p>
-                    <p id="mensajeCompra" class="mensaje"></p>
-                </article>
-
-                <div class="grid-billetera">
-                    <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">catálogo de productos</h3>
-                        <div id="listaProductos" class="lista-productos"></div>
-                    </article>
-
-                    <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">carrito</h3>
-                        <div id="listaCarrito" class="lista-carrito"></div>
-
-                        <div class="pie-carrito">
-                            <p class="total-carrito">total: <span id="totalCarrito">$ 0</span></p>
-
-                            <div class="acciones-formulario">
-                                <button id="botonConfirmarCompra" class="boton">confirmar compra</button>
-                                <button id="botonVaciarCarrito" class="boton boton-secundario">vaciar carrito</button>
-                            </div>
-                        </div>
-                    </article>
+            <header class="encabezado-alumno">
+                <div>
+                    <h1 id="textoUsuarioActual">¡Hola!</h1>
+                    <p>bienvenido a tu billetera estudiantil</p>
                 </div>
 
-                <article class="tarjeta">
-                    <h3 class="subtitulo-seccion">historial de movimientos</h3>
+                <button id="botonSalirSistema" class="boton boton-secundario">salir</button>
+            </header>
+
+            <div class="grid-alumno-superior">
+
+                <article class="tarjeta-alumno tarjeta-saldo">
+                    <p class="rotulo">saldo disponible</p>
+                    <p id="saldoDisponible" class="saldo-alumno">$ 0</p>
+                    <p>para comprar tu merienda</p>
+                    <p id="estadoTitular" class="mensaje"></p>
+                </article>
+
+                <article class="tarjeta-alumno">
+                    <h3>accesos rápidos</h3>
+
+                    <div class="acciones-rapidas-alumno">
+                        <div class="accion-rapida">
+                            <span>🛒</span>
+                            <p>comprar</p>
+                        </div>
+
+                        <div class="accion-rapida">
+                            <span>💳</span>
+                            <p>ver saldo</p>
+                        </div>
+
+                        <div class="accion-rapida">
+                            <span>📜</span>
+                            <p>historial</p>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+
+            <div class="grid-alumno-medio">
+
+                <article class="tarjeta-alumno">
+                    <h3>mi tarjeta estudiantil</h3>
+
+                    <div class="tarjeta-estudiantil">
+                        <p>TARJETA ESTUDIANTIL</p>
+                        <small>solo para compras simuladas de merienda</small>
+
+                        <div>
+                            <strong id="nombreTitular">sin titular</strong>
+                            <span id="cursoTitular">sin curso</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="tarjeta-alumno">
+                    <h3>historial de movimientos</h3>
                     <div id="listaHistorial" class="lista-historial"></div>
                 </article>
 
             </div>
+
+            <div class="grid-alumno-medio">
+
+                <article class="tarjeta-alumno">
+                    <h3>catálogo de productos</h3>
+                    <div id="listaProductos" class="lista-productos"></div>
+                </article>
+
+                <article class="tarjeta-alumno">
+                    <h3>carrito</h3>
+                    <div id="listaCarrito" class="lista-carrito"></div>
+
+                    <div class="pie-carrito">
+                        <p class="total-carrito">total: <span id="totalCarrito">$ 0</span></p>
+
+                        <div class="acciones-formulario">
+                            <button id="botonConfirmarCompra" class="boton">confirmar compra</button>
+                            <button id="botonVaciarCarrito" class="boton boton-secundario">vaciar carrito</button>
+                        </div>
+                    </div>
+
+                    <p id="mensajeCompra" class="mensaje"></p>
+                </article>
+
+            </div>
+
         </section>
 
+    </div>
+</section>
         <!-- =======================================================
              BLOQUE PANTALLA ADMINISTRADOR COMUN
         ======================================================== -->

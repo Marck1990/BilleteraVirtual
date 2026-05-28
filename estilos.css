@@ -384,3 +384,217 @@ select {
         align-items: center;
     }
 }
+
+
+
+/* bloque vista alumno estilo mi merienda */
+
+.layout-alumno {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    background-color: #f4f3ea;
+}
+
+.menu-alumno {
+    background-color: #edf0e2;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    border-right: 1px solid #dde2cf;
+}
+
+.marca-alumno {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-alumno {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #486535;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+}
+
+.marca-alumno h2 {
+    font-size: 20px;
+    color: #2f4b24;
+    margin: 0;
+}
+
+.marca-alumno p {
+    font-size: 13px;
+    color: #69745f;
+    margin: 2px 0 0;
+}
+
+.nav-alumno {
+    display: grid;
+    gap: 12px;
+}
+
+.nav-alumno button {
+    border: none;
+    background-color: transparent;
+    text-align: left;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    color: #2f352c;
+    cursor: pointer;
+}
+
+.nav-alumno .nav-alumno-activo {
+    background-color: #3f5f2b;
+    color: white;
+}
+
+.nota-alumno {
+    margin-top: auto;
+    background-color: #f8f7ef;
+    border: 1px solid #dde2cf;
+    border-radius: 18px;
+    padding: 18px;
+    color: #59624f;
+    font-size: 14px;
+}
+
+.contenido-alumno {
+    padding: 36px;
+}
+
+.encabezado-alumno {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+}
+
+.encabezado-alumno h1 {
+    margin: 0;
+    color: #1f2b1d;
+    font-size: 32px;
+}
+
+.encabezado-alumno p {
+    margin: 6px 0 0;
+    color: #66705d;
+}
+
+.grid-alumno-superior,
+.grid-alumno-medio {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.tarjeta-alumno {
+    background-color: #fffdf7;
+    border: 1px solid #e2dfd3;
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 12px 30px rgba(65, 75, 55, 0.08);
+}
+
+.tarjeta-alumno h3 {
+    margin-top: 0;
+    color: #23301f;
+}
+
+.tarjeta-saldo {
+    background: linear-gradient(135deg, #fffdf7, #e8e3cf);
+}
+
+.saldo-alumno {
+    font-size: 46px;
+    font-weight: 800;
+    color: #365923;
+    margin: 10px 0;
+}
+
+.acciones-rapidas-alumno {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.accion-rapida {
+    border: 1px solid #e2dfd3;
+    border-radius: 18px;
+    padding: 18px;
+    text-align: center;
+    background-color: #f8f7ef;
+}
+
+.accion-rapida span {
+    font-size: 30px;
+}
+
+.accion-rapida p {
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.tarjeta-estudiantil {
+    min-height: 190px;
+    border-radius: 22px;
+    padding: 28px;
+    background: linear-gradient(135deg, #8c9970, #4f673c);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.tarjeta-estudiantil p {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.tarjeta-estudiantil small {
+    max-width: 280px;
+}
+
+.tarjeta-estudiantil strong,
+.tarjeta-estudiantil span {
+    display: block;
+    text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+    .layout-alumno {
+        grid-template-columns: 1fr;
+    }
+
+    .menu-alumno {
+        display: none;
+    }
+
+    .contenido-alumno {
+        padding: 18px;
+    }
+
+    .grid-alumno-superior,
+    .grid-alumno-medio {
+        grid-template-columns: 1fr;
+    }
+
+    .encabezado-alumno {
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .saldo-alumno {
+        font-size: 38px;
+    }
+
+    .acciones-rapidas-alumno {
+        grid-template-columns: 1fr;
+    }
+}
