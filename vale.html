@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#3f5f2b"
+    >
+
+    <title>Vale digital escolar</title>
+
+    <link
+        rel="stylesheet"
+        href="vale.css"
+    >
+</head>
+
+<body>
+
+    <main class="pagina-vale">
+
+        <article class="comprobante-vale">
+
+            <header class="encabezado-comprobante">
+
+                <div class="marca-comprobante">
+
+                    <div class="logo-comprobante">
+                        <span>✓</span>
+                    </div>
+
+                    <div>
+
+                        <p class="nombre-sistema">
+                            MI MERIENDA
+                        </p>
+
+                        <p class="subtitulo-sistema">
+                            Billetera Estudiantil
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <span
+                    id="estadoVale"
+                    class="estado-vale estado-pendiente"
+                >
+                    PENDIENTE
+                </span>
+
+            </header>
+
+            <!-- mensaje de error -->
+
+            <section
+                id="panelError"
+                class="panel-error oculto"
+                aria-live="polite"
+            >
+
+                <h1>
+                    Comprobante no válido
+                </h1>
+
+                <p id="mensajeError">
+                    No fue posible leer la información del vale.
+                </p>
+
+                <a
+                    href="index.html"
+                    class="boton boton-secundario"
+                >
+                    volver al inicio
+                </a>
+
+            </section>
+
+            <!-- contenido del comprobante -->
+
+            <section
+                id="contenidoVale"
+                class="contenido-vale oculto"
+            >
+
+                <div class="titulo-comprobante">
+
+                    <p class="rotulo">
+                        vale digital
+                    </p>
+
+                    <h1 id="codigoVale">
+                        VAL-00000000-00000
+                    </h1>
+
+                    <p
+                        id="tiempoRestanteVale"
+                        class="tiempo-restante"
+                    >
+                        Tiempo restante: 00:00
+                    </p>
+
+                </div>
+
+                <section class="datos-vale">
+
+                    <div class="dato-vale">
+
+                        <span class="dato-etiqueta">
+                            titular
+                        </span>
+
+                        <strong id="titularVale">
+                            -
+                        </strong>
+
+                    </div>
+
+                    <div class="dato-vale">
+
+                        <span class="dato-etiqueta">
+                            fecha de creación
+                        </span>
+
+                        <strong id="fechaCreacionVale">
+                            -
+                        </strong>
+
+                    </div>
+
+                    <div class="dato-vale">
+
+                        <span class="dato-etiqueta">
+                            válido hasta
+                        </span>
+
+                        <strong id="fechaVencimientoVale">
+                            -
+                        </strong>
+
+                    </div>
+
+                    <div
+                        id="bloqueFechaUtilizacion"
+                        class="dato-vale oculto"
+                    >
+
+                        <span class="dato-etiqueta">
+                            utilizado el
+                        </span>
+
+                        <strong id="fechaUtilizacionVale">
+                            -
+                        </strong>
+
+                    </div>
+
+                </section>
+
+                <section class="detalle-compra">
+
+                    <h2>
+                        detalle de la compra
+                    </h2>
+
+                    <div class="tabla-contenedor">
+
+                        <table class="tabla-productos">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        producto
+                                    </th>
+
+                                    <th>
+                                        cantidad
+                                    </th>
+
+                                    <th>
+                                        precio
+                                    </th>
+
+                                    <th>
+                                        subtotal
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="listaProductosVale"></tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+                <section class="total-comprobante">
+
+                    <span>
+                        total
+                    </span>
+
+                    <strong id="totalVale">
+                        $ 0
+                    </strong>
+
+                </section>
+
+                <section class="acciones-comprobante">
+
+                    <button
+                        type="button"
+                        id="botonMarcarUtilizado"
+                        class="boton boton-principal"
+                    >
+                        marcar como utilizado
+                    </button>
+
+                    <button
+                        type="button"
+                        id="botonActualizarEstado"
+                        class="boton boton-secundario"
+                    >
+                        actualizar estado
+                    </button>
+
+                </section>
+
+                <p
+                    id="mensajeAccionVale"
+                    class="mensaje-accion"
+                    aria-live="polite"
+                ></p>
+
+                <footer class="pie-comprobante">
+
+                    <p>
+                        Comprobante educativo de compra escolar.
+                    </p>
+
+                    <p>
+                        El estado utilizado queda guardado en este
+                        dispositivo hasta incorporar sincronización
+                        central.
+                    </p>
+
+                </footer>
+
+            </section>
+
+        </article>
+
+    </main>
+
+    <script src="vale.js"></script>
+
+</body>
+
+</html>

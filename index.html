@@ -3,363 +3,1086 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Billetera Virtual Escolar</title>
-    <link rel="stylesheet" href="estilos.css">
+
+    <link
+        rel="stylesheet"
+        href="estilos.css"
+    >
 </head>
 
 <body>
+
     <main class="aplicacion">
 
         <!-- =======================================================
-             BLOQUE PANTALLA DE INICIO
+             PANTALLA DE INICIO
         ======================================================== -->
-        <section id="pantallaInicio" class="pantalla">
+
+        <section
+            id="pantallaInicio"
+            class="pantalla"
+        >
             <div class="contenedor-inicio">
 
                 <article class="panel-izquierdo">
-                    <h1 class="titulo-app">Billetera Virtual Escolar</h1>
-                    <p class="subtitulo-app">simulación educativa de consumo responsable</p>
+
+                    <h1 class="titulo-app">
+                        Billetera Virtual Escolar
+                    </h1>
+
+                    <p class="subtitulo-app">
+                        simulación educativa de consumo responsable
+                    </p>
 
                     <div class="tarjeta-acceso">
-                        <h2 class="titulo-seccion">ingreso al sistema</h2>
 
-                        <label for="inputUsuarioIngreso" class="etiqueta-control">usuario</label>
-                        <input type="text" id="inputUsuarioIngreso" class="input-control"
-                            placeholder="ejemplo: equipo1 o docente1">
+                        <h2 class="titulo-seccion">
+                            ingreso al sistema
+                        </h2>
 
-                        <label for="inputContrasenaIngreso" class="etiqueta-control">contraseña</label>
-                        <input type="password" id="inputContrasenaIngreso" class="input-control"
-                            placeholder="ingresar contraseña">
+                        <label
+                            for="inputUsuarioIngreso"
+                            class="etiqueta-control"
+                        >
+                            usuario
+                        </label>
+
+                        <input
+                            type="text"
+                            id="inputUsuarioIngreso"
+                            class="input-control"
+                            placeholder="ejemplo: equipo1 o docente1"
+                            autocomplete="username"
+                        >
+
+                        <label
+                            for="inputContrasenaIngreso"
+                            class="etiqueta-control"
+                        >
+                            contraseña
+                        </label>
+
+                        <input
+                            type="password"
+                            id="inputContrasenaIngreso"
+                            class="input-control"
+                            placeholder="ingresar contraseña"
+                            autocomplete="current-password"
+                        >
 
                         <div class="acciones-formulario">
-                            <button id="botonIngresarSistema" class="boton">ingresar</button>
-                            <button id="botonIrRegistro" class="boton boton-secundario">registrarse</button>
+
+                            <button
+                                type="button"
+                                id="botonIngresarSistema"
+                                class="boton"
+                            >
+                                ingresar
+                            </button>
+
+                            <button
+                                type="button"
+                                id="botonIrRegistro"
+                                class="boton boton-secundario"
+                            >
+                                registrarse
+                            </button>
+
                         </div>
 
-                        <p id="mensajeInicio" class="mensaje"></p>
+                        <p
+                            id="mensajeInicio"
+                            class="mensaje"
+                            aria-live="polite"
+                        ></p>
+
                     </div>
 
                     <div class="acciones-inferiores">
-                        <button id="botonRecuperarAcceso" class="enlace-boton">recuperar acceso</button>
-                        <button id="botonSoporte" class="enlace-boton">soporte</button>
+
+                        <button
+                            type="button"
+                            id="botonRecuperarAcceso"
+                            class="enlace-boton"
+                        >
+                            recuperar acceso
+                        </button>
+
+                        <button
+                            type="button"
+                            id="botonSoporte"
+                            class="enlace-boton"
+                        >
+                            soporte
+                        </button>
+
                     </div>
+
                 </article>
 
                 <article class="panel-derecho">
+
                     <div class="contenedor-qr">
-                        <div class="codigo-qr">qr</div>
+
+                        <div class="codigo-qr">
+                            QR
+                        </div>
+
                     </div>
 
                     <p class="texto-panel">
-                        app educativa para trabajar con saldo escolar ficticio y compras simuladas
+                        app educativa para trabajar con saldo escolar
+                        ficticio y compras simuladas
                     </p>
+
                 </article>
 
             </div>
         </section>
 
         <!-- =======================================================
-             BLOQUE PANTALLA DE REGISTRO
+             PANTALLA DE REGISTRO
         ======================================================== -->
-        <section id="pantallaRegistro" class="pantalla oculto">
-            <div class="contenedor-secundario">
-                <article class="tarjeta-formulario">
-                    <h2 class="titulo-seccion">registro de usuario</h2>
 
-                    <label for="selectTipoRegistro" class="etiqueta-control">tipo de cuenta</label>
-                    <select id="selectTipoRegistro" class="input-control">
-                        <option value="titular">titular</option>
-                        <option value="admin">administrador</option>
-                        <option value="adminSuperior">admin superior</option>
+        <section
+            id="pantallaRegistro"
+            class="pantalla oculto"
+        >
+            <div class="contenedor-secundario">
+
+                <article class="tarjeta-formulario">
+
+                    <h2 class="titulo-seccion">
+                        registro de usuario
+                    </h2>
+
+                    <label
+                        for="selectTipoRegistro"
+                        class="etiqueta-control"
+                    >
+                        tipo de cuenta
+                    </label>
+
+                    <select
+                        id="selectTipoRegistro"
+                        class="input-control"
+                    >
+                        <option value="titular">
+                            titular
+                        </option>
+
+                        <option value="admin">
+                            administrador
+                        </option>
+
+                        <option value="adminSuperior">
+                            admin superior
+                        </option>
                     </select>
 
-                    <label for="inputUsuarioRegistro" class="etiqueta-control">usuario</label>
-                    <input type="text" id="inputUsuarioRegistro" class="input-control"
-                        placeholder="ejemplo: equipo1 o docente1">
+                    <label
+                        for="inputUsuarioRegistro"
+                        class="etiqueta-control"
+                    >
+                        usuario
+                    </label>
 
-                    <label for="inputNombreRegistro" class="etiqueta-control">nombre visible</label>
-                    <input type="text" id="inputNombreRegistro" class="input-control"
-                        placeholder="ejemplo: equipo 1a o profesor juan">
+                    <input
+                        type="text"
+                        id="inputUsuarioRegistro"
+                        class="input-control"
+                        placeholder="ejemplo: equipo1 o docente1"
+                        autocomplete="username"
+                    >
+
+                    <label
+                        for="inputNombreRegistro"
+                        class="etiqueta-control"
+                    >
+                        nombre y apellido
+                    </label>
+
+                    <input
+                        type="text"
+                        id="inputNombreRegistro"
+                        class="input-control"
+                        placeholder="ejemplo: Lucre Ferraz"
+                        autocomplete="name"
+                    >
 
                     <div id="bloqueCursoRegistro">
-                        <label for="inputCursoRegistro" class="etiqueta-control">curso o grupo</label>
-                        <input type="text" id="inputCursoRegistro" class="input-control" placeholder="ejemplo: 2do 3">
+
+                        <label
+                            for="inputCursoRegistro"
+                            class="etiqueta-control"
+                        >
+                            curso o grupo
+                        </label>
+
+                        <input
+                            type="text"
+                            id="inputCursoRegistro"
+                            class="input-control"
+                            placeholder="ejemplo: 2do 3"
+                        >
+
                     </div>
 
-                    <label for="inputContrasenaRegistro" class="etiqueta-control">contraseña</label>
-                    <input type="password" id="inputContrasenaRegistro" class="input-control"
-                        placeholder="crear contraseña">
+                    <label
+                        for="inputContrasenaRegistro"
+                        class="etiqueta-control"
+                    >
+                        contraseña
+                    </label>
 
-                    <!-- bloque validacion por codigo para admin superior -->
-                    <div id="bloqueAdminSuperiorCodigo" class="oculto">
+                    <input
+                        type="password"
+                        id="inputContrasenaRegistro"
+                        class="input-control"
+                        placeholder="crear contraseña"
+                        autocomplete="new-password"
+                    >
+
+                    <div
+                        id="bloqueAdminSuperiorCodigo"
+                        class="oculto"
+                    >
+
                         <p class="texto-ayuda">
-                            para registrar un admin superior, el sistema debe enviar un código al correo autorizado
+                            para registrar un admin superior,
+                            el sistema enviará una palabra
+                            de validación al correo autorizado
                         </p>
 
                         <div class="acciones-formulario">
-                            <button id="botonEnviarCodigoAdminSuperior" type="button" class="boton boton-advertencia">
-                                enviar código de validación
+
+                            <button
+                                type="button"
+                                id="botonEnviarCodigoAdminSuperior"
+                                class="boton boton-advertencia"
+                            >
+                                enviar palabra de validación
                             </button>
+
                         </div>
 
-                        <label for="inputCodigoAdminSuperior" class="etiqueta-control">código de validación</label>
-                        <input type="text" id="inputCodigoAdminSuperior" class="input-control"
-                            placeholder="ingresar código recibido">
+                        <label
+                            for="inputCodigoAdminSuperior"
+                            class="etiqueta-control"
+                        >
+                            palabra de validación
+                        </label>
 
-                        <p id="mensajeAdminSuperiorRegistro" class="mensaje"></p>
+                        <input
+                            type="text"
+                            id="inputCodigoAdminSuperior"
+                            class="input-control"
+                            placeholder="ingresar palabra recibida"
+                            autocomplete="off"
+                        >
+
+                        <p
+                            id="mensajeAdminSuperiorRegistro"
+                            class="mensaje"
+                            aria-live="polite"
+                        ></p>
+
                     </div>
 
                     <div class="acciones-formulario">
-                        <button id="botonRegistrarCuenta" class="boton">guardar registro</button>
-                        <button id="botonVolverInicioDesdeRegistro" class="boton boton-secundario">volver</button>
+
+                        <button
+                            type="button"
+                            id="botonRegistrarCuenta"
+                            class="boton"
+                        >
+                            guardar registro
+                        </button>
+
+                        <button
+                            type="button"
+                            id="botonVolverInicioDesdeRegistro"
+                            class="boton boton-secundario"
+                        >
+                            volver
+                        </button>
+
                     </div>
 
-                    <p id="mensajeRegistro" class="mensaje"></p>
+                    <p
+                        id="mensajeRegistro"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
+
                 </article>
+
             </div>
         </section>
 
         <!-- =======================================================
-             BLOQUE PANTALLA BILLETERA TITULAR
+             BILLETERA DEL TITULAR
         ======================================================== -->
-        <!-- bloque pantalla billetera titular estilo mi merienda -->
-        <section id="pantallaBilletera" class="pantalla oculto">
+
+        <section
+            id="pantallaBilletera"
+            class="pantalla oculto"
+        >
             <div class="layout-alumno">
 
                 <aside class="menu-alumno">
+
                     <div class="marca-alumno">
+
                         <div class="logo-alumno"></div>
+
                         <div>
-                            <h2>MI MERIENDA</h2>
-                            <p>Billetera Estudiantil</p>
+
+                            <h2>
+                                MI MERIENDA
+                            </h2>
+
+                            <p>
+                                Billetera Estudiantil
+                            </p>
+
                         </div>
+
                     </div>
 
                     <nav class="nav-alumno">
-                        <button class="nav-alumno-activo">inicio</button>
 
-                        <button>historial de compras</button>
+                        <button
+                            type="button"
+                            class="nav-alumno-activo"
+                        >
+                            inicio
+                        </button>
 
+                        <button type="button">
+                            historial de compras
+                        </button>
 
                     </nav>
 
                     <div class="nota-alumno">
-                        <p>Proyecto de billetera estudiantil para consumo responsable.</p>
-                        <p>Un uso simple, educativo y comunitario.</p>
+
+                        <p>
+                            Proyecto de billetera estudiantil
+                            para consumo responsable.
+                        </p>
+
+                        <p>
+                            Un uso simple, educativo y comunitario.
+                        </p>
+
                     </div>
+
                 </aside>
 
                 <section class="contenido-alumno">
 
                     <header class="encabezado-alumno">
+
                         <div>
-                            <h1 id="textoUsuarioActual">¡Hola!</h1>
-                            <p>bienvenido a tu billetera estudiantil</p>
+
+                            <h1 id="textoUsuarioActual">
+                                usuario activo
+                            </h1>
+
+                            <p>
+                                bienvenido a tu billetera estudiantil
+                            </p>
+
                         </div>
 
-                        <button id="botonSalirSistema" class="boton boton-secundario">salir</button>
+                        <button
+                            type="button"
+                            id="botonSalirSistema"
+                            class="boton boton-secundario"
+                        >
+                            salir
+                        </button>
+
                     </header>
+
+                    <!-- saldo y ayuda -->
 
                     <div class="grid-alumno-superior">
 
-
                         <article class="tarjeta tarjeta-saldo">
-                            <p class="rotulo">saldo disponible</p>
 
-                            <p id="saldoDisponible" class="saldo-disponible">$ 0</p>
-
-                            <p class="texto-normal">para comprar tu merienda</p>
-
-                            <p id="estadoTitular" class="mensaje"></p>
-                        </article>
-
-                        <article class="tarjeta-alumno">
-                            <h3>ayuda</h3>
-                            <p class="texto-suave">
-                                si tenés un problema con tu saldo, tus compras o tu cuenta, podés enviar un mensaje al
-                                administrador.
+                            <p class="rotulo">
+                                saldo disponible
                             </p>
 
-                            <label for="inputMensajeAyudaAlumno" class="etiqueta-control">mensaje</label>
-                            <textarea id="inputMensajeAyudaAlumno" class="input-control textarea-ayuda-alumno"
-                                placeholder="escribí tu consulta para el administrador"></textarea>
+                            <p
+                                id="saldoDisponible"
+                                class="saldo-disponible"
+                            >
+                                $ 0
+                            </p>
 
-                            <button id="botonEnviarAyudaAlumno" class="boton">enviar mensaje</button>
+                            <p class="texto-normal">
+                                para comprar tu merienda
+                            </p>
 
-                            <p id="mensajeAyudaAlumno" class="mensaje"></p>
+                            <p
+                                id="estadoTitular"
+                                class="mensaje"
+                                aria-live="polite"
+                            ></p>
+
+                        </article>
+
+                        <article class="tarjeta-alumno">
+
+                            <h3>
+                                ayuda
+                            </h3>
+
+                            <p class="texto-suave">
+                                si tenés un problema con tu saldo,
+                                tus compras o tu cuenta, podés enviar
+                                un mensaje al administrador
+                            </p>
+
+                            <label
+                                for="inputMensajeAyudaAlumno"
+                                class="etiqueta-control"
+                            >
+                                mensaje
+                            </label>
+
+                            <textarea
+                                id="inputMensajeAyudaAlumno"
+                                class="input-control textarea-ayuda-alumno"
+                                placeholder="escribí tu consulta para el administrador"
+                            ></textarea>
+
+                            <button
+                                type="button"
+                                id="botonEnviarAyudaAlumno"
+                                class="boton"
+                            >
+                                enviar mensaje
+                            </button>
+
+                            <p
+                                id="mensajeAyudaAlumno"
+                                class="mensaje"
+                                aria-live="polite"
+                            ></p>
+
                         </article>
 
                     </div>
 
+                    <!-- tarjeta estudiantil e historial -->
+
                     <div class="grid-alumno-medio">
 
-                        <article class="tarjeta tarjeta-estudiantil">
+                        <article
+                            class="tarjeta-alumno tarjeta-estudiantil-contenedor"
+                        >
 
-                            <div>
-                                <h3>TARJETA ESTUDIANTIL</h3>
+                            <h3>
+                                mi tarjeta estudiantil
+                            </h3>
 
-                                <p>
-                                    Solo para compras de merienda
-                                </p>
-                            </div>
+                            <div class="tarjeta-estudiantil">
 
-                            <div>
-                                <p id="nombreTitular">MARCK</p>
-                                <p id="cursoTitular">LICEO RURAL DE DURAZNO</p>
+                                <div class="tarjeta-estudiantil-contenido">
+
+                                    <div class="tarjeta-estudiantil-superior">
+
+                                        <h4>
+                                            TARJETA ESTUDIANTIL
+                                        </h4>
+
+                                        <p>
+                                            Solo para compras de merienda
+                                        </p>
+
+                                    </div>
+
+                                    <div class="tarjeta-estudiantil-inferior">
+
+                                        <p
+                                            id="nombreTitular"
+                                            class="tarjeta-nombre"
+                                        >
+                                            NOMBRE APELLIDO
+                                        </p>
+
+                                        <p class="tarjeta-institucion">
+                                            Escuela-Liceo N° 34
+                                            San Jorge Lladó Wilkins
+                                        </p>
+
+                                        <span
+                                            id="cursoTitular"
+                                            class="oculto"
+                                            aria-hidden="true"
+                                        ></span>
+
+                                    </div>
+
+                                </div>
+
                             </div>
 
                         </article>
 
                         <article class="tarjeta-alumno">
-                            <h3>historial de movimientos</h3>
-                            <div id="listaHistorial" class="lista-historial"></div>
+
+                            <h3>
+                                historial de movimientos
+                            </h3>
+
+                            <div
+                                id="listaHistorial"
+                                class="lista-historial"
+                            ></div>
+
                         </article>
 
                     </div>
 
+                    <!-- productos y carrito -->
+
                     <div class="grid-alumno-medio">
 
                         <article class="tarjeta-alumno">
-                            <h3>catálogo de productos</h3>
-                            <div id="listaProductos" class="lista-productos"></div>
+
+                            <h3>
+                                catálogo de productos
+                            </h3>
+
+                            <div
+                                id="listaProductos"
+                                class="lista-productos"
+                            ></div>
+
                         </article>
 
                         <article class="tarjeta-alumno">
-                            <h3>carrito</h3>
-                            <div id="listaCarrito" class="lista-carrito"></div>
+
+                            <h3>
+                                carrito
+                            </h3>
+
+                            <div
+                                id="listaCarrito"
+                                class="lista-carrito"
+                            ></div>
 
                             <div class="pie-carrito">
-                                <p class="total-carrito">total: <span id="totalCarrito">$ 0</span></p>
+
+                                <p class="total-carrito">
+
+                                    total:
+
+                                    <span id="totalCarrito">
+                                        $ 0
+                                    </span>
+
+                                </p>
 
                                 <div class="acciones-formulario">
-                                    <button id="botonConfirmarCompra" class="boton">confirmar compra</button>
-                                    <button id="botonVaciarCarrito" class="boton boton-secundario">vaciar
-                                        carrito</button>
+
+                                    <button
+                                        type="button"
+                                        id="botonConfirmarCompra"
+                                        class="boton"
+                                    >
+                                        confirmar compra
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        id="botonVaciarCarrito"
+                                        class="boton boton-secundario"
+                                    >
+                                        vaciar carrito
+                                    </button>
+
                                 </div>
+
                             </div>
 
-                            <p id="mensajeCompra" class="mensaje"></p>
+                            <p
+                                id="mensajeCompra"
+                                class="mensaje"
+                                aria-live="polite"
+                            ></p>
+
                         </article>
 
                     </div>
+
+                    <!-- vale digital generado -->
+
+                    <article
+                        id="panelValeGenerado"
+                        class="tarjeta-alumno panel-vale-generado oculto"
+                        aria-live="polite"
+                    >
+
+                        <div class="encabezado-vale-generado">
+
+                            <div>
+
+                                <p class="rotulo-vale">
+                                    vale digital generado
+                                </p>
+
+                                <h3 id="codigoValeGenerado">
+                                    VAL-00000000-00000
+                                </h3>
+
+                            </div>
+
+                            <span
+                                id="estadoValeGenerado"
+                                class="estado-vale estado-vale-pendiente"
+                            >
+                                PENDIENTE
+                            </span>
+
+                        </div>
+
+                        <p
+                            id="tiempoRestanteVale"
+                            class="tiempo-restante-vale"
+                        >
+                            Tiempo restante: 25:00
+                        </p>
+
+                        <p class="texto-suave">
+                            mostrale este código al almacenero o docente
+                            para visualizar el comprobante de la compra
+                        </p>
+
+                        <div class="contenido-vale-generado">
+
+                            <div
+                                id="contenedorQrVale"
+                                class="contenedor-qr-vale"
+                                aria-label="Código QR del vale"
+                            ></div>
+
+                            <div class="acciones-vale-generado">
+
+                                <a
+                                    id="enlaceAbrirComprobanteVale"
+                                    class="boton enlace-comprobante-vale"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    abrir comprobante
+                                </a>
+
+                                <button
+                                    type="button"
+                                    id="botonCerrarValeGenerado"
+                                    class="boton boton-secundario"
+                                >
+                                    cerrar
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </article>
 
                 </section>
 
             </div>
         </section>
+
         <!-- =======================================================
-             BLOQUE PANTALLA ADMINISTRADOR COMUN
+             PANEL DEL ADMINISTRADOR
         ======================================================== -->
-        <section id="pantallaAdmin" class="pantalla oculto">
+
+        <section
+            id="pantallaAdmin"
+            class="pantalla oculto"
+        >
             <div class="contenedor-principal">
 
                 <header class="encabezado-billetera">
+
                     <div>
-                        <h2 class="titulo-seccion">panel administrador</h2>
-                        <p id="textoAdminActual" class="texto-suave">sin administrador activo</p>
+
+                        <h2 class="titulo-seccion">
+                            panel administrador
+                        </h2>
+
+                        <p
+                            id="textoAdminActual"
+                            class="texto-suave"
+                        >
+                            sin administrador activo
+                        </p>
+
                     </div>
 
                     <div class="acciones-encabezado">
-                        <button id="botonSalirAdmin" class="boton boton-secundario">cerrar sesión</button>
+
+                        <button
+                            type="button"
+                            id="botonSalirAdmin"
+                            class="boton boton-secundario"
+                        >
+                            cerrar sesión
+                        </button>
+
                     </div>
+
                 </header>
 
                 <div class="grid-admin">
+
                     <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">usuarios registrados</h3>
-                        <div id="listaUsuariosAdmin" class="lista-usuarios-admin"></div>
+
+                        <h3 class="subtitulo-seccion">
+                            usuarios registrados
+                        </h3>
+
+                        <div
+                            id="listaUsuariosAdmin"
+                            class="lista-usuarios-admin"
+                        ></div>
+
                     </article>
 
                     <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">agregar producto</h3>
 
-                        <label for="inputNombreProducto" class="etiqueta-control">nombre del producto</label>
-                        <input type="text" id="inputNombreProducto" class="input-control" placeholder="ejemplo: pera">
+                        <h3 class="subtitulo-seccion">
+                            agregar producto
+                        </h3>
 
-                        <label for="inputPrecioProducto" class="etiqueta-control">precio</label>
-                        <input type="number" id="inputPrecioProducto" class="input-control" placeholder="ejemplo: 45">
+                        <label
+                            for="inputNombreProducto"
+                            class="etiqueta-control"
+                        >
+                            nombre del producto
+                        </label>
 
-                        <button id="botonAgregarProducto" class="boton">agregar producto</button>
+                        <input
+                            type="text"
+                            id="inputNombreProducto"
+                            class="input-control"
+                            placeholder="ejemplo: pera"
+                        >
+
+                        <label
+                            for="inputPrecioProducto"
+                            class="etiqueta-control"
+                        >
+                            precio
+                        </label>
+
+                        <input
+                            type="number"
+                            id="inputPrecioProducto"
+                            class="input-control"
+                            placeholder="ejemplo: 45"
+                            min="1"
+                            step="1"
+                        >
+
+                        <button
+                            type="button"
+                            id="botonAgregarProducto"
+                            class="boton"
+                        >
+                            agregar producto
+                        </button>
+
                     </article>
 
                     <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">quitar productos</h3>
-                        <div id="listaProductosAdmin" class="lista-productos-admin"></div>
+
+                        <h3 class="subtitulo-seccion">
+                            quitar productos
+                        </h3>
+
+                        <div
+                            id="listaProductosAdmin"
+                            class="lista-productos-admin"
+                        ></div>
+
                     </article>
+
                 </div>
 
                 <article class="tarjeta">
-                    <h3 class="subtitulo-seccion">historial completo</h3>
-                    <div id="listaHistorialAdmin" class="lista-historial"></div>
+
+                    <h3 class="subtitulo-seccion">
+                        historial completo
+                    </h3>
+
+                    <div
+                        id="listaHistorialAdmin"
+                        class="lista-historial"
+                    ></div>
+
                 </article>
 
             </div>
         </section>
 
         <!-- =======================================================
-             BLOQUE PANTALLA ADMIN SUPERIOR
+             PANEL DEL ADMIN SUPERIOR
         ======================================================== -->
-        <section id="pantallaAdminSuperior" class="pantalla oculto">
+
+        <section
+            id="pantallaAdminSuperior"
+            class="pantalla oculto"
+        >
             <div class="contenedor-principal">
 
                 <header class="encabezado-billetera">
+
                     <div>
-                        <h2 class="titulo-seccion">panel admin superior</h2>
-                        <p id="textoAdminSuperiorActual" class="texto-suave">sin admin superior activo</p>
+
+                        <h2 class="titulo-seccion">
+                            panel admin superior
+                        </h2>
+
+                        <p
+                            id="textoAdminSuperiorActual"
+                            class="texto-suave"
+                        >
+                            sin admin superior activo
+                        </p>
+
                     </div>
 
                     <div class="acciones-encabezado">
-                        <button id="botonSalirAdminSuperior" class="boton boton-secundario">cerrar sesión</button>
+
+                        <button
+                            type="button"
+                            id="botonSalirAdminSuperior"
+                            class="boton boton-secundario"
+                        >
+                            cerrar sesión
+                        </button>
+
                     </div>
+
                 </header>
 
-                <!-- bloque gestion completa de cuentas -->
+                <!-- cuentas -->
+
                 <article class="tarjeta">
-                    <h3 class="subtitulo-seccion">gestionar cuentas del sistema</h3>
+
+                    <h3 class="subtitulo-seccion">
+                        gestionar cuentas del sistema
+                    </h3>
+
                     <p class="texto-suave">
-                        desde aquí el admin superior puede administrar titulares, administradores y su propia cuenta
+                        desde aquí el admin superior puede
+                        administrar titulares, administradores
+                        y su propia cuenta
                     </p>
 
-                    <div id="mensajeAccionesAdminSuperior" class="mensaje"></div>
-                    <div id="listaCuentasAdminSuperior" class="lista-cuentas-admin-superior"></div>
+                    <div
+                        id="mensajeAccionesAdminSuperior"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></div>
+
+                    <div
+                        id="listaCuentasAdminSuperior"
+                        class="lista-cuentas-admin-superior"
+                    ></div>
+
                 </article>
 
-                <!-- bloque configuracion general -->
                 <div class="grid-admin">
-                    <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">configuración general</h3>
 
-                        <label for="inputSaldoInicialSistema" class="etiqueta-control">saldo inicial por defecto</label>
-                        <input type="number" id="inputSaldoInicialSistema" class="input-control"
-                            placeholder="ejemplo: 100">
+                    <!-- configuración general -->
+
+                    <article class="tarjeta">
+
+                        <h3 class="subtitulo-seccion">
+                            configuración general
+                        </h3>
+
+                        <label
+                            for="inputSaldoInicialSistema"
+                            class="etiqueta-control"
+                        >
+                            saldo inicial por defecto
+                        </label>
+
+                        <input
+                            type="number"
+                            id="inputSaldoInicialSistema"
+                            class="input-control"
+                            placeholder="ejemplo: 100"
+                            min="0"
+                            step="1"
+                        >
 
                         <div class="acciones-formulario">
-                            <button id="botonGuardarSaldoInicialSistema" class="boton">guardar saldo inicial</button>
-                            <button id="botonAlternarRegistroPublico" class="boton boton-advertencia">
+
+                            <button
+                                type="button"
+                                id="botonGuardarSaldoInicialSistema"
+                                class="boton"
+                            >
+                                guardar saldo inicial
+                            </button>
+
+                            <button
+                                type="button"
+                                id="botonAlternarRegistroPublico"
+                                class="boton boton-advertencia"
+                            >
                                 alternar registro público
                             </button>
+
                         </div>
 
-                        <p id="mensajeAdminSuperiorPanel" class="mensaje"></p>
+                        <p
+                            id="mensajeAdminSuperiorPanel"
+                            class="mensaje"
+                            aria-live="polite"
+                        ></p>
+
                     </article>
+
+                    <!-- configuración de vales -->
 
                     <article class="tarjeta">
-                        <h3 class="subtitulo-seccion">administradores registrados</h3>
-                        <div id="listaAdministradoresAdminSuperior" class="lista-administradores-admin-superior"></div>
+
+                        <h3 class="subtitulo-seccion">
+                            configuración de vales
+                        </h3>
+
+                        <label
+                            for="inputMaximoComprasDiarias"
+                            class="etiqueta-control"
+                        >
+                            máximo de compras por día
+                        </label>
+
+                        <input
+                            type="number"
+                            id="inputMaximoComprasDiarias"
+                            class="input-control"
+                            min="1"
+                            step="1"
+                            value="2"
+                        >
+
+                        <label
+                            for="inputVigenciaValesMinutos"
+                            class="etiqueta-control"
+                        >
+                            vigencia del vale en minutos
+                        </label>
+
+                        <input
+                            type="number"
+                            id="inputVigenciaValesMinutos"
+                            class="input-control"
+                            min="1"
+                            step="1"
+                            value="25"
+                        >
+
+                        <label
+                            for="inputMaximoValesPendientes"
+                            class="etiqueta-control"
+                        >
+                            máximo de vales pendientes por titular
+                        </label>
+
+                        <input
+                            type="number"
+                            id="inputMaximoValesPendientes"
+                            class="input-control"
+                            min="1"
+                            step="1"
+                            value="1"
+                        >
+
+                        <button
+                            type="button"
+                            id="botonGuardarConfiguracionVales"
+                            class="boton"
+                        >
+                            guardar configuración de vales
+                        </button>
+
+                        <p
+                            id="resumenConfiguracionVales"
+                            class="texto-ayuda-panel"
+                        >
+                            Máximo diario: 2 | Vigencia: 25 minutos |
+                            Vales pendientes: 1
+                        </p>
+
                     </article>
+
+                    <!-- administradores -->
+
+                    <article class="tarjeta">
+
+                        <h3 class="subtitulo-seccion">
+                            administradores registrados
+                        </h3>
+
+                        <div
+                            id="listaAdministradoresAdminSuperior"
+                            class="lista-administradores-admin-superior"
+                        ></div>
+
+                    </article>
+
                 </div>
 
-                <!-- bloque historial global -->
+                <!-- historial -->
+
                 <article class="tarjeta">
-                    <h3 class="subtitulo-seccion">historial global del sistema</h3>
-                    <div id="listaHistorialGlobalAdminSuperior" class="lista-historial"></div>
+
+                    <h3 class="subtitulo-seccion">
+                        historial global del sistema
+                    </h3>
+
+                    <div
+                        id="listaHistorialGlobalAdminSuperior"
+                        class="lista-historial"
+                    ></div>
+
                 </article>
 
-                <!-- bloque estadisticas generales -->
+                <!-- estadísticas -->
+
                 <article class="tarjeta">
-                    <h3 class="subtitulo-seccion">estadísticas generales</h3>
-                    <div id="panelEstadisticasAdminSuperior" class="panel-estadisticas-admin-superior"></div>
+
+                    <h3 class="subtitulo-seccion">
+                        estadísticas generales
+                    </h3>
+
+                    <div
+                        id="panelEstadisticasAdminSuperior"
+                        class="panel-estadisticas-admin-superior"
+                    ></div>
+
                 </article>
 
             </div>
@@ -367,7 +1090,22 @@
 
     </main>
 
+    <!-- Generador de códigos QR -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"
+    ></script>
+
+    <!-- EmailJS -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"
+    ></script>
+
+    <!-- Lógica principal -->
+
     <script src="funcion.js"></script>
+
 </body>
 
 </html>

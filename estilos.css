@@ -12,16 +12,28 @@
     --color-peligro: #b91c1c;
     --color-advertencia: #d97706;
     --color-saldo: #0f766e;
-    --sombra-panel: 0 12px 30px rgba(15, 23, 42, 0.08);
+
+    --sombra-panel:
+        0 12px 30px rgba(15, 23, 42, 0.08);
+
     --radio-grande: 20px;
     --radio-base: 14px;
+
     --espaciado-xs: 8px;
     --espaciado-sm: 12px;
     --espaciado-md: 20px;
     --espaciado-lg: 32px;
     --espaciado-xl: 48px;
-    --fuente-principal: Arial, Helvetica, sans-serif;
+
+    --fuente-principal:
+        Arial,
+        Helvetica,
+        sans-serif;
 }
+
+/* =======================================================
+   REINICIO GENERAL
+======================================================= */
 
 * {
     box-sizing: border-box;
@@ -29,36 +41,76 @@
     padding: 0;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: var(--fuente-principal);
-    background: linear-gradient(135deg, #eaf1f8 0%, #f7f9fc 100%);
-    color: var(--color-texto);
     min-height: 100vh;
+    overflow-x: hidden;
+
+    font-family:
+        var(--fuente-principal);
+
+    color:
+        var(--color-texto);
+
+    background:
+        linear-gradient(
+            135deg,
+            #eaf1f8 0%,
+            #f7f9fc 100%
+        );
 }
 
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
 }
 
-.aplicacion {
+button,
+a {
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+img,
+canvas {
+    max-width: 100%;
+}
+
+.aplicacion,
+.pantalla {
     min-height: 100vh;
 }
 
 .pantalla {
-    min-height: 100vh;
-    padding: var(--espaciado-lg);
+    padding:
+        var(--espaciado-lg);
+}
+
+#pantallaBilletera {
+    padding: 0;
 }
 
 .oculto {
-    display: none;
+    display: none !important;
 }
 
+/* =======================================================
+   PANTALLAS GENERALES
+======================================================= */
+
 .contenedor-inicio {
-    min-height: calc(100vh - 64px);
+    width: 100%;
+    min-height:
+        calc(100vh - 64px);
+
     max-width: 1100px;
     margin: 0 auto;
+
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--espaciado-lg);
@@ -69,122 +121,242 @@ select {
 .panel-derecho,
 .tarjeta,
 .tarjeta-formulario {
-    background-color: var(--color-panel);
-    border: 1px solid var(--color-borde);
-    border-radius: var(--radio-grande);
-    box-shadow: var(--sombra-panel);
-    padding: var(--espaciado-lg);
+    padding:
+        var(--espaciado-lg);
+
+    background-color:
+        var(--color-panel);
+
+    border:
+        1px solid
+        var(--color-borde);
+
+    border-radius:
+        var(--radio-grande);
+
+    box-shadow:
+        var(--sombra-panel);
 }
 
-.panel-izquierdo {
-    display: flex;
-    flex-direction: column;
-    gap: var(--espaciado-md);
-}
-
-.panel-derecho {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: var(--espaciado-md);
-    min-height: 320px;
-}
-
-.titulo-app {
-    font-size: 2.2rem;
-    line-height: 1.1;
-}
-
-.subtitulo-app {
-    color: var(--color-texto-suave);
-    font-size: 1rem;
-}
-
-.titulo-seccion {
-    font-size: 1.6rem;
-}
-
-.subtitulo-seccion {
-    font-size: 1.2rem;
-    margin-bottom: var(--espaciado-sm);
-}
-
+.panel-izquierdo,
 .tarjeta-acceso,
 .tarjeta-formulario {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
+}
+
+.panel-izquierdo {
+    gap:
+        var(--espaciado-md);
+}
+
+.panel-derecho {
+    min-height: 320px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap:
+        var(--espaciado-md);
+}
+
+.titulo-app {
+    font-size:
+        clamp(
+            2rem,
+            5vw,
+            2.6rem
+        );
+
+    line-height: 1.1;
+}
+
+.subtitulo-app {
+    color:
+        var(--color-texto-suave);
+
+    font-size: 1rem;
+}
+
+.titulo-seccion {
+    font-size:
+        clamp(
+            1.35rem,
+            3vw,
+            1.6rem
+        );
+}
+
+.subtitulo-seccion {
+    margin-bottom:
+        var(--espaciado-sm);
+
+    font-size: 1.2rem;
+}
+
+.tarjeta-acceso,
+.tarjeta-formulario {
+    gap:
+        var(--espaciado-sm);
 }
 
 .etiqueta-control {
-    font-weight: 700;
+    display: block;
+
+    margin-top:
+        var(--espaciado-xs);
+
     font-size: 0.95rem;
+    font-weight: 700;
 }
 
-.texto-ayuda {
-    color: var(--color-texto-suave);
+.texto-ayuda,
+.texto-ayuda-panel {
+    color:
+        var(--color-texto-suave);
+
     font-size: 0.95rem;
+    line-height: 1.5;
 }
 
 .input-control {
     width: 100%;
-    border: 1px solid var(--color-borde);
-    border-radius: var(--radio-base);
-    padding: 13px 14px;
-    background-color: #ffffff;
-    color: var(--color-texto);
+
+    padding:
+        13px 14px;
+
+    color:
+        var(--color-texto);
+
+    background-color:
+        #ffffff;
+
+    border:
+        1px solid
+        var(--color-borde);
+
+    border-radius:
+        var(--radio-base);
+
     outline: none;
 }
 
 .input-control:focus {
-    border-color: var(--color-principal);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color:
+        var(--color-principal);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            37,
+            99,
+            235,
+            0.15
+        );
 }
 
+textarea.input-control {
+    line-height: 1.5;
+}
+
+/* =======================================================
+   BOTONES
+======================================================= */
+
 .boton {
-    border: none;
-    border-radius: var(--radio-base);
-    padding: 13px 18px;
-    background-color: var(--color-principal);
+    min-height: 44px;
+
+    padding:
+        13px 18px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap:
+        var(--espaciado-xs);
+
     color: #ffffff;
+
+    background-color:
+        var(--color-principal);
+
+    border: none;
+
+    border-radius:
+        var(--radio-base);
+
     cursor: pointer;
+
     font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
 
 .boton:hover {
-    background-color: var(--color-principal-hover);
+    background-color:
+        var(--color-principal-hover);
+}
+
+.boton:active {
+    transform:
+        translateY(1px);
+}
+
+.boton:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
 }
 
 .boton-secundario {
-    background-color: var(--color-secundario);
-    color: var(--color-texto);
+    color:
+        var(--color-texto);
+
+    background-color:
+        var(--color-secundario);
 }
 
 .boton-secundario:hover {
-    background-color: #c9d7e8;
+    background-color:
+        #c9d7e8;
 }
 
 .boton-peligro {
-    background-color: var(--color-peligro);
     color: #ffffff;
+
+    background-color:
+        var(--color-peligro);
 }
 
 .boton-peligro:hover {
-    background-color: #991b1b;
+    background-color:
+        #991b1b;
 }
 
 .boton-advertencia {
-    background-color: var(--color-advertencia);
     color: #ffffff;
+
+    background-color:
+        var(--color-advertencia);
 }
 
 .boton-advertencia:hover {
-    background-color: #b45309;
+    background-color:
+        #b45309;
 }
 
 .boton-chico {
-    padding: 10px 14px;
+    min-height: 40px;
+
+    padding:
+        10px 14px;
+
     font-size: 0.95rem;
 }
 
@@ -194,43 +366,38 @@ select {
 .acciones-usuario-admin {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
+    gap:
+        var(--espaciado-sm);
 }
 
 .enlace-boton {
+    padding: 0;
+
+    color:
+        var(--color-principal);
+
     background: none;
     border: none;
-    padding: 0;
-    color: var(--color-principal);
-    text-align: left;
+
     cursor: pointer;
+
     font-weight: 700;
+    text-align: left;
 }
+
+.enlace-boton:hover {
+    text-decoration: underline;
+}
+
+/* =======================================================
+   MENSAJES Y TEXTOS
+======================================================= */
 
 .mensaje {
     min-height: 24px;
-    font-weight: 700;
-}
 
-.contenedor-qr {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.codigo-qr {
-    width: 180px;
-    height: 180px;
-    border: 3px dashed var(--color-borde);
-    border-radius: var(--radio-base);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-transform: uppercase;
     font-weight: 700;
-    font-size: 1.6rem;
-    color: var(--color-texto-suave);
-    background-color: #f8fbff;
+    line-height: 1.4;
 }
 
 .texto-panel,
@@ -244,8 +411,55 @@ select {
 .texto-normal,
 .usuario-admin-dato,
 .admin-superior-dato {
-    color: var(--color-texto-suave);
+    color:
+        var(--color-texto-suave);
 }
+
+.texto-suave,
+.texto-normal,
+.texto-panel {
+    line-height: 1.5;
+}
+
+/* =======================================================
+   QR DECORATIVO DE INICIO
+======================================================= */
+
+.contenedor-qr {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.codigo-qr {
+    width: 180px;
+    height: 180px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color:
+        var(--color-texto-suave);
+
+    background-color:
+        #f8fbff;
+
+    border:
+        3px dashed
+        var(--color-borde);
+
+    border-radius:
+        var(--radio-base);
+
+    font-size: 1.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* =======================================================
+   CONTENEDORES GENERALES
+======================================================= */
 
 .contenedor-secundario,
 .contenedor-principal {
@@ -255,7 +469,9 @@ select {
 }
 
 .contenedor-secundario {
-    min-height: calc(100vh - 64px);
+    min-height:
+        calc(100vh - 64px);
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -269,34 +485,47 @@ select {
 .encabezado-billetera {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
-    margin-bottom: var(--espaciado-md);
+    gap:
+        var(--espaciado-sm);
+
+    margin-bottom:
+        var(--espaciado-md);
 }
 
 .tarjeta {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
-    margin-bottom: var(--espaciado-md);
-}
+    gap:
+        var(--espaciado-sm);
 
-.nombre-titular {
-    font-size: 1.5rem;
-    font-weight: 700;
+    margin-bottom:
+        var(--espaciado-md);
 }
 
 .saldo-disponible {
-    font-size: 2.4rem;
+    color:
+        var(--color-saldo);
+
+    font-size:
+        clamp(
+            2rem,
+            5vw,
+            2.4rem
+        );
+
     font-weight: 800;
-    color: var(--color-saldo);
 }
 
-.grid-billetera,
 .grid-admin {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--espaciado-md);
+    gap:
+        var(--espaciado-md);
 }
+
+/* =======================================================
+   LISTAS
+======================================================= */
 
 .lista-productos,
 .lista-carrito,
@@ -304,10 +533,12 @@ select {
 .lista-productos-admin,
 .lista-usuarios-admin,
 .lista-administradores-admin-superior,
+.lista-cuentas-admin-superior,
 .panel-estadisticas-admin-superior {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
+    gap:
+        var(--espaciado-sm);
 }
 
 .producto,
@@ -317,13 +548,22 @@ select {
 .item-usuario-admin,
 .item-admin-superior,
 .item-estadistica-admin-superior {
-    border: 1px solid var(--color-borde);
-    border-radius: var(--radio-base);
     padding: 14px;
-    background-color: #f8fbff;
+
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
+    gap:
+        var(--espaciado-sm);
+
+    background-color:
+        #f8fbff;
+
+    border:
+        1px solid
+        var(--color-borde);
+
+    border-radius:
+        var(--radio-base);
 }
 
 .producto-nombre,
@@ -335,20 +575,26 @@ select {
 }
 
 .usuario-bloqueado {
-    border-color: #fbbf24;
-    background-color: #fff7ed;
+    background-color:
+        #fff7ed;
+
+    border-color:
+        #fbbf24;
 }
 
 .estadistica-valor {
+    color:
+        var(--color-principal);
+
     font-size: 1.4rem;
     font-weight: 700;
-    color: var(--color-principal);
 }
 
 .pie-carrito {
     display: flex;
     flex-direction: column;
-    gap: var(--espaciado-sm);
+    gap:
+        var(--espaciado-sm);
 }
 
 .total-carrito {
@@ -357,52 +603,45 @@ select {
 }
 
 .lista-vacia {
+    padding:
+        var(--espaciado-sm) 0;
+
     font-style: italic;
 }
 
-@media (min-width: 768px) {
-    .contenedor-inicio {
-        grid-template-columns: 1.1fr 0.9fr;
-    }
-
-    .acciones-inferiores,
-    .acciones-formulario,
-    .acciones-encabezado,
-    .acciones-usuario-admin {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .grid-billetera,
-    .grid-admin {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .encabezado-billetera {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
-}
-
-
-
-/* bloque vista alumno estilo mi merienda */
+/* =======================================================
+   VISTA DEL TITULAR
+======================================================= */
 
 .layout-alumno {
-    display: grid;
-    grid-template-columns: 260px 1fr;
+    width: 100%;
     min-height: 100vh;
-    background-color: #f4f3ea;
+
+    display: grid;
+    grid-template-columns:
+        260px
+        minmax(0, 1fr);
+
+    background-color:
+        #f4f3ea;
 }
 
 .menu-alumno {
-    background-color: #edf0e2;
-    padding: 32px 24px;
+    min-width: 0;
+
+    padding:
+        32px 24px;
+
     display: flex;
     flex-direction: column;
     gap: 32px;
-    border-right: 1px solid #dde2cf;
+
+    background-color:
+        #edf0e2;
+
+    border-right:
+        1px solid
+        #dde2cf;
 }
 
 .marca-alumno {
@@ -414,22 +653,36 @@ select {
 .logo-alumno {
     width: 44px;
     height: 44px;
-    border: 2px solid #486535;
-    border-radius: 50%;
+
+    flex-shrink: 0;
+
     display: grid;
     place-items: center;
+
+    border:
+        2px solid
+        #486535;
+
+    border-radius: 50%;
 }
 
 .marca-alumno h2 {
-    font-size: 20px;
-    color: #2f4b24;
     margin: 0;
+
+    color:
+        #2f4b24;
+
+    font-size: 20px;
 }
 
 .marca-alumno p {
+    margin:
+        2px 0 0;
+
+    color:
+        #69745f;
+
     font-size: 13px;
-    color: #69745f;
-    margin: 2px 0 0;
 }
 
 .nav-alumno {
@@ -438,32 +691,77 @@ select {
 }
 
 .nav-alumno button {
+    width: 100%;
+
+    padding:
+        14px 18px;
+
+    color:
+        #2f352c;
+
+    background-color:
+        transparent;
+
     border: none;
-    background-color: transparent;
-    text-align: left;
-    padding: 14px 18px;
+
     border-radius: 12px;
-    font-weight: 700;
-    color: #2f352c;
+
     cursor: pointer;
+
+    font-weight: 700;
+    text-align: left;
+}
+
+.nav-alumno button:hover {
+    background-color:
+        rgba(
+            63,
+            95,
+            43,
+            0.1
+        );
 }
 
 .nav-alumno .nav-alumno-activo {
-    background-color: #3f5f2b;
-    color: white;
+    color: #ffffff;
+
+    background-color:
+        #3f5f2b;
+}
+
+.nav-alumno .nav-alumno-activo:hover {
+    background-color:
+        #344f24;
 }
 
 .nota-alumno {
     margin-top: auto;
-    background-color: #f8f7ef;
-    border: 1px solid #dde2cf;
-    border-radius: 18px;
+
     padding: 18px;
-    color: #59624f;
+
+    color:
+        #59624f;
+
+    background-color:
+        #f8f7ef;
+
+    border:
+        1px solid
+        #dde2cf;
+
+    border-radius: 18px;
+
     font-size: 14px;
+    line-height: 1.5;
+}
+
+.nota-alumno p + p {
+    margin-top: 10px;
 }
 
 .contenido-alumno {
+    min-width: 0;
+
     padding: 36px;
 }
 
@@ -471,103 +769,703 @@ select {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap:
+        var(--espaciado-md);
+
     margin-bottom: 28px;
 }
 
 .encabezado-alumno h1 {
     margin: 0;
-    color: #1f2b1d;
-    font-size: 32px;
+
+    color:
+        #1f2b1d;
+
+    font-size:
+        clamp(
+            1.7rem,
+            4vw,
+            2rem
+        );
 }
 
 .encabezado-alumno p {
-    margin: 6px 0 0;
-    color: #66705d;
+    margin:
+        6px 0 0;
+
+    color:
+        #66705d;
 }
 
 .grid-alumno-superior,
 .grid-alumno-medio {
+    min-width: 0;
+
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
     gap: 22px;
+
     margin-bottom: 22px;
 }
 
 .tarjeta-alumno {
-    background-color: #fffdf7;
-    border: 1px solid #e2dfd3;
-    border-radius: 22px;
+    min-width: 0;
+
     padding: 24px;
-    box-shadow: 0 12px 30px rgba(65, 75, 55, 0.08);
+
+    background-color:
+        #fffdf7;
+
+    border:
+        1px solid
+        #e2dfd3;
+
+    border-radius: 22px;
+
+    box-shadow:
+        0 12px 30px
+        rgba(
+            65,
+            75,
+            55,
+            0.08
+        );
 }
 
 .tarjeta-alumno h3 {
     margin-top: 0;
-    color: #23301f;
+
+    color:
+        #23301f;
 }
+
+.textarea-ayuda-alumno {
+    min-height: 110px;
+
+    margin:
+        10px 0;
+
+    resize: vertical;
+}
+
+/* =======================================================
+   TARJETA DEL SALDO
+======================================================= */
 
 .tarjeta-saldo {
-    background: linear-gradient(135deg, #fffdf7, #e8e3cf);
+    position: relative;
+
+    min-height: 260px;
+
+    padding: 30px;
+
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    color:
+        #355221;
+
+    background-image:
+        url("img/fondo _tarjeta.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    border-radius: 24px;
 }
 
-.saldo-alumno {
-    font-size: 46px;
-    font-weight: 800;
-    color: #365923;
-    margin: 10px 0;
+.tarjeta-saldo::before {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.18
+        );
+
+    backdrop-filter:
+        blur(1px);
 }
 
-.acciones-rapidas-alumno {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+.tarjeta-saldo > * {
+    position: relative;
+    z-index: 1;
 }
 
-.accion-rapida {
-    border: 1px solid #e2dfd3;
-    border-radius: 18px;
-    padding: 18px;
-    text-align: center;
-    background-color: #f8f7ef;
+/* =======================================================
+   TARJETA ESTUDIANTIL
+======================================================= */
+
+.tarjeta-estudiantil-contenedor {
+    min-width: 0;
 }
 
-.accion-rapida span {
-    font-size: 30px;
-}
+.tarjeta-estudiantil-contenedor h3 {
+    margin-bottom: 14px;
 
-.accion-rapida p {
+    color:
+        #18231b;
+
+    font-size: 20px;
     font-weight: 700;
-    margin-bottom: 0;
 }
 
 .tarjeta-estudiantil {
-    min-height: 190px;
-    border-radius: 22px;
-    padding: 28px;
-    background: linear-gradient(135deg, #8c9970, #4f673c);
-    color: white;
+    position: relative;
+
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+
+    aspect-ratio: 3 / 2;
+
+    overflow: hidden;
+
+    container-type:
+        inline-size;
+
+    background-image:
+        url("img/tarjeta-fondo.3.png");
+
+    background-size:
+        100% 100%;
+
+    background-position:
+        center;
+
+    background-repeat:
+        no-repeat;
+
+    border-radius:
+        clamp(
+            22px,
+            4cqw,
+            34px
+        );
+}
+
+.tarjeta-estudiantil-contenido {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    height: 100%;
+
+    padding:
+        clamp(
+            24px,
+            6.5cqw,
+            48px
+        )
+        clamp(
+            30px,
+            10cqw,
+            76px
+        );
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.tarjeta-estudiantil p {
-    font-size: 24px;
-    font-weight: 800;
+.tarjeta-estudiantil-superior {
+    width: 68%;
+    max-width: 560px;
+}
+
+.tarjeta-estudiantil-inferior {
+    width: 72%;
+    max-width: 570px;
+}
+
+.tarjeta-estudiantil-superior h4,
+.tarjeta-estudiantil-superior p,
+.tarjeta-nombre,
+.tarjeta-institucion {
+    color:
+        #e8e5d7;
+
+    font-family:
+        "Courier New",
+        Courier,
+        monospace;
+
+    text-shadow:
+        -1px -1px 0 #ffffff,
+        1px 1px 0 #4a503c,
+        2px 3px 3px rgba(0, 0, 0, 0.55);
+}
+
+.tarjeta-estudiantil-superior h4 {
+    margin:
+        0 0
+        clamp(
+            8px,
+            2.5cqw,
+            20px
+        );
+
+    font-size:
+        clamp(
+            19px,
+            4.4cqw,
+            31px
+        );
+
+    font-weight: 700;
+
+    letter-spacing:
+        clamp(
+            1px,
+            0.35cqw,
+            2px
+        );
+
+    line-height: 1.1;
+}
+
+.tarjeta-estudiantil-superior p {
     margin: 0;
+
+    font-size:
+        clamp(
+            13px,
+            3.05cqw,
+            22px
+        );
+
+    font-weight: 500;
+
+    letter-spacing:
+        clamp(
+            0.5px,
+            0.2cqw,
+            1px
+        );
+
+    line-height: 1.4;
 }
 
-.tarjeta-estudiantil small {
-    max-width: 280px;
+.tarjeta-nombre {
+    margin:
+        0 0
+        clamp(
+            5px,
+            1.3cqw,
+            8px
+        );
+
+    font-size:
+        clamp(
+            17px,
+            3.7cqw,
+            27px
+        );
+
+    font-weight: 700;
+
+    letter-spacing:
+        clamp(
+            1px,
+            0.3cqw,
+            2px
+        );
+
+    line-height: 1.12;
+    text-transform: uppercase;
+
+    overflow-wrap: break-word;
 }
 
-.tarjeta-estudiantil strong,
-.tarjeta-estudiantil span {
-    display: block;
+.tarjeta-institucion {
+    margin: 0;
+
+    max-width: 100%;
+
+    font-size:
+        clamp(
+            10px,
+            2.25cqw,
+            18px
+        );
+
+    font-weight: 600;
+
+    letter-spacing:
+        clamp(
+            0.5px,
+            0.18cqw,
+            1px
+        );
+
+    line-height: 1.3;
+    text-transform: uppercase;
+
+    overflow-wrap: break-word;
+}
+
+.tarjeta-estudiantil #cursoTitular {
+    display: none !important;
+}
+
+/* =======================================================
+   PANEL DEL VALE Y CÓDIGO QR
+======================================================= */
+
+.panel-vale-generado {
+    margin-bottom: 24px;
+
+    border:
+        2px solid
+        rgba(
+            63,
+            95,
+            43,
+            0.2
+        );
+
+    background:
+        linear-gradient(
+            145deg,
+            #fffef9 0%,
+            #f5f8ef 100%
+        );
+}
+
+.encabezado-vale-generado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap:
+        var(--espaciado-md);
+
+    margin-bottom:
+        var(--espaciado-sm);
+}
+
+.rotulo-vale {
+    margin-bottom: 6px;
+
+    color:
+        #65705d;
+
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
-@media (max-width: 900px) {
+#codigoValeGenerado {
+    margin: 0;
+
+    overflow-wrap: anywhere;
+
+    color:
+        #24351d;
+
+    font-size:
+        clamp(
+            1.1rem,
+            3vw,
+            1.5rem
+        );
+}
+
+.estado-vale {
+    flex-shrink: 0;
+
+    padding:
+        8px 12px;
+
+    border-radius: 999px;
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.estado-vale-pendiente {
+    color:
+        #854d0e;
+
+    background-color:
+        #fef3c7;
+
+    border:
+        1px solid
+        #f59e0b;
+}
+
+.estado-vale-utilizado {
+    color:
+        #166534;
+
+    background-color:
+        #dcfce7;
+
+    border:
+        1px solid
+        #22c55e;
+}
+
+.estado-vale-vencido {
+    color:
+        #991b1b;
+
+    background-color:
+        #fee2e2;
+
+    border:
+        1px solid
+        #ef4444;
+}
+
+.tiempo-restante-vale {
+    margin:
+        10px 0;
+
+    color:
+        #3f5f2b;
+
+    font-size:
+        clamp(
+            1.15rem,
+            3vw,
+            1.45rem
+        );
+
+    font-weight: 800;
+}
+
+.contenido-vale-generado {
+    margin-top:
+        var(--espaciado-md);
+
+    display: grid;
+    grid-template-columns:
+        minmax(
+            240px,
+            280px
+        )
+        minmax(
+            0,
+            1fr
+        );
+
+    gap:
+        var(--espaciado-lg);
+
+    align-items: center;
+}
+
+.contenedor-qr-vale {
+    width: 100%;
+    max-width: 280px;
+    min-height: 280px;
+
+    margin: 0 auto;
+
+    padding: 18px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color:
+        #ffffff;
+
+    border:
+        1px solid
+        #d9e2d2;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 10px 24px
+        rgba(
+            37,
+            52,
+            29,
+            0.1
+        );
+
+    text-align: center;
+}
+
+.contenedor-qr-vale img,
+.contenedor-qr-vale canvas {
+    width: 100% !important;
+    height: auto !important;
+
+    display: block;
+}
+
+.acciones-vale-generado {
+    display: flex;
+    flex-direction: column;
+    gap:
+        var(--espaciado-sm);
+}
+
+.enlace-comprobante-vale {
+    width: 100%;
+}
+
+/* =======================================================
+   TABLET Y LAPTOP
+======================================================= */
+
+@media (
+    min-width: 901px
+)
+and (
+    max-width: 1450px
+) {
+    .layout-alumno {
+        grid-template-columns:
+            230px
+            minmax(0, 1fr);
+    }
+
+    .menu-alumno {
+        padding:
+            26px 20px;
+    }
+
+    .contenido-alumno {
+        padding: 26px;
+    }
+
+    .grid-alumno-superior,
+    .grid-alumno-medio {
+        gap: 18px;
+    }
+
+    .tarjeta-alumno {
+        padding: 20px;
+    }
+
+    .tarjeta-estudiantil-contenido {
+        padding:
+            6.5cqw
+            9cqw;
+    }
+
+    .tarjeta-estudiantil-superior {
+        width: 67%;
+    }
+
+    .tarjeta-estudiantil-inferior {
+        width: 70%;
+    }
+
+    .tarjeta-estudiantil-superior h4 {
+        font-size:
+            clamp(
+                18px,
+                4.1cqw,
+                26px
+            );
+    }
+
+    .tarjeta-estudiantil-superior p {
+        font-size:
+            clamp(
+                13px,
+                2.8cqw,
+                18px
+            );
+    }
+
+    .tarjeta-nombre {
+        font-size:
+            clamp(
+                16px,
+                3.45cqw,
+                23px
+            );
+    }
+
+    .tarjeta-institucion {
+        font-size:
+            clamp(
+                10px,
+                2.05cqw,
+                14px
+            );
+
+        line-height: 1.25;
+    }
+}
+
+/* =======================================================
+   ESCRITORIO
+======================================================= */
+
+@media (
+    min-width: 768px
+) {
+    .contenedor-inicio {
+        grid-template-columns:
+            1.1fr
+            0.9fr;
+    }
+
+    .acciones-inferiores,
+    .acciones-formulario,
+    .acciones-encabezado,
+    .acciones-usuario-admin {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .grid-admin {
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+    }
+
+    .encabezado-billetera {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+/* =======================================================
+   TABLET VERTICAL Y MÓVIL
+======================================================= */
+
+@media (
+    max-width: 900px
+) {
+    .pantalla {
+        padding: 0;
+    }
+
+    #pantallaInicio,
+    #pantallaRegistro,
+    #pantallaAdmin,
+    #pantallaAdminSuperior {
+        padding: 18px;
+    }
+
     .layout-alumno {
         grid-template-columns: 1fr;
     }
@@ -590,76 +1488,212 @@ select {
         gap: 16px;
     }
 
-    .saldo-alumno {
-        font-size: 38px;
-    }
-
-    .acciones-rapidas-alumno {
+    .contenido-vale-generado {
         grid-template-columns: 1fr;
     }
+
+    .acciones-vale-generado {
+        width: 100%;
+        max-width: 380px;
+        margin: 0 auto;
+    }
 }
 
-/* bloque ayuda alumno */
+/* =======================================================
+   MÓVIL
+======================================================= */
 
-.textarea-ayuda-alumno {
-    min-height: 110px;
-    resize: vertical;
+@media (
+    max-width: 600px
+) {
+    .panel-izquierdo,
+    .panel-derecho,
+    .tarjeta,
+    .tarjeta-formulario {
+        padding: 22px;
+    }
+
+    .contenedor-secundario,
+    .contenedor-principal {
+        width: 100%;
+    }
+
+    .contenido-alumno {
+        padding: 14px;
+    }
+
+    .encabezado-alumno {
+        flex-direction: column;
+    }
+
+    .encabezado-alumno .boton {
+        width: 100%;
+    }
+
+    .tarjeta-alumno {
+        padding: 18px;
+    }
+
+    .tarjeta-saldo {
+        min-height: 220px;
+        padding: 22px;
+    }
+
+    .tarjeta-estudiantil {
+        border-radius: 22px;
+    }
+
+    .tarjeta-estudiantil-contenido {
+        padding:
+            6.5cqw
+            8.5cqw;
+    }
+
+    .tarjeta-estudiantil-superior {
+        width: 72%;
+    }
+
+    .tarjeta-estudiantil-inferior {
+        width: 74%;
+    }
+
+    .tarjeta-estudiantil-superior h4 {
+        font-size:
+            clamp(
+                16px,
+                5.2cqw,
+                20px
+            );
+
+        margin-bottom:
+            clamp(
+                5px,
+                2cqw,
+                10px
+            );
+    }
+
+    .tarjeta-estudiantil-superior p {
+        font-size:
+            clamp(
+                11px,
+                3.7cqw,
+                14px
+            );
+
+        line-height: 1.3;
+    }
+
+    .tarjeta-nombre {
+        font-size:
+            clamp(
+                14px,
+                4.6cqw,
+                18px
+            );
+    }
+
+    .tarjeta-institucion {
+        font-size:
+            clamp(
+                8px,
+                2.8cqw,
+                11px
+            );
+
+        line-height: 1.2;
+    }
+
+    .encabezado-vale-generado {
+        flex-direction: column;
+    }
+
+    .estado-vale {
+        align-self: flex-start;
+    }
+
+    .contenedor-qr-vale {
+        max-width: 260px;
+        min-height: 260px;
+        padding: 14px;
+    }
+
+    .acciones-formulario .boton,
+    .acciones-usuario-admin .boton {
+        width: 100%;
+    }
 }
 
+/* =======================================================
+   MÓVILES MUY PEQUEÑOS
+======================================================= */
 
-/* tarjeta saldo principal */
+@media (
+    max-width: 380px
+) {
+    #pantallaInicio,
+    #pantallaRegistro,
+    #pantallaAdmin,
+    #pantallaAdminSuperior {
+        padding: 10px;
+    }
 
-.tarjeta-saldo {
-    background-image: url("img/fondo\ _tarjeta.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    .contenido-alumno {
+        padding: 10px;
+    }
 
-    min-height: 260px;
-    border-radius: 24px;
-    padding: 30px;
+    .tarjeta-alumno {
+        padding: 14px;
+        border-radius: 18px;
+    }
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    .tarjeta-estudiantil-contenido {
+        padding:
+            6cqw
+            8cqw;
+    }
 
-    color: #355221;
+    .tarjeta-estudiantil-superior {
+        width: 73%;
+    }
 
-    position: relative;
-    overflow: hidden;
-}
+    .tarjeta-estudiantil-inferior {
+        width: 76%;
+    }
 
-/* opcional: capa blanca suave encima */
+    .tarjeta-estudiantil-superior h4 {
+        font-size:
+            clamp(
+                14px,
+                5cqw,
+                18px
+            );
+    }
 
-.tarjeta-saldo::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(1px);
-}
+    .tarjeta-estudiantil-superior p {
+        font-size:
+            clamp(
+                10px,
+                3.5cqw,
+                13px
+            );
+    }
 
-.tarjeta-saldo * {
-    position: relative;
-    z-index: 2;
-}
+    .tarjeta-nombre {
+        font-size:
+            clamp(
+                12px,
+                4.4cqw,
+                16px
+            );
+    }
 
-
-/* tarjeta de identificacion  */
-
-.tarjeta-estudiantil {
-    background-image: url("img/fondo-identificacion.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    min-height: 240px;
-    border-radius: 24px;
-    padding: 30px;
-
-    color: white;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    .tarjeta-institucion {
+        font-size:
+            clamp(
+                7px,
+                2.7cqw,
+                10px
+            );
+    }
 }

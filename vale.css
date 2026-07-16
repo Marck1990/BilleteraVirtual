@@ -1,0 +1,538 @@
+:root {
+    --color-fondo: #eef1e5;
+    --color-panel: #fffdf7;
+    --color-principal: #3f5f2b;
+    --color-principal-hover: #304a20;
+    --color-texto: #24301f;
+    --color-texto-suave: #65705d;
+    --color-borde: #dce2d3;
+    --color-error: #b91c1c;
+    --color-exito: #166534;
+    --color-advertencia: #92400e;
+    --sombra: 0 18px 50px rgba(43, 56, 35, 0.14);
+    --radio-grande: 26px;
+    --radio-base: 14px;
+    --fuente: Arial, Helvetica, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+
+    font-family: var(--fuente);
+    color: var(--color-texto);
+
+    background:
+        radial-gradient(
+            circle at top,
+            #f8f8f0 0%,
+            var(--color-fondo) 65%,
+            #e4e9db 100%
+        );
+}
+
+button,
+a {
+    font: inherit;
+}
+
+button {
+    border: none;
+}
+
+.oculto {
+    display: none !important;
+}
+
+/* =======================================================
+   ESTRUCTURA
+======================================================= */
+
+.pagina-vale {
+    width: 100%;
+    min-height: 100vh;
+
+    padding: 28px 16px;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.comprobante-vale {
+    width: 100%;
+    max-width: 760px;
+
+    overflow: hidden;
+
+    background-color: var(--color-panel);
+
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-grande);
+
+    box-shadow: var(--sombra);
+}
+
+/* =======================================================
+   ENCABEZADO
+======================================================= */
+
+.encabezado-comprobante {
+    padding: 24px 28px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #eef2e5 0%,
+            #f9f9f2 100%
+        );
+
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.marca-comprobante {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-comprobante {
+    width: 46px;
+    height: 46px;
+
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    color: #ffffff;
+    background-color: var(--color-principal);
+
+    border-radius: 50%;
+
+    font-size: 24px;
+    font-weight: 800;
+}
+
+.nombre-sistema {
+    color: var(--color-principal);
+
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.subtitulo-sistema {
+    margin-top: 3px;
+
+    color: var(--color-texto-suave);
+
+    font-size: 0.85rem;
+}
+
+.estado-vale {
+    flex-shrink: 0;
+
+    padding: 9px 13px;
+
+    border-radius: 999px;
+
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 0.7px;
+}
+
+.estado-pendiente {
+    color: #854d0e;
+    background-color: #fef3c7;
+    border: 1px solid #f59e0b;
+}
+
+.estado-utilizado {
+    color: #166534;
+    background-color: #dcfce7;
+    border: 1px solid #22c55e;
+}
+
+.estado-vencido {
+    color: #991b1b;
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+}
+
+/* =======================================================
+   CONTENIDO
+======================================================= */
+
+.contenido-vale {
+    padding: 30px 28px;
+}
+
+.titulo-comprobante {
+    padding-bottom: 24px;
+
+    border-bottom: 1px dashed var(--color-borde);
+}
+
+.rotulo {
+    margin-bottom: 8px;
+
+    color: var(--color-texto-suave);
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.titulo-comprobante h1 {
+    overflow-wrap: anywhere;
+
+    color: var(--color-principal);
+
+    font-size: clamp(1.35rem, 5vw, 2rem);
+    line-height: 1.2;
+}
+
+.tiempo-restante {
+    margin-top: 12px;
+
+    color: var(--color-advertencia);
+
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+/* =======================================================
+   DATOS DEL VALE
+======================================================= */
+
+.datos-vale {
+    padding: 24px 0;
+
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 16px;
+
+    border-bottom: 1px dashed var(--color-borde);
+}
+
+.dato-vale {
+    min-width: 0;
+
+    padding: 15px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    background-color: #f7f9f3;
+
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-base);
+}
+
+.dato-etiqueta {
+    color: var(--color-texto-suave);
+
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.dato-vale strong {
+    overflow-wrap: anywhere;
+
+    font-size: 0.98rem;
+    line-height: 1.4;
+}
+
+/* =======================================================
+   PRODUCTOS
+======================================================= */
+
+.detalle-compra {
+    padding: 24px 0;
+}
+
+.detalle-compra h2 {
+    margin-bottom: 16px;
+
+    font-size: 1.15rem;
+}
+
+.tabla-contenedor {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio-base);
+}
+
+.tabla-productos {
+    width: 100%;
+    min-width: 560px;
+
+    border-collapse: collapse;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+    padding: 14px 12px;
+
+    border-bottom: 1px solid var(--color-borde);
+
+    text-align: left;
+}
+
+.tabla-productos th {
+    color: var(--color-texto-suave);
+    background-color: #f1f4ea;
+
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.tabla-productos tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.celda-numero {
+    white-space: nowrap;
+}
+
+/* =======================================================
+   TOTAL
+======================================================= */
+
+.total-comprobante {
+    padding: 22px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+
+    color: #ffffff;
+    background-color: var(--color-principal);
+
+    border-radius: 18px;
+}
+
+.total-comprobante span {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.total-comprobante strong {
+    font-size: clamp(1.5rem, 6vw, 2.15rem);
+}
+
+/* =======================================================
+   ACCIONES
+======================================================= */
+
+.acciones-comprobante {
+    margin-top: 22px;
+
+    display: flex;
+    gap: 12px;
+}
+
+.boton {
+    min-height: 46px;
+
+    padding: 13px 18px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: var(--radio-base);
+
+    cursor: pointer;
+
+    font-weight: 800;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.boton:active {
+    transform: translateY(1px);
+}
+
+.boton:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.boton-principal {
+    flex: 1;
+
+    color: #ffffff;
+    background-color: var(--color-principal);
+}
+
+.boton-principal:hover:not(:disabled) {
+    background-color: var(--color-principal-hover);
+}
+
+.boton-secundario {
+    color: var(--color-texto);
+    background-color: #e6ebdd;
+}
+
+.boton-secundario:hover {
+    background-color: #d9e1cf;
+}
+
+.mensaje-accion {
+    min-height: 24px;
+
+    margin-top: 14px;
+
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.mensaje-exito {
+    color: var(--color-exito);
+}
+
+.mensaje-error {
+    color: var(--color-error);
+}
+
+/* =======================================================
+   PIE
+======================================================= */
+
+.pie-comprobante {
+    margin-top: 20px;
+    padding-top: 18px;
+
+    color: var(--color-texto-suave);
+
+    border-top: 1px dashed var(--color-borde);
+
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.pie-comprobante p + p {
+    margin-top: 6px;
+}
+
+/* =======================================================
+   ERROR
+======================================================= */
+
+.panel-error {
+    padding: 42px 28px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.panel-error h1 {
+    color: var(--color-error);
+}
+
+.panel-error p {
+    color: var(--color-texto-suave);
+
+    line-height: 1.5;
+}
+
+/* =======================================================
+   RESPONSIVE
+======================================================= */
+
+@media (max-width: 600px) {
+    .pagina-vale {
+        padding: 12px;
+    }
+
+    .comprobante-vale {
+        border-radius: 20px;
+    }
+
+    .encabezado-comprobante {
+        padding: 20px;
+
+        align-items: flex-start;
+    }
+
+    .contenido-vale {
+        padding: 24px 20px;
+    }
+
+    .datos-vale {
+        grid-template-columns: 1fr;
+    }
+
+    .acciones-comprobante {
+        flex-direction: column;
+    }
+
+    .boton {
+        width: 100%;
+    }
+
+    .total-comprobante {
+        padding: 18px;
+    }
+}
+
+@media (max-width: 400px) {
+    .pagina-vale {
+        padding: 0;
+    }
+
+    .comprobante-vale {
+        min-height: 100vh;
+
+        border: none;
+        border-radius: 0;
+    }
+
+    .encabezado-comprobante {
+        flex-direction: column;
+    }
+
+    .estado-vale {
+        align-self: flex-start;
+    }
+}
