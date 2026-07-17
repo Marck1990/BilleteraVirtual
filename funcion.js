@@ -1461,9 +1461,137 @@ function validarCompraParaVale(
     };
 }
 
+
+
+
+
+
+async function sincronizarValesLocalesConSupabase() {
+    if (
+        typeof window.valesRepository ===
+        "undefined"
+    ) {
+        return false;
+    }
+
+    const vales =
+        listarVales();
+
+    let huboCambios = false;
+
+    try {
+        for (
+            let i = 0;
+            i < vales.length;
+            i++
+        ) {
+            const vale =
+                vales[i];
+
+            if (
+                vale.estado !==
+                    ESTADOS_VALE.PENDIENTE ||
+                typeof vale.tokenPublico !==
+                    "string" ||
+                vale.tokenPublico.trim() ===
+                    ""
+            ) {
+                continue;
+            }
+
+            const resultado =
+                await window
+                    .valesRepository
+                    .obtenerVale(
+                        vale.tokenPublico
+                    );
+
+            if (
+                !resultado.correcto ||
+                !resultado.existe ||
+                resultado.vale === null
+            ) {
+                continue;
+            }
+
+            let datosRemotos =
+                resultado.vale;
+
+            if (
+                datosRemotos.vale !== null &&
+                typeof datosRemotos.vale ===
+                    "object"
+            ) {
+                datosRemotos =
+                    datosRemotos.vale;
+            }
+
+            const estadoRemoto =
+                String(
+                    datosRemotos.estado || ""
+                ).toLowerCase();
+
+            if (
+                estadoRemoto === "used" ||
+                estadoRemoto === "usado" ||
+                estadoRemoto === "utilizado"
+            ) {
+                vale.estado =
+                    ESTADOS_VALE.UTILIZADO;
+
+                vale.fechaUtilizacion =
+                    datosRemotos.utilizado_en ||
+                    datosRemotos.fechaUtilizacion ||
+                    vale.fechaUtilizacion ||
+                    null;
+
+                huboCambios = true;
+            } else if (
+                estadoRemoto === "expired" ||
+                estadoRemoto === "vencido"
+            ) {
+                vale.estado =
+                    ESTADOS_VALE.VENCIDO;
+
+                huboCambios = true;
+            }
+        }
+
+        if (huboCambios) {
+            guardarListaVales(
+                vales
+            );
+        }
+
+        return true;
+    } catch (error) {
+        console.error(
+            "Error al sincronizar vales:",
+            error
+        );
+
+        return false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function procesarCompraConVale() {
     const usuarioActivo =
         obtenerUsuarioActivo();
+
+    await sincronizarValesLocalesConSupabase();
 
     actualizarValesVencidos();
 
