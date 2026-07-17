@@ -1,3 +1,130 @@
+
+async function verificarPermisoUtilizacion() {
+    usuarioPuedeUtilizarVale = false;
+
+    ocultarElemento(
+        botonMarcarUtilizado
+    );
+
+    if (
+        typeof window.supabaseCliente ===
+        "undefined"
+    ) {
+        return;
+    }
+
+    try {
+        const respuestaSesion =
+            await window
+                .supabaseCliente
+                .auth
+                .getSession();
+
+        if (
+            respuestaSesion.error ||
+            respuestaSesion.data.session ===
+                null
+        ) {
+            return;
+        }
+
+        const usuarioId =
+            respuestaSesion
+                .data
+                .session
+                .user
+                .id;
+
+        const respuestaPerfil =
+            await window
+                .supabaseCliente
+                .from("perfiles")
+                .select("rol, activo")
+                .eq(
+                    "id",
+                    usuarioId
+                )
+                .single();
+
+        if (
+            respuestaPerfil.error ||
+            respuestaPerfil.data === null ||
+            respuestaPerfil.data.activo ===
+                false
+        ) {
+            return;
+        }
+
+        const rol =
+            respuestaPerfil.data.rol;
+
+        usuarioPuedeUtilizarVale =
+            rol === "admin" ||
+            rol === "admin_superior" ||
+            rol === "operador_vales";
+    } catch (error) {
+        console.error(
+            "Error al verificar permisos:",
+            error
+        );
+    }
+}
+
+function actualizarBotonUtilizacion() {
+    if (
+        botonMarcarUtilizado === null
+    ) {
+        return;
+    }
+
+    if (
+        !usuarioPuedeUtilizarVale ||
+        valeActual === null
+    ) {
+        ocultarElemento(
+            botonMarcarUtilizado
+        );
+
+        return;
+    }
+
+    mostrarElemento(
+        botonMarcarUtilizado
+    );
+
+    if (
+        valeActual.estado ===
+        ESTADOS_VALE.UTILIZADO
+    ) {
+        botonMarcarUtilizado.disabled =
+            true;
+
+        botonMarcarUtilizado.textContent =
+            "vale utilizado";
+
+        return;
+    }
+
+    if (
+        valeActual.estado ===
+        ESTADOS_VALE.VENCIDO
+    ) {
+        botonMarcarUtilizado.disabled =
+            true;
+
+        botonMarcarUtilizado.textContent =
+            "vale vencido";
+
+        return;
+    }
+
+    botonMarcarUtilizado.disabled =
+        false;
+
+    botonMarcarUtilizado.textContent =
+        "marcar como utilizado";
+}
+
 // =======================================================
 // ESTADOS DEL VALE
 // =======================================================
@@ -10,6 +137,7 @@ const ESTADOS_VALE = Object.freeze({
 
 let valeActual = null;
 let tokenValeActual = null;
+let usuarioPuedeUtilizarVale = false;
 let intervaloCuentaRegresiva = null;
 
 // =======================================================
@@ -754,12 +882,6 @@ function actualizarInformacionEstado() {
         tiempoRestanteVale.textContent =
             "Vale utilizado";
 
-        botonMarcarUtilizado.disabled =
-            true;
-
-        botonMarcarUtilizado.textContent =
-            "vale utilizado";
-
         mostrarElemento(
             bloqueFechaUtilizacion
         );
@@ -768,6 +890,8 @@ function actualizarInformacionEstado() {
             formatearFecha(
                 valeActual.fechaUtilizacion
             );
+
+        actualizarBotonUtilizacion();
 
         return;
     }
@@ -783,11 +907,7 @@ function actualizarInformacionEstado() {
         tiempoRestanteVale.textContent =
             "Vale vencido";
 
-        botonMarcarUtilizado.disabled =
-            true;
-
-        botonMarcarUtilizado.textContent =
-            "vale vencido";
+        actualizarBotonUtilizacion();
 
         return;
     }
@@ -804,12 +924,9 @@ function actualizarInformacionEstado() {
             tiempoRestante
         );
 
-    botonMarcarUtilizado.disabled =
-        false;
-
-    botonMarcarUtilizado.textContent =
-        "marcar como utilizado";
+    actualizarBotonUtilizacion();
 }
+
 
 function renderizarComprobante() {
     ocultarElemento(panelError);
@@ -990,6 +1107,15 @@ function obtenerMensajeResultadoUtilizacion(
 
 async function marcarValeComoUtilizado() {
     limpiarMensajeAccion();
+if (!usuarioPuedeUtilizarVale) {
+    mostrarMensajeAccion(
+        "No tenés permiso para utilizar este vale.",
+        "error"
+    );
+
+    return;
+}
+
     actualizarEstadoValeActual();
 
     if (
@@ -1075,6 +1201,7 @@ async function iniciarVale() {
         return;
     }
 
+    await verificarPermisoUtilizacion();
     await cargarValeDesdeSupabase();
 }
 
