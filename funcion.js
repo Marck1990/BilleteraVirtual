@@ -2811,7 +2811,17 @@ function abrirPanelAdminSuperior() {
     );
 }
 
-function salirSistema() {
+async function salirSistema() {
+    if (
+        typeof window.supabaseCliente !==
+        "undefined"
+    ) {
+        await window
+            .supabaseCliente
+            .auth
+            .signOut();
+    }
+
     sesion.tipo = "";
     sesion.usuarioId = null;
     sesion.adminId = null;
