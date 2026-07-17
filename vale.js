@@ -1,5 +1,5 @@
 // =======================================================
-// ESTADOS Y ALMACENAMIENTO
+// ESTADOS DEL VALE
 // =======================================================
 
 const ESTADOS_VALE = Object.freeze({
@@ -8,9 +8,8 @@ const ESTADOS_VALE = Object.freeze({
     VENCIDO: "vencido"
 });
 
-const CLAVE_VALES = "bve_vales_v1";
-
 let valeActual = null;
+let tokenValeActual = null;
 let intervaloCuentaRegresiva = null;
 
 // =======================================================
@@ -85,13 +84,19 @@ function mostrarError(texto) {
     ocultarElemento(contenidoVale);
     mostrarElemento(panelError);
 
-    mensajeError.textContent = texto;
+    if (mensajeError !== null) {
+        mensajeError.textContent = texto;
+    }
 }
 
 function mostrarMensajeAccion(
     texto,
     tipo
 ) {
+    if (mensajeAccionVale === null) {
+        return;
+    }
+
     mensajeAccionVale.textContent = texto;
 
     mensajeAccionVale.className =
@@ -99,6 +104,10 @@ function mostrarMensajeAccion(
 }
 
 function limpiarMensajeAccion() {
+    if (mensajeAccionVale === null) {
+        return;
+    }
+
     mensajeAccionVale.textContent = "";
     mensajeAccionVale.className =
         "mensaje-accion";
@@ -162,85 +171,263 @@ function formatearTiempoRestante(
 }
 
 // =======================================================
-// DECODIFICACIÓN DEL VALE
+// LECTURA DEL TOKEN
 // =======================================================
 
-function decodificarBase64Url(textoCodificado) {
-    try {
-        let base64 =
-            textoCodificado
-                .split("-")
-                .join("+")
-                .split("_")
-                .join("/");
-
-        while (base64.length % 4 !== 0) {
-            base64 += "=";
-        }
-
-        const binario = atob(base64);
-
-        const bytes =
-            new Uint8Array(
-                binario.length
-            );
-
-        for (
-            let i = 0;
-            i < binario.length;
-            i++
-        ) {
-            bytes[i] =
-                binario.charCodeAt(i);
-        }
-
-        return new TextDecoder()
-            .decode(bytes);
-    } catch (error) {
-        console.error(
-            "Error al decodificar:",
-            error
-        );
-
-        return null;
-    }
-}
-
-function leerDatosDesdeUrl() {
+function leerTokenDesdeUrl() {
     const parametros =
         new URLSearchParams(
             window.location.search
         );
 
-    const datosCodificados =
-        parametros.get("datos");
+    const token =
+        parametros.get("token");
 
     if (
-        datosCodificados === null ||
-        datosCodificados.trim() === ""
+        token === null ||
+        token.trim() === ""
     ) {
         return null;
     }
 
-    const texto =
-        decodificarBase64Url(
-            datosCodificados
+    return token.trim();
+}
+
+// =======================================================
+// NORMALIZACIÓN DE DATOS DE SUPABASE
+// =======================================================
+
+function obtenerPrimerValorValido(
+    valores
+) {
+    for (
+        let i = 0;
+        i < valores.length;
+        i++
+    ) {
+        if (
+            valores[i] !== undefined &&
+            valores[i] !== null
+        ) {
+            return valores[i];
+        }
+    }
+
+    return null;
+}
+
+function normalizarEstado(
+    estado,
+    fechaVencimiento
+) {
+    const textoEstado =
+        String(
+            estado || ""
+        ).toLowerCase();
+
+    if (
+        textoEstado === "utilizado" ||
+        textoEstado === "usado" ||
+        textoEstado === "used"
+    ) {
+        return ESTADOS_VALE.UTILIZADO;
+    }
+
+    if (
+        textoEstado === "vencido" ||
+        textoEstado === "expired"
+    ) {
+        return ESTADOS_VALE.VENCIDO;
+    }
+
+    const vencimiento =
+        new Date(
+            fechaVencimiento
+        ).getTime();
+
+    if (
+        !Number.isNaN(vencimiento) &&
+        Date.now() >= vencimiento
+    ) {
+        return ESTADOS_VALE.VENCIDO;
+    }
+
+    return ESTADOS_VALE.PENDIENTE;
+}
+
+function normalizarProducto(
+    producto
+) {
+    const nombre =
+        obtenerPrimerValorValido([
+            producto.nombre,
+            producto.producto_nombre,
+            producto.nombre_producto
+        ]);
+
+    const cantidad =
+        Number(
+            obtenerPrimerValorValido([
+                producto.cantidad
+            ])
         );
 
-    if (texto === null) {
+    const precioUnitario =
+        Number(
+            obtenerPrimerValorValido([
+                producto.precioUnitario,
+                producto.precio_unitario,
+                producto.precio
+            ])
+        );
+
+    let subtotal =
+        Number(
+            obtenerPrimerValorValido([
+                producto.subtotal
+            ])
+        );
+
+    if (!Number.isFinite(subtotal)) {
+        subtotal =
+            cantidad *
+            precioUnitario;
+    }
+
+    return {
+        nombre: String(nombre || ""),
+        cantidad: cantidad,
+        precioUnitario: precioUnitario,
+        subtotal: subtotal
+    };
+}
+
+function normalizarDatosVale(
+    respuesta
+) {
+    if (
+        respuesta === null ||
+        typeof respuesta !== "object"
+    ) {
         return null;
     }
 
-    try {
-        return JSON.parse(texto);
-    } catch (error) {
-        console.error(
-            "Error al interpretar el vale:",
-            error
-        );
+    let origen = respuesta;
 
-        return null;
+    if (
+        respuesta.vale !== null &&
+        typeof respuesta.vale === "object"
+    ) {
+        origen = respuesta.vale;
     }
+
+    const fechaCreacion =
+        obtenerPrimerValorValido([
+            origen.fechaCreacion,
+            origen.creado_en,
+            origen.fecha_creacion,
+            respuesta.creado_en
+        ]);
+
+    const fechaVencimiento =
+        obtenerPrimerValorValido([
+            origen.fechaVencimiento,
+            origen.vence_en,
+            origen.fecha_vencimiento,
+            respuesta.vence_en
+        ]);
+
+    const fechaUtilizacion =
+        obtenerPrimerValorValido([
+            origen.fechaUtilizacion,
+            origen.utilizado_en,
+            origen.fecha_utilizacion,
+            respuesta.utilizado_en
+        ]);
+
+    const productosOriginales =
+        obtenerPrimerValorValido([
+            origen.productos,
+            origen.detalles,
+            origen.vale_detalles,
+            respuesta.productos,
+            respuesta.detalles
+        ]);
+
+    const productos = [];
+
+    if (Array.isArray(productosOriginales)) {
+        for (
+            let i = 0;
+            i < productosOriginales.length;
+            i++
+        ) {
+            productos.push(
+                normalizarProducto(
+                    productosOriginales[i]
+                )
+            );
+        }
+    }
+
+    const estadoOriginal =
+        obtenerPrimerValorValido([
+            origen.estado,
+            respuesta.estado
+        ]);
+
+    return {
+        id: String(
+            obtenerPrimerValorValido([
+                origen.codigo,
+                origen.id,
+                respuesta.codigo
+            ]) || ""
+        ),
+
+        tokenPublico:
+            obtenerPrimerValorValido([
+                origen.tokenPublico,
+                origen.token_publico,
+                respuesta.token_publico,
+                tokenValeActual
+            ]),
+
+        titularNombre: String(
+            obtenerPrimerValorValido([
+                origen.titularNombre,
+                origen.titular_nombre,
+                origen.titular,
+                respuesta.titular_nombre
+            ]) || ""
+        ),
+
+        estado:
+            normalizarEstado(
+                estadoOriginal,
+                fechaVencimiento
+            ),
+
+        fechaCreacion:
+            fechaCreacion,
+
+        fechaVencimiento:
+            fechaVencimiento,
+
+        fechaUtilizacion:
+            fechaUtilizacion,
+
+        productos:
+            productos,
+
+        total:
+            Number(
+                obtenerPrimerValorValido([
+                    origen.total,
+                    respuesta.total
+                ])
+            )
+    };
 }
 
 // =======================================================
@@ -401,137 +588,6 @@ function validarDatosVale(vale) {
 }
 
 // =======================================================
-// ALMACENAMIENTO LOCAL DEL ESTADO
-// =======================================================
-
-function listarValesLocales() {
-    try {
-        const contenido =
-            localStorage.getItem(
-                CLAVE_VALES
-            );
-
-        if (contenido === null) {
-            return [];
-        }
-
-        const lista =
-            JSON.parse(contenido);
-
-        if (!Array.isArray(lista)) {
-            return [];
-        }
-
-        return lista;
-    } catch (error) {
-        console.error(
-            "Error al leer los vales locales:",
-            error
-        );
-
-        return [];
-    }
-}
-
-function guardarListaValesLocales(lista) {
-    try {
-        localStorage.setItem(
-            CLAVE_VALES,
-            JSON.stringify(lista)
-        );
-
-        return true;
-    } catch (error) {
-        console.error(
-            "Error al guardar el vale:",
-            error
-        );
-
-        return false;
-    }
-}
-
-function buscarValeLocal(idVale) {
-    const lista =
-        listarValesLocales();
-
-    for (
-        let i = 0;
-        i < lista.length;
-        i++
-    ) {
-        if (lista[i].id === idVale) {
-            return lista[i];
-        }
-    }
-
-    return null;
-}
-
-function guardarValeLocal(vale) {
-    const lista =
-        listarValesLocales();
-
-    let encontrado = false;
-
-    for (
-        let i = 0;
-        i < lista.length;
-        i++
-    ) {
-        if (lista[i].id === vale.id) {
-            lista[i] = vale;
-            encontrado = true;
-            break;
-        }
-    }
-
-    if (!encontrado) {
-        lista.push(vale);
-    }
-
-    return guardarListaValesLocales(
-        lista
-    );
-}
-
-function combinarEstadoLocal(
-    valeUrl,
-    valeLocal
-) {
-    const combinado = {
-        ...valeUrl
-    };
-
-    combinado.fechaUtilizacion =
-        valeUrl.fechaUtilizacion || null;
-
-    if (valeLocal === null) {
-        return combinado;
-    }
-
-    if (
-        valeLocal.estado ===
-        ESTADOS_VALE.UTILIZADO
-    ) {
-        combinado.estado =
-            ESTADOS_VALE.UTILIZADO;
-
-        combinado.fechaUtilizacion =
-            valeLocal.fechaUtilizacion ||
-            combinado.fechaUtilizacion;
-    } else if (
-        valeLocal.estado ===
-        ESTADOS_VALE.VENCIDO
-    ) {
-        combinado.estado =
-            ESTADOS_VALE.VENCIDO;
-    }
-
-    return combinado;
-}
-
-// =======================================================
 // ESTADO DEL VALE
 // =======================================================
 
@@ -552,16 +608,12 @@ function actualizarEstadoValeActual() {
             valeActual.fechaVencimiento
         ).getTime();
 
-    if (Date.now() >= vencimiento) {
+    if (
+        !Number.isNaN(vencimiento) &&
+        Date.now() >= vencimiento
+    ) {
         valeActual.estado =
             ESTADOS_VALE.VENCIDO;
-
-        guardarValeLocal(
-            valeActual
-        );
-    } else {
-        valeActual.estado =
-            ESTADOS_VALE.PENDIENTE;
     }
 }
 
@@ -805,13 +857,143 @@ function iniciarCuentaRegresiva() {
 }
 
 // =======================================================
+// CONSULTA A SUPABASE
+// =======================================================
+
+async function consultarValeSupabase() {
+    if (
+        typeof window.valesRepository ===
+        "undefined"
+    ) {
+        return {
+            correcto: false,
+            mensaje:
+                "El servicio de vales no está disponible."
+        };
+    }
+
+    const resultado =
+        await window.valesRepository
+            .obtenerVale(
+                tokenValeActual
+            );
+
+    if (!resultado.correcto) {
+        return {
+            correcto: false,
+            mensaje:
+                "No se pudo consultar el vale."
+        };
+    }
+
+    if (!resultado.existe) {
+        return {
+            correcto: false,
+            mensaje:
+                "El vale no existe o el enlace no es válido."
+        };
+    }
+
+    const valeNormalizado =
+        normalizarDatosVale(
+            resultado.vale
+        );
+
+    if (
+        !validarDatosVale(
+            valeNormalizado
+        )
+    ) {
+        return {
+            correcto: false,
+            mensaje:
+                "Los datos del comprobante están incompletos."
+        };
+    }
+
+    return {
+        correcto: true,
+        vale: valeNormalizado
+    };
+}
+
+async function cargarValeDesdeSupabase() {
+    botonActualizarEstado.disabled =
+        true;
+
+    botonMarcarUtilizado.disabled =
+        true;
+
+    const resultado =
+        await consultarValeSupabase();
+
+    botonActualizarEstado.disabled =
+        false;
+
+    if (!resultado.correcto) {
+        mostrarError(
+            resultado.mensaje
+        );
+
+        return false;
+    }
+
+    valeActual =
+        resultado.vale;
+
+    renderizarComprobante();
+    iniciarCuentaRegresiva();
+
+    return true;
+}
+
+// =======================================================
 // ACCIONES
 // =======================================================
 
-function marcarValeComoUtilizado() {
+function obtenerMensajeResultadoUtilizacion(
+    resultado
+) {
+    if (
+        resultado === "no_autenticado"
+    ) {
+        return "Debés iniciar sesión para utilizar el vale.";
+    }
+
+    if (
+        resultado === "sin_permiso"
+    ) {
+        return "Tu usuario no tiene permiso para utilizar vales.";
+    }
+
+    if (
+        resultado === "vale_no_encontrado"
+    ) {
+        return "El vale no existe.";
+    }
+
+    if (
+        resultado === "vale_utilizado" ||
+        resultado === "ya_utilizado"
+    ) {
+        return "El vale ya fue utilizado.";
+    }
+
+    if (
+        resultado === "vale_vencido"
+    ) {
+        return "El vale está vencido.";
+    }
+
+    return "No se pudo marcar el vale como utilizado.";
+}
+
+async function marcarValeComoUtilizado() {
+    limpiarMensajeAccion();
     actualizarEstadoValeActual();
 
     if (
+        valeActual === null ||
         valeActual.estado !==
         ESTADOS_VALE.PENDIENTE
     ) {
@@ -828,99 +1010,72 @@ function marcarValeComoUtilizado() {
         return;
     }
 
-    valeActual.estado =
-        ESTADOS_VALE.UTILIZADO;
+    botonMarcarUtilizado.disabled =
+        true;
 
-    valeActual.fechaUtilizacion =
-        new Date().toISOString();
+    botonActualizarEstado.disabled =
+        true;
 
-    const guardado =
-        guardarValeLocal(
-            valeActual
-        );
+    const resultado =
+        await window.valesRepository
+            .marcarValeComoUsado(
+                tokenValeActual
+            );
 
-    if (!guardado) {
+    botonActualizarEstado.disabled =
+        false;
+
+    if (!resultado.correcto) {
         mostrarMensajeAccion(
-            "No se pudo guardar el estado del vale.",
+            obtenerMensajeResultadoUtilizacion(
+                resultado.resultado
+            ),
             "error"
         );
 
+        actualizarInformacionEstado();
         return;
     }
+
+    await cargarValeDesdeSupabase();
 
     mostrarMensajeAccion(
         "Vale marcado como utilizado correctamente.",
         "exito"
     );
-
-    actualizarInformacionEstado();
 }
 
-function actualizarComprobante() {
+async function actualizarComprobante() {
     limpiarMensajeAccion();
 
-    const valeLocal =
-        buscarValeLocal(
-            valeActual.id
+    const actualizado =
+        await cargarValeDesdeSupabase();
+
+    if (actualizado) {
+        mostrarMensajeAccion(
+            "Estado actualizado.",
+            "exito"
         );
-
-    valeActual =
-        combinarEstadoLocal(
-            valeActual,
-            valeLocal
-        );
-
-    actualizarInformacionEstado();
-
-    mostrarMensajeAccion(
-        "Estado actualizado.",
-        "exito"
-    );
+    }
 }
 
 // =======================================================
 // INICIO
 // =======================================================
 
-function iniciarVale() {
-    const datosUrl =
-        leerDatosDesdeUrl();
+async function iniciarVale() {
+    tokenValeActual =
+        leerTokenDesdeUrl();
 
-    if (datosUrl === null) {
+    if (tokenValeActual === null) {
         mostrarError(
-            "El enlace no contiene la información necesaria."
+            "El enlace no contiene el token del vale."
         );
 
         return;
     }
 
-    if (!validarDatosVale(datosUrl)) {
-        mostrarError(
-            "Los datos del comprobante están incompletos o fueron modificados."
-        );
-
-        return;
-    }
-
-    const valeLocal =
-        buscarValeLocal(
-            datosUrl.id
-        );
-
-    valeActual =
-        combinarEstadoLocal(
-            datosUrl,
-            valeLocal
-        );
-
-    actualizarEstadoValeActual();
-
-    guardarValeLocal(
-        valeActual
-    );
-
-    renderizarComprobante();
-    iniciarCuentaRegresiva();
+    await cargarValeDesdeSupabase();
 }
 
 botonMarcarUtilizado.addEventListener(

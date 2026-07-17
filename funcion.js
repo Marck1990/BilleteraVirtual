@@ -1461,7 +1461,7 @@ function validarCompraParaVale(
     };
 }
 
-function procesarCompraConVale() {
+async function procesarCompraConVale() {
     const usuarioActivo =
         obtenerUsuarioActivo();
 
@@ -1496,20 +1496,13 @@ function procesarCompraConVale() {
     }
 
     const vale = crearVale({
-        id:
-            idVale,
-
-        titular:
-            usuarioActivo,
-
+        id: idVale,
+        titular: usuarioActivo,
         fechaCreacion:
             new Date().toISOString(),
-
         productos:
             agruparProductosDelCarrito(),
-
-        total:
-            validacion.total
+        total: validacion.total
     });
 
     const saldoAnterior =
@@ -1525,27 +1518,18 @@ function procesarCompraConVale() {
 
     registrarMovimientoUsuario(
         usuarioActivo.id,
-
         "compra",
-
         "compra " +
             vale.id +
             " por " +
             formatearMoneda(
                 vale.total
             ),
-
         -vale.total,
-
         usuarioActivo.saldo
     );
 
-    if (
-        !guardarResultadoCompra(
-            vale,
-            usuarios
-        )
-    ) {
+    if (!guardarUsuarios(usuarios)) {
         usuarioActivo.saldo =
             saldoAnterior;
 
@@ -1554,12 +1538,39 @@ function procesarCompraConVale() {
 
         mostrarMensaje(
             mensajeCompra,
-            "no se pudo guardar la compra",
+            "no se pudo guardar el saldo",
             "var(--color-error)"
         );
 
         return null;
     }
+
+    const resultadoSupabase =
+        await window.valesRepository
+            .guardarVale(vale);
+
+    if (!resultadoSupabase.correcto) {
+        usuarioActivo.saldo =
+            saldoAnterior;
+
+        usuarioActivo.historial =
+            historialAnterior;
+
+        guardarUsuarios(usuarios);
+
+        mostrarMensaje(
+            mensajeCompra,
+            "no se pudo guardar el vale en Supabase",
+            "var(--color-error)"
+        );
+
+        return null;
+    }
+
+    const valeGuardado =
+        resultadoSupabase.vale;
+
+    guardarVale(valeGuardado);
 
     carrito = [];
 
@@ -1568,15 +1579,16 @@ function procesarCompraConVale() {
     mostrarMensaje(
         mensajeCompra,
         "compra aprobada. Vale generado: " +
-            vale.id,
+            valeGuardado.id,
         "var(--color-exito)"
     );
 
-    mostrarValeGenerado(vale);
+    mostrarValeGenerado(
+        valeGuardado
+    );
 
-    return vale;
+    return valeGuardado;
 }
-
 // =======================================================
 // GENERACIÓN DEL QR
 // =======================================================
@@ -1672,17 +1684,12 @@ function codificarDatosVale(datos) {
     }
 }
 
-function construirUrlComprobante(
-    vale
-) {
-    const datos =
-        codificarDatosVale(
-            crearDatosPublicosVale(
-                vale
-            )
-        );
-
-    if (datos === null) {
+function construirUrlComprobante(vale) {
+    if (
+        vale === null ||
+        typeof vale.tokenPublico !== "string" ||
+        vale.tokenPublico.trim() === ""
+    ) {
         return null;
     }
 
@@ -1692,8 +1699,8 @@ function construirUrlComprobante(
     );
 
     url.searchParams.set(
-        "datos",
-        datos
+        "token",
+        vale.tokenPublico
     );
 
     return url.toString();
@@ -2434,7 +2441,7 @@ function registrarCuenta() {
 // LOGIN Y NAVEGACIÓN
 // =======================================================
 
-function ingresarAlSistema() {
+async function ingresarAlSistema() {
     const nombreUsuario =
         inputUsuarioIngreso
             .value
@@ -2456,6 +2463,218 @@ function ingresarAlSistema() {
         );
 
         return;
+    }
+
+    // Las cuentas con correo se autentican en Supabase
+    if (nombreUsuario.includes("@")) {
+        botonIngresarSistema.disabled =
+            true;
+
+        try {
+            const respuestaInicio =
+                await window
+                    .supabaseCliente
+                    .auth
+                    .signInWithPassword({
+                        email:
+                            nombreUsuario,
+                        password:
+                            contrasena
+                    });
+
+            if (respuestaInicio.error) {
+                mostrarMensaje(
+                    mensajeInicio,
+                    "correo o contraseña incorrectos",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            const usuarioSupabase =
+                respuestaInicio
+                    .data
+                    .user;
+
+            const respuestaPerfil =
+                await window
+                    .supabaseCliente
+                    .from("perfiles")
+                    .select(
+                        "nombre, rol, activo"
+                    )
+                    .eq(
+                        "id",
+                        usuarioSupabase.id
+                    )
+                    .single();
+
+            if (
+                respuestaPerfil.error ||
+                respuestaPerfil.data === null
+            ) {
+                await window
+                    .supabaseCliente
+                    .auth
+                    .signOut();
+
+                mostrarMensaje(
+                    mensajeInicio,
+                    "no se pudo obtener el perfil",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            const perfil =
+                respuestaPerfil.data;
+
+            if (perfil.activo === false) {
+                await window
+                    .supabaseCliente
+                    .auth
+                    .signOut();
+
+                mostrarMensaje(
+                    mensajeInicio,
+                    "la cuenta está deshabilitada",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            let tipoAplicacion = "";
+
+            if (
+                perfil.rol ===
+                "admin_superior"
+            ) {
+                tipoAplicacion =
+                    "adminSuperior";
+            } else if (
+                perfil.rol === "admin" ||
+                perfil.rol ===
+                    "operador_vales"
+            ) {
+                tipoAplicacion =
+                    "admin";
+            } else {
+                await window
+                    .supabaseCliente
+                    .auth
+                    .signOut();
+
+                mostrarMensaje(
+                    mensajeInicio,
+                    "la cuenta no tiene permisos administrativos",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            let admin =
+                buscarAdministradorPorNombreUsuario(
+                    nombreUsuario
+                );
+
+            if (admin === null) {
+                admin = {
+                    id:
+                        siguienteIdAdmin,
+
+                    tipo:
+                        tipoAplicacion,
+
+                    usuario:
+                        nombreUsuario,
+
+                    nombre:
+                        perfil.nombre ||
+                        nombreUsuario,
+
+                    contrasena:
+                        "",
+
+                    autenticacion:
+                        "supabase"
+                };
+
+                administradores.push(
+                    admin
+                );
+
+                siguienteIdAdmin++;
+            } else {
+                admin.tipo =
+                    tipoAplicacion;
+
+                admin.nombre =
+                    perfil.nombre ||
+                    admin.nombre;
+
+                admin.autenticacion =
+                    "supabase";
+            }
+
+            guardarAdministradores(
+                administradores
+            );
+
+            sesion.tipo =
+                tipoAplicacion;
+
+            sesion.adminId =
+                admin.id;
+
+            sesion.usuarioId =
+                null;
+
+            limpiarMensaje(
+                mensajeInicio
+            );
+
+            if (
+                tipoAplicacion ===
+                "adminSuperior"
+            ) {
+                abrirPanelAdminSuperior();
+            } else {
+                abrirPanelAdmin();
+            }
+
+            return;
+        } catch (error) {
+            console.error(
+                "Error al iniciar sesión:",
+                error
+            );
+
+            mostrarMensaje(
+                mensajeInicio,
+                "no se pudo conectar con Supabase",
+                "var(--color-error)"
+            );
+
+            return;
+        } finally {
+            botonIngresarSistema.disabled =
+                false;
+        }
+    }
+
+    // Evita conservar una sesión administrativa anterior
+    if (
+        typeof window.supabaseCliente !==
+        "undefined"
+    ) {
+        await window
+            .supabaseCliente
+            .auth
+            .signOut();
     }
 
     const admin =

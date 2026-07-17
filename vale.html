@@ -4,22 +4,13 @@
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="theme-color"
-        content="#3f5f2b"
-    >
+    <meta name="theme-color" content="#3f5f2b">
 
     <title>Vale digital escolar</title>
 
-    <link
-        rel="stylesheet"
-        href="vale.css"
-    >
+    <link rel="stylesheet" href="vale.css">
 </head>
 
 <body>
@@ -50,10 +41,7 @@
 
                 </div>
 
-                <span
-                    id="estadoVale"
-                    class="estado-vale estado-pendiente"
-                >
+                <span id="estadoVale" class="estado-vale estado-pendiente">
                     PENDIENTE
                 </span>
 
@@ -61,11 +49,7 @@
 
             <!-- mensaje de error -->
 
-            <section
-                id="panelError"
-                class="panel-error oculto"
-                aria-live="polite"
-            >
+            <section id="panelError" class="panel-error oculto" aria-live="polite">
 
                 <h1>
                     Comprobante no válido
@@ -75,10 +59,7 @@
                     No fue posible leer la información del vale.
                 </p>
 
-                <a
-                    href="index.html"
-                    class="boton boton-secundario"
-                >
+                <a href="index.html" class="boton boton-secundario">
                     volver al inicio
                 </a>
 
@@ -86,10 +67,7 @@
 
             <!-- contenido del comprobante -->
 
-            <section
-                id="contenidoVale"
-                class="contenido-vale oculto"
-            >
+            <section id="contenidoVale" class="contenido-vale oculto">
 
                 <div class="titulo-comprobante">
 
@@ -101,10 +79,7 @@
                         VAL-00000000-00000
                     </h1>
 
-                    <p
-                        id="tiempoRestanteVale"
-                        class="tiempo-restante"
-                    >
+                    <p id="tiempoRestanteVale" class="tiempo-restante">
                         Tiempo restante: 00:00
                     </p>
 
@@ -148,10 +123,7 @@
 
                     </div>
 
-                    <div
-                        id="bloqueFechaUtilizacion"
-                        class="dato-vale oculto"
-                    >
+                    <div id="bloqueFechaUtilizacion" class="dato-vale oculto">
 
                         <span class="dato-etiqueta">
                             utilizado el
@@ -221,29 +193,17 @@
 
                 <section class="acciones-comprobante">
 
-                    <button
-                        type="button"
-                        id="botonMarcarUtilizado"
-                        class="boton boton-principal"
-                    >
+                    <button type="button" id="botonMarcarUtilizado" class="boton boton-principal">
                         marcar como utilizado
                     </button>
 
-                    <button
-                        type="button"
-                        id="botonActualizarEstado"
-                        class="boton boton-secundario"
-                    >
+                    <button type="button" id="botonActualizarEstado" class="boton boton-secundario">
                         actualizar estado
                     </button>
 
                 </section>
 
-                <p
-                    id="mensajeAccionVale"
-                    class="mensaje-accion"
-                    aria-live="polite"
-                ></p>
+                <p id="mensajeAccionVale" class="mensaje-accion" aria-live="polite"></p>
 
                 <footer class="pie-comprobante">
 
@@ -264,6 +224,12 @@
         </article>
 
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="js/supabaseClient.js"></script>
+    <script src="js/valesSupabaseAdapter.js"></script>
+    <script src="js/valesRepository.js"></script>
 
     <script src="vale.js"></script>
 
