@@ -5458,3 +5458,16 @@ function iniciarAplicacion() {
 }
 
 iniciarAplicacion();
+
+
+const botonCrearNuevoAdmin =
+    document.querySelector(
+        "#botonCrearNuevoAdmin"
+    );
+
+if (botonCrearNuevoAdmin !== null) {
+    botonCrearNuevoAdmin.addEventListener(
+        "click",
+        crearAdministradorDesdePanelSuperior
+    );
+}
