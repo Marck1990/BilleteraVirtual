@@ -3202,8 +3202,61 @@ function volverAInicio() {
     );
 }
 
-function abrirBilletera() {
+
+
+
+
+async function cargarProductosDesdeSupabase() {
+    if (
+        typeof window.productosRepository ===
+        "undefined"
+    ) {
+        return false;
+    }
+
+    const resultado =
+        await window
+            .productosRepository
+            .listarProductos(false);
+
+    if (!resultado.correcto) {
+        console.error(
+            "No se pudieron cargar los productos:",
+            resultado
+        );
+
+        return false;
+    }
+
+    productos =
+        resultado.productos;
+
+    siguienteIdProducto =
+        obtenerSiguienteId(productos);
+
+    return true;
+}
+
+
+
+
+
+
+
+async function abrirBilletera() {
     actualizarValesVencidos();
+
+    const productosCargados =
+        await cargarProductosDesdeSupabase();
+
+    if (!productosCargados) {
+        mostrarMensaje(
+            mensajeCompra,
+            "no se pudieron cargar los productos",
+            "var(--color-error)"
+        );
+    }
+
     renderizarTodoTitular();
 
     mostrarPantalla(
@@ -3296,10 +3349,9 @@ async function cargarUsuariosParaAdministracion() {
 
 
 
-
-
 async function abrirPanelAdmin() {
     await cargarUsuariosParaAdministracion();
+    await cargarProductosDesdeSupabase();
 
     renderizarTodoAdmin();
 
@@ -3308,10 +3360,20 @@ async function abrirPanelAdmin() {
     );
 }
 
+
+
+
+
+
+
+
+
 async function abrirPanelAdminSuperior() {
     actualizarValesVencidos();
 
     await cargarUsuariosParaAdministracion();
+
+    await cargarProductosDesdeSupabase();
 
     renderizarTodoAdminSuperior();
 
@@ -3564,6 +3626,9 @@ function renderizarAdministradorActivo() {
               ")";
 }
 
+
+
+
 function renderizarUsuariosAdmin() {
     listaUsuariosAdmin.innerHTML = "";
 
@@ -3579,32 +3644,32 @@ function renderizarUsuariosAdmin() {
         i < usuarios.length;
         i++
     ) {
-        const usuario =
-            usuarios[i];
+        const usuario = usuarios[i];
+
+        const textoBloqueo =
+            usuario.bloqueado
+                ? "desbloquear usuario"
+                : "bloquear usuario";
 
         listaUsuariosAdmin.innerHTML += `
             <div
                 class="item-usuario-admin
                 ${usuario.bloqueado ? "usuario-bloqueado" : ""}"
             >
-
                 <p class="usuario-admin-nombre">
                     ${usuario.nombre}
                 </p>
 
                 <p class="usuario-admin-dato">
-                    usuario:
-                    ${usuario.usuario}
+                    usuario: ${usuario.usuario}
                 </p>
 
                 <p class="usuario-admin-dato">
-                    curso:
-                    ${usuario.curso}
+                    curso: ${usuario.curso}
                 </p>
 
                 <p class="usuario-admin-dato">
-                    saldo:
-                    ${formatearMoneda(usuario.saldo)}
+                    saldo: ${formatearMoneda(usuario.saldo)}
                 </p>
 
                 <p class="usuario-admin-dato">
@@ -3613,34 +3678,35 @@ function renderizarUsuariosAdmin() {
                 </p>
 
                 <div class="acciones-usuario-admin">
-
                     <button
                         class="boton boton-chico"
-                        onclick="agregarDineroAUsuario(${usuario.id})"
+                        onclick="agregarDineroAUsuario('${usuario.id}')"
                     >
                         agregar dinero
                     </button>
 
                     <button
                         class="boton boton-advertencia boton-chico"
-                        onclick="alternarBloqueoUsuario(${usuario.id})"
+                        onclick="alternarBloqueoUsuario('${usuario.id}')"
                     >
-                        ${usuario.bloqueado ? "desbloquear usuario" : "bloquear usuario"}
+                        ${textoBloqueo}
                     </button>
 
                     <button
                         class="boton boton-peligro boton-chico"
-                        onclick="borrarUsuario(${usuario.id})"
+                        onclick="borrarUsuario('${usuario.id}')"
                     >
                         borrar usuario
                     </button>
-
                 </div>
-
             </div>
         `;
     }
 }
+
+
+
+
 
 function renderizarProductosAdmin() {
     listaProductosAdmin.innerHTML = "";
@@ -4337,19 +4403,20 @@ async function agregarDineroAUsuario(
             idUsuario
         );
 
-    const texto = prompt(
+    if (usuario === null) {
+        return;
+    }
+
+    const montoTexto = prompt(
         "ingresá el monto a agregar"
     );
 
-    if (
-        usuario === null ||
-        texto === null
-    ) {
+    if (montoTexto === null) {
         return;
     }
 
     const monto =
-        Number(texto);
+        Number(montoTexto);
 
     if (
         Number.isNaN(monto) ||
@@ -4358,50 +4425,33 @@ async function agregarDineroAUsuario(
         return;
     }
 
-    if (
-        usuario.autenticacion ===
-        "supabase"
-    ) {
-        const resultado =
-            await window
-                .usuariosRepository
-                .modificarSaldo(
-                    usuario.id,
-                    monto,
-                    "el administrador agregó saldo"
-                );
-
-        if (!resultado.correcto) {
-            console.error(
-                "No se pudo agregar saldo:",
-                resultado
+    const resultado =
+        await window
+            .usuariosSupabaseAdapter
+            .modificarSaldo(
+                idUsuario,
+                monto,
+                "el administrador agregó saldo"
             );
 
-            return;
-        }
-
-        await cargarUsuariosParaAdministracion();
-
-        renderizarTodoAdmin();
+    if (!resultado.correcto) {
+        alert(
+            resultado.mensaje ||
+            "no se pudo agregar el saldo"
+        );
 
         return;
     }
 
-    usuario.saldo += monto;
-
-    registrarMovimientoUsuario(
-        usuario.id,
-        "agregar_saldo",
-        "el administrador agregó saldo por " +
-            formatearMoneda(monto),
-        monto,
-        usuario.saldo
-    );
-
-    guardarUsuarios(usuarios);
+    await cargarUsuariosParaAdministracion();
 
     renderizarTodoAdmin();
 }
+
+
+
+
+
 
 
 
@@ -4421,59 +4471,30 @@ async function alternarBloqueoUsuario(
     const nuevoEstado =
         !usuario.bloqueado;
 
-    if (
-        usuario.autenticacion ===
-        "supabase"
-    ) {
-        const resultado =
-            await window
-                .usuariosRepository
-                .cambiarBloqueo(
-                    usuario.id,
-                    nuevoEstado
-                );
-
-        if (!resultado.correcto) {
-            console.error(
-                "No se pudo cambiar el bloqueo:",
-                resultado
+    const resultado =
+        await window
+            .usuariosSupabaseAdapter
+            .cambiarBloqueo(
+                idUsuario,
+                nuevoEstado
             );
 
-            return;
-        }
-
-        await cargarUsuariosParaAdministracion();
-
-        renderizarTodoAdmin();
+    if (!resultado.correcto) {
+        alert(
+            resultado.mensaje ||
+            "no se pudo modificar el estado"
+        );
 
         return;
     }
 
-    usuario.bloqueado =
-        nuevoEstado;
-
-    registrarMovimientoUsuario(
-        usuario.id,
-
-        nuevoEstado
-            ? "bloqueo_usuario"
-            : "desbloqueo_usuario",
-
-        nuevoEstado
-            ? "el administrador bloqueó el usuario"
-            : "el administrador desbloqueó el usuario",
-
-        0,
-
-        usuario.saldo
-    );
-
-    guardarUsuarios(
-        usuarios
-    );
+    await cargarUsuariosParaAdministracion();
 
     renderizarTodoAdmin();
 }
+
+
+
 
 
 
@@ -4503,7 +4524,8 @@ function borrarUsuario(
     renderizarTodoAdmin();
 }
 
-function agregarProducto() {
+
+async function agregarProducto() {
     const nombre =
         inputNombreProducto
             .value
@@ -4522,22 +4544,49 @@ function agregarProducto() {
         return;
     }
 
-    productos.push({
-        id:
-            siguienteIdProducto,
+    if (
+        typeof window.productosRepository !==
+        "undefined"
+    ) {
+        const resultado =
+            await window
+                .productosRepository
+                .crearProducto(
+                    nombre,
+                    precio
+                );
 
-        nombre:
-            nombre,
+        if (!resultado.correcto) {
+            alert(
+                resultado.mensaje ||
+                "no se pudo crear el producto"
+            );
 
-        precio:
-            precio
-    });
+            return;
+        }
 
-    siguienteIdProducto++;
+        await cargarProductosDesdeSupabase();
+    } else {
+        productos.push({
+            id:
+                siguienteIdProducto,
 
-    guardarProductos(
-        productos
-    );
+            nombre:
+                nombre,
+
+            precio:
+                precio,
+
+            activo:
+                true
+        });
+
+        siguienteIdProducto++;
+
+        guardarProductos(
+            productos
+        );
+    }
 
     inputNombreProducto.value =
         "";
@@ -4548,30 +4597,60 @@ function agregarProducto() {
     renderizarTodoAdmin();
 }
 
-function quitarProducto(
+
+
+
+
+
+
+
+async function quitarProducto(
     idProducto
 ) {
-    for (
-        let i = 0;
-        i < productos.length;
-        i++
+    if (
+        typeof window.productosRepository !==
+        "undefined"
     ) {
-        if (
-            productos[i].id ===
-            idProducto
-        ) {
-            productos.splice(
-                i,
-                1
+        const resultado =
+            await window
+                .productosRepository
+                .eliminarProducto(
+                    idProducto
+                );
+
+        if (!resultado.correcto) {
+            alert(
+                resultado.mensaje ||
+                "no se pudo quitar el producto"
             );
 
-            break;
+            return;
         }
-    }
 
-    guardarProductos(
-        productos
-    );
+        await cargarProductosDesdeSupabase();
+    } else {
+        for (
+            let i = 0;
+            i < productos.length;
+            i++
+        ) {
+            if (
+                Number(productos[i].id) ===
+                Number(idProducto)
+            ) {
+                productos.splice(
+                    i,
+                    1
+                );
+
+                break;
+            }
+        }
+
+        guardarProductos(
+            productos
+        );
+    }
 
     renderizarTodoAdmin();
 }
