@@ -9,6 +9,10 @@ const DOMINIO_INTERNO =
 const MAXIMO_ADMINISTRADORES =
     3;
 
+// =======================================================
+// UTILIDADES
+// =======================================================
+
 function normalizarTexto(valor) {
     if (typeof valor !== "string") {
         return "";
@@ -21,7 +25,8 @@ function normalizarRol(valor) {
     return normalizarTexto(valor)
         .toLowerCase()
         .replaceAll("_", "")
-        .replaceAll("-", "");
+        .replaceAll("-", "")
+        .replaceAll(" ", "");
 }
 
 function construirCorreoInterno(
@@ -47,9 +52,77 @@ async function convertirRespuestaJson(
     try {
         return JSON.parse(texto);
     } catch (error) {
-        return {};
+        return {
+            textoOriginal:
+                texto
+        };
     }
 }
+
+function obtenerCuerpoPeticion(req) {
+    if (
+        req.body !== null &&
+        typeof req.body === "object"
+    ) {
+        return req.body;
+    }
+
+    if (
+        typeof req.body === "string"
+    ) {
+        try {
+            return JSON.parse(
+                req.body
+            );
+        } catch (error) {
+            return {};
+        }
+    }
+
+    return {};
+}
+
+/*
+    Las claves nuevas sb_secret_ no son JWT
+    y no deben enviarse como Bearer.
+
+    Las claves antiguas service_role sí son JWT
+    y necesitan Authorization.
+*/
+
+function crearEncabezadosSecretos(
+    claveSecreta,
+    incluirContenido = false
+) {
+    const encabezados = {
+        apikey:
+            claveSecreta,
+
+        Accept:
+            "application/json"
+    };
+
+    if (
+        !claveSecreta.startsWith(
+            "sb_secret_"
+        )
+    ) {
+        encabezados.Authorization =
+            "Bearer " +
+            claveSecreta;
+    }
+
+    if (incluirContenido) {
+        encabezados["Content-Type"] =
+            "application/json";
+    }
+
+    return encabezados;
+}
+
+// =======================================================
+// ELIMINAR USUARIO DE AUTH SI FALLA EL PERFIL
+// =======================================================
 
 async function eliminarUsuarioAuth(
     supabaseUrl,
@@ -57,24 +130,36 @@ async function eliminarUsuarioAuth(
     usuarioId
 ) {
     try {
-        await fetch(
-            supabaseUrl +
-                "/auth/v1/admin/users/" +
-                usuarioId,
-            {
-                method:
-                    "DELETE",
+        const respuesta =
+            await fetch(
+                supabaseUrl +
+                    "/auth/v1/admin/users/" +
+                    encodeURIComponent(
+                        usuarioId
+                    ),
+                {
+                    method:
+                        "DELETE",
 
-                headers: {
-                    apikey:
-                        claveSecreta,
-
-                    Authorization:
-                        "Bearer " +
-                        claveSecreta
+                    headers:
+                        crearEncabezadosSecretos(
+                            claveSecreta
+                        )
                 }
-            }
-        );
+            );
+
+        if (!respuesta.ok) {
+            const datosError =
+                await convertirRespuestaJson(
+                    respuesta
+                );
+
+            console.error(
+                "No se pudo revertir el usuario:",
+                respuesta.status,
+                datosError
+            );
+        }
     } catch (error) {
         console.error(
             "No se pudo revertir el usuario:",
@@ -83,11 +168,20 @@ async function eliminarUsuarioAuth(
     }
 }
 
+// =======================================================
+// CONTROLADOR PRINCIPAL
+// =======================================================
+
 export default async function handler(
     req,
     res
 ) {
     if (req.method !== "POST") {
+        res.setHeader(
+            "Allow",
+            "POST"
+        );
+
         return res.status(405).json({
             ok: false,
 
@@ -95,6 +189,10 @@ export default async function handler(
                 "método no permitido"
         });
     }
+
+    // ===================================================
+    // CONFIGURACIÓN DEL SERVIDOR
+    // ===================================================
 
     const supabaseUrl =
         normalizarTexto(
@@ -113,6 +211,10 @@ export default async function handler(
         supabaseUrl === "" ||
         claveSecreta === ""
     ) {
+        console.error(
+            "Faltan las variables de entorno de Supabase."
+        );
+
         return res.status(500).json({
             ok: false,
 
@@ -120,6 +222,10 @@ export default async function handler(
                 "el servidor no está configurado"
         });
     }
+
+    // ===================================================
+    // OBTENER TOKEN DEL ADMIN SUPERIOR
+    // ===================================================
 
     const autorizacion =
         normalizarTexto(
@@ -135,14 +241,28 @@ export default async function handler(
             ok: false,
 
             mensaje:
-                "no autorizado"
+                "sesión no encontrada"
+        });
+    }
+
+    const tokenUsuario =
+        autorizacion
+            .slice(7)
+            .trim();
+
+    if (tokenUsuario === "") {
+        return res.status(401).json({
+            ok: false,
+
+            mensaje:
+                "sesión inválida"
         });
     }
 
     try {
-        /* -----------------------------------------------
-           VERIFICAR LA SESIÓN DEL SOLICITANTE
-        ------------------------------------------------ */
+        // ===================================================
+        // VERIFICAR TOKEN CON SUPABASE AUTH
+        // ===================================================
 
         const respuestaSesion =
             await fetch(
@@ -157,7 +277,11 @@ export default async function handler(
                             claveSecreta,
 
                         Authorization:
-                            autorizacion
+                            "Bearer " +
+                            tokenUsuario,
+
+                        Accept:
+                            "application/json"
                     }
                 }
             );
@@ -169,42 +293,52 @@ export default async function handler(
 
         if (
             !respuestaSesion.ok ||
-            !datosSesion.id
+            typeof datosSesion.id !==
+                "string" ||
+            datosSesion.id === ""
         ) {
+            console.error(
+                "Error al verificar sesión:",
+                respuestaSesion.status,
+                datosSesion
+            );
+
             return res.status(401).json({
                 ok: false,
 
                 mensaje:
-                    "sesión inválida"
+                    "la sesión venció; iniciá sesión nuevamente"
             });
         }
 
-        /* -----------------------------------------------
-           VERIFICAR ROL ADMIN SUPERIOR
-        ------------------------------------------------ */
+        const solicitanteId =
+            datosSesion.id;
+
+        // ===================================================
+        // VERIFICAR PERFIL Y ROL ADMIN SUPERIOR
+        // ===================================================
+
+        const urlPerfil =
+            supabaseUrl +
+            "/rest/v1/perfiles" +
+            "?id=eq." +
+            encodeURIComponent(
+                solicitanteId
+            ) +
+            "&select=id,usuario,nombre,rol" +
+            "&limit=1";
 
         const respuestaPerfil =
             await fetch(
-                supabaseUrl +
-                    "/rest/v1/perfiles" +
-                    "?id=eq." +
-                    encodeURIComponent(
-                        datosSesion.id
-                    ) +
-                    "&select=id,rol" +
-                    "&limit=1",
+                urlPerfil,
                 {
                     method:
                         "GET",
 
-                    headers: {
-                        apikey:
-                            claveSecreta,
-
-                        Authorization:
-                            "Bearer " +
+                    headers:
+                        crearEncabezadosSecretos(
                             claveSecreta
-                    }
+                        )
                 }
             );
 
@@ -213,26 +347,39 @@ export default async function handler(
                 respuestaPerfil
             );
 
-        const perfil =
-            Array.isArray(perfiles)
+        if (!respuestaPerfil.ok) {
+            console.error(
+                "Error al consultar perfil:",
+                respuestaPerfil.status,
+                perfiles
+            );
+
+            return res.status(500).json({
+                ok: false,
+
+                mensaje:
+                    "no se pudo verificar el perfil"
+            });
+        }
+
+        const perfilSolicitante =
+            Array.isArray(perfiles) &&
+            perfiles.length > 0
                 ? perfiles[0]
                 : null;
 
-        if (
-            !respuestaPerfil.ok ||
-            perfil === null
-        ) {
+        if (perfilSolicitante === null) {
             return res.status(403).json({
                 ok: false,
 
                 mensaje:
-                    "no autorizado"
+                    "el usuario no tiene un perfil autorizado"
             });
         }
 
         const rolSolicitante =
             normalizarRol(
-                perfil.rol
+                perfilSolicitante.rol
             );
 
         if (
@@ -247,14 +394,14 @@ export default async function handler(
             });
         }
 
-   
-
-        /* -----------------------------------------------
-           VALIDAR DATOS DEL NUEVO ADMIN
-        ------------------------------------------------ */
+        // ===================================================
+        // VALIDAR DATOS DEL ADMINISTRADOR NUEVO
+        // ===================================================
 
         const cuerpo =
-            req.body || {};
+            obtenerCuerpoPeticion(
+                req
+            );
 
         const usuario =
             normalizarTexto(
@@ -279,7 +426,7 @@ export default async function handler(
                 ok: false,
 
                 mensaje:
-                    "el usuario debe tener entre 3 y 40 caracteres"
+                    "el usuario debe tener entre 3 y 40 caracteres y usar solo letras, números, punto, guion o guion bajo"
             });
         }
 
@@ -307,9 +454,70 @@ export default async function handler(
             });
         }
 
-        /* -----------------------------------------------
-           CONTROLAR EL LÍMITE DE ADMINISTRADORES
-        ------------------------------------------------ */
+        // ===================================================
+        // VERIFICAR USUARIO REPETIDO EN PERFILES
+        // ===================================================
+
+        const respuestaUsuarioExistente =
+            await fetch(
+                supabaseUrl +
+                    "/rest/v1/perfiles" +
+                    "?usuario=ilike." +
+                    encodeURIComponent(
+                        usuario
+                    ) +
+                    "&select=id" +
+                    "&limit=1",
+                {
+                    method:
+                        "GET",
+
+                    headers:
+                        crearEncabezadosSecretos(
+                            claveSecreta
+                        )
+                }
+            );
+
+        const usuariosExistentes =
+            await convertirRespuestaJson(
+                respuestaUsuarioExistente
+            );
+
+        if (
+            !respuestaUsuarioExistente.ok
+        ) {
+            console.error(
+                "Error al verificar usuario repetido:",
+                respuestaUsuarioExistente.status,
+                usuariosExistentes
+            );
+
+            return res.status(500).json({
+                ok: false,
+
+                mensaje:
+                    "no se pudo verificar el nombre de usuario"
+            });
+        }
+
+        if (
+            Array.isArray(
+                usuariosExistentes
+            ) &&
+            usuariosExistentes.length > 0
+        ) {
+            return res.status(409).json({
+                ok: false,
+
+                mensaje:
+                    "ese nombre de usuario ya existe"
+            });
+        }
+
+        // ===================================================
+        // CONTROLAR CANTIDAD MÁXIMA DE ADMINISTRADORES
+        // ===================================================
 
         const respuestaAdmins =
             await fetch(
@@ -321,14 +529,10 @@ export default async function handler(
                     method:
                         "GET",
 
-                    headers: {
-                        apikey:
-                            claveSecreta,
-
-                        Authorization:
-                            "Bearer " +
+                    headers:
+                        crearEncabezadosSecretos(
                             claveSecreta
-                    }
+                        )
                 }
             );
 
@@ -338,6 +542,12 @@ export default async function handler(
             );
 
         if (!respuestaAdmins.ok) {
+            console.error(
+                "Error al contar administradores:",
+                respuestaAdmins.status,
+                adminsActuales
+            );
+
             return res.status(500).json({
                 ok: false,
 
@@ -365,26 +575,14 @@ export default async function handler(
             });
         }
 
-        /* -----------------------------------------------
-           CREAR USUARIO EN SUPABASE AUTH
-        ------------------------------------------------ */
+        // ===================================================
+        // CREAR ADMINISTRADOR EN SUPABASE AUTH
+        // ===================================================
 
         const correoInterno =
             construirCorreoInterno(
                 usuario
             );
-
-        const encabezadosSupabase = {
-            apikey:
-                claveSecreta,
-
-            Authorization:
-                "Bearer " +
-                claveSecreta,
-
-            "Content-Type":
-                "application/json"
-        };
 
         const respuestaAuth =
             await fetch(
@@ -395,7 +593,10 @@ export default async function handler(
                         "POST",
 
                     headers:
-                        encabezadosSupabase,
+                        crearEncabezadosSecretos(
+                            claveSecreta,
+                            true
+                        ),
 
                     body:
                         JSON.stringify({
@@ -415,6 +616,9 @@ export default async function handler(
                                 nombre:
                                     nombre,
 
+                                curso:
+                                    "",
+
                                 rol:
                                     "admin"
                             }
@@ -428,31 +632,41 @@ export default async function handler(
             );
 
         if (!respuestaAuth.ok) {
+            console.error(
+                "Error al crear usuario en Auth:",
+                respuestaAuth.status,
+                datosAuth
+            );
+
             const mensajeAuth =
                 String(
                     datosAuth.message ||
                     datosAuth.msg ||
+                    datosAuth.error_description ||
                     ""
                 ).toLowerCase();
 
             if (
                 respuestaAuth.status ===
                     422 ||
+                respuestaAuth.status ===
+                    409 ||
                 mensajeAuth.includes(
                     "already"
                 ) ||
                 mensajeAuth.includes(
                     "registered"
+                ) ||
+                mensajeAuth.includes(
+                    "exists"
                 )
             ) {
-                return res
-                    .status(409)
-                    .json({
-                        ok: false,
+                return res.status(409).json({
+                    ok: false,
 
-                        mensaje:
-                            "ese nombre de usuario ya existe"
-                    });
+                    mensaje:
+                        "ese nombre de usuario ya existe"
+                });
             }
 
             return res.status(500).json({
@@ -468,7 +682,16 @@ export default async function handler(
             datosAuth.id ||
             datosAuth.user?.id;
 
-        if (!usuarioId) {
+        if (
+            typeof usuarioId !==
+                "string" ||
+            usuarioId === ""
+        ) {
+            console.error(
+                "Auth no devolvió un ID:",
+                datosAuth
+            );
+
             return res.status(500).json({
                 ok: false,
 
@@ -477,9 +700,9 @@ export default async function handler(
             });
         }
 
-        /* -----------------------------------------------
-           CREAR PERFIL CON ROL ADMIN
-        ------------------------------------------------ */
+        // ===================================================
+        // CREAR PERFIL Y BILLETERA CON ROL ADMIN
+        // ===================================================
 
         const respuestaCrearPerfil =
             await fetch(
@@ -490,7 +713,10 @@ export default async function handler(
                         "POST",
 
                     headers:
-                        encabezadosSupabase,
+                        crearEncabezadosSecretos(
+                            claveSecreta,
+                            true
+                        ),
 
                     body:
                         JSON.stringify({
@@ -525,6 +751,12 @@ export default async function handler(
             datosPerfilCreado.resultado !==
                 "creado_correctamente"
         ) {
+            console.error(
+                "Error al crear perfil:",
+                respuestaCrearPerfil.status,
+                datosPerfilCreado
+            );
+
             await eliminarUsuarioAuth(
                 supabaseUrl,
                 claveSecreta,
@@ -535,14 +767,12 @@ export default async function handler(
                 datosPerfilCreado.resultado ===
                 "usuario_duplicado"
             ) {
-                return res
-                    .status(409)
-                    .json({
-                        ok: false,
+                return res.status(409).json({
+                    ok: false,
 
-                        mensaje:
-                            "ese nombre de usuario ya existe"
-                    });
+                    mensaje:
+                        "ese nombre de usuario ya existe"
+                });
             }
 
             return res.status(500).json({
@@ -552,6 +782,10 @@ export default async function handler(
                     "no se pudo crear el perfil del administrador"
             });
         }
+
+        // ===================================================
+        // RESPUESTA CORRECTA
+        // ===================================================
 
         return res.status(201).json({
             ok: true,
@@ -579,12 +813,15 @@ export default async function handler(
                     0,
 
                 bloqueado:
-                    false
+                    false,
+
+                autenticacion:
+                    "supabase"
             }
         });
     } catch (error) {
         console.error(
-            "Error al crear administrador:",
+            "Error inesperado al crear administrador:",
             error
         );
 
