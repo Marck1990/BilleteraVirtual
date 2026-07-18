@@ -2577,180 +2577,52 @@ async function ingresarAlSistema() {
         return;
     }
 
-    // Las cuentas con correo se autentican en Supabase
-    if (nombreUsuario.includes("@")) {
-        botonIngresarSistema.disabled =
-            true;
+    limpiarMensaje(
+        mensajeInicio
+    );
 
-        try {
-            const respuestaInicio =
-                await window
-                    .supabaseCliente
-                    .auth
-                    .signInWithPassword({
-                        email:
-                            nombreUsuario,
-                        password:
-                            contrasena
-                    });
+    // ===================================================
+    // CUENTAS LOCALES ANTIGUAS
+    // ===================================================
 
-            if (respuestaInicio.error) {
-                mostrarMensaje(
-                    mensajeInicio,
-                    "correo o contraseña incorrectos",
-                    "var(--color-error)"
-                );
-
-                return;
-            }
-
-            const usuarioSupabase =
-                respuestaInicio
-                    .data
-                    .user;
-
-            const respuestaPerfil =
-                await window
-                    .supabaseCliente
-                    .from("perfiles")
-                    .select(
-                        "nombre, rol, activo"
-                    )
-                    .eq(
-                        "id",
-                        usuarioSupabase.id
-                    )
-                    .single();
-
-            if (
-                respuestaPerfil.error ||
-                respuestaPerfil.data === null
-            ) {
-                await window
-                    .supabaseCliente
-                    .auth
-                    .signOut();
-
-                mostrarMensaje(
-                    mensajeInicio,
-                    "no se pudo obtener el perfil",
-                    "var(--color-error)"
-                );
-
-                return;
-            }
-
-            const perfil =
-                respuestaPerfil.data;
-
-            if (perfil.activo === false) {
-                await window
-                    .supabaseCliente
-                    .auth
-                    .signOut();
-
-                mostrarMensaje(
-                    mensajeInicio,
-                    "la cuenta está deshabilitada",
-                    "var(--color-error)"
-                );
-
-                return;
-            }
-
-            let tipoAplicacion = "";
-
-            if (
-                perfil.rol ===
-                "admin_superior"
-            ) {
-                tipoAplicacion =
-                    "adminSuperior";
-            } else if (
-                perfil.rol === "admin" ||
-                perfil.rol ===
-                    "operador_vales"
-            ) {
-                tipoAplicacion =
-                    "admin";
-            } else {
-                await window
-                    .supabaseCliente
-                    .auth
-                    .signOut();
-
-                mostrarMensaje(
-                    mensajeInicio,
-                    "la cuenta no tiene permisos administrativos",
-                    "var(--color-error)"
-                );
-
-                return;
-            }
-
-            let admin =
-                buscarAdministradorPorNombreUsuario(
-                    nombreUsuario
-                );
-
-            if (admin === null) {
-                admin = {
-                    id:
-                        siguienteIdAdmin,
-
-                    tipo:
-                        tipoAplicacion,
-
-                    usuario:
-                        nombreUsuario,
-
-                    nombre:
-                        perfil.nombre ||
-                        nombreUsuario,
-
-                    contrasena:
-                        "",
-
-                    autenticacion:
-                        "supabase"
-                };
-
-                administradores.push(
-                    admin
-                );
-
-                siguienteIdAdmin++;
-            } else {
-                admin.tipo =
-                    tipoAplicacion;
-
-                admin.nombre =
-                    perfil.nombre ||
-                    admin.nombre;
-
-                admin.autenticacion =
-                    "supabase";
-            }
-
-            guardarAdministradores(
-                administradores
+    if (!nombreUsuario.includes("@")) {
+        const adminLocal =
+            buscarAdministradorPorNombreUsuario(
+                nombreUsuario
             );
 
+        if (
+            adminLocal !== null &&
+            adminLocal.autenticacion !==
+                "supabase"
+        ) {
+            if (
+                adminLocal.contrasena !==
+                contrasena
+            ) {
+                mostrarMensaje(
+                    mensajeInicio,
+                    "contraseña incorrecta",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
             sesion.tipo =
-                tipoAplicacion;
+                adminLocal.tipo;
 
             sesion.adminId =
-                admin.id;
+                adminLocal.id;
 
             sesion.usuarioId =
                 null;
 
-            limpiarMensaje(
-                mensajeInicio
-            );
+            sesion.origen =
+                "local";
 
             if (
-                tipoAplicacion ===
+                adminLocal.tipo ===
                 "adminSuperior"
             ) {
                 abrirPanelAdminSuperior();
@@ -2759,124 +2631,334 @@ async function ingresarAlSistema() {
             }
 
             return;
-        } catch (error) {
-            console.error(
-                "Error al iniciar sesión:",
-                error
+        }
+
+        const usuarioLocal =
+            buscarUsuarioPorNombreUsuario(
+                nombreUsuario
             );
 
+        if (
+            usuarioLocal !== null &&
+            usuarioLocal.autenticacion !==
+                "supabase"
+        ) {
+            if (
+                usuarioLocal.contrasena !==
+                contrasena
+            ) {
+                mostrarMensaje(
+                    mensajeInicio,
+                    "contraseña incorrecta",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            if (usuarioLocal.bloqueado) {
+                mostrarMensaje(
+                    mensajeInicio,
+                    "usuario bloqueado",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            sesion.tipo =
+                "titular";
+
+            sesion.usuarioId =
+                usuarioLocal.id;
+
+            sesion.adminId =
+                null;
+
+            sesion.origen =
+                "local";
+
+            carrito = [];
+
+            abrirBilletera();
+
+            return;
+        }
+    }
+
+    // ===================================================
+    // CUENTAS DE SUPABASE
+    // ===================================================
+
+    if (
+        typeof window.usuariosRepository ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensajeInicio,
+            "el servicio de usuarios no está disponible",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    botonIngresarSistema.disabled =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .usuariosRepository
+                .iniciarSesion(
+                    nombreUsuario,
+                    contrasena
+                );
+
+        if (!resultado.correcto) {
             mostrarMensaje(
                 mensajeInicio,
-                "no se pudo conectar con Supabase",
+                resultado.mensaje,
                 "var(--color-error)"
             );
 
             return;
-        } finally {
-            botonIngresarSistema.disabled =
-                false;
         }
-    }
 
-    // Evita conservar una sesión administrativa anterior
-    if (
-        typeof window.supabaseCliente !==
-        "undefined"
-    ) {
-        await window
-            .supabaseCliente
-            .auth
-            .signOut();
-    }
+        const usuarioSupabase =
+            resultado.usuario;
 
-    const admin =
-        buscarAdministradorPorNombreUsuario(
-            nombreUsuario
-        );
-
-    if (admin !== null) {
         if (
-            admin.contrasena !==
-            contrasena
+            usuarioSupabase === null ||
+            typeof usuarioSupabase !==
+                "object"
         ) {
             mostrarMensaje(
                 mensajeInicio,
-                "contraseña incorrecta",
+                "no se pudo obtener el perfil",
                 "var(--color-error)"
             );
 
             return;
         }
 
+        // ===============================================
+        // TITULAR DE SUPABASE
+        // ===============================================
+
+        if (
+            usuarioSupabase.tipo ===
+            "titular"
+        ) {
+            if (
+                usuarioSupabase.bloqueado
+            ) {
+                await window
+                    .usuariosRepository
+                    .cerrarSesion();
+
+                mostrarMensaje(
+                    mensajeInicio,
+                    "usuario bloqueado",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            const usuarioAplicacion = {
+                id:
+                    usuarioSupabase.id,
+
+                tipo:
+                    "titular",
+
+                usuario:
+                    usuarioSupabase.usuario,
+
+                nombre:
+                    usuarioSupabase.nombre,
+
+                curso:
+                    usuarioSupabase.curso,
+
+                contrasena:
+                    "",
+
+                saldo:
+                    usuarioSupabase.saldo,
+
+                bloqueado:
+                    usuarioSupabase.bloqueado,
+
+                historial:
+                    usuarioSupabase.historial,
+
+                autenticacion:
+                    "supabase"
+            };
+
+            let indiceUsuario = -1;
+
+            for (
+                let i = 0;
+                i < usuarios.length;
+                i++
+            ) {
+                if (
+                    usuarios[i].id ===
+                        usuarioAplicacion.id ||
+                    usuarios[i].usuario
+                        .toLowerCase() ===
+                        usuarioAplicacion.usuario
+                            .toLowerCase()
+                ) {
+                    indiceUsuario = i;
+                    break;
+                }
+            }
+
+            if (indiceUsuario === -1) {
+                usuarios.push(
+                    usuarioAplicacion
+                );
+            } else {
+                usuarios[indiceUsuario] =
+                    usuarioAplicacion;
+            }
+
+            sesion.tipo =
+                "titular";
+
+            sesion.usuarioId =
+                usuarioAplicacion.id;
+
+            sesion.adminId =
+                null;
+
+            sesion.origen =
+                "supabase";
+
+            carrito = [];
+
+            abrirBilletera();
+
+            return;
+        }
+
+        // ===============================================
+        // ADMINISTRADORES DE SUPABASE
+        // ===============================================
+
+        let tipoAdministrador = "";
+
+        if (
+            usuarioSupabase.tipo ===
+            "admin_superior"
+        ) {
+            tipoAdministrador =
+                "adminSuperior";
+        } else if (
+            usuarioSupabase.tipo ===
+                "admin" ||
+            usuarioSupabase.tipo ===
+                "operador_vales"
+        ) {
+            tipoAdministrador =
+                "admin";
+        }
+
+        if (tipoAdministrador === "") {
+            await window
+                .usuariosRepository
+                .cerrarSesion();
+
+            mostrarMensaje(
+                mensajeInicio,
+                "la cuenta no tiene permisos",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        let adminAplicacion =
+            buscarAdministradorPorNombreUsuario(
+                nombreUsuario
+            );
+
+        if (adminAplicacion === null) {
+            adminAplicacion = {
+                id:
+                    siguienteIdAdmin,
+
+                tipo:
+                    tipoAdministrador,
+
+                usuario:
+                    nombreUsuario,
+
+                nombre:
+                    usuarioSupabase.nombre,
+
+                contrasena:
+                    "",
+
+                autenticacion:
+                    "supabase"
+            };
+
+            administradores.push(
+                adminAplicacion
+            );
+
+            siguienteIdAdmin++;
+        } else {
+            adminAplicacion.tipo =
+                tipoAdministrador;
+
+            adminAplicacion.nombre =
+                usuarioSupabase.nombre;
+
+            adminAplicacion.autenticacion =
+                "supabase";
+        }
+
         sesion.tipo =
-            admin.tipo;
+            tipoAdministrador;
 
         sesion.adminId =
-            admin.id;
+            adminAplicacion.id;
 
         sesion.usuarioId =
             null;
 
-        limpiarMensaje(
-            mensajeInicio
-        );
+        sesion.origen =
+            "supabase";
 
         if (
-            admin.tipo ===
+            tipoAdministrador ===
             "adminSuperior"
         ) {
             abrirPanelAdminSuperior();
         } else {
             abrirPanelAdmin();
         }
-
-        return;
-    }
-
-    const usuario =
-        buscarUsuarioPorNombreUsuario(
-            nombreUsuario
+    } catch (error) {
+        console.error(
+            "Error al ingresar:",
+            error
         );
 
-    if (usuario !== null) {
-        if (
-            usuario.contrasena !==
-            contrasena
-        ) {
-            mostrarMensaje(
-                mensajeInicio,
-                "contraseña incorrecta",
-                "var(--color-error)"
-            );
-
-            return;
-        }
-
-        sesion.tipo =
-            "titular";
-
-        sesion.usuarioId =
-            usuario.id;
-
-        sesion.adminId =
-            null;
-
-        carrito = [];
-
-        limpiarMensaje(
-            mensajeInicio
+        mostrarMensaje(
+            mensajeInicio,
+            "no se pudo conectar con Supabase",
+            "var(--color-error)"
         );
-
-        abrirBilletera();
-
-        return;
+    } finally {
+        botonIngresarSistema.disabled =
+            false;
     }
-
-    mostrarMensaje(
-        mensajeInicio,
-        "usuario no encontrado",
-        "var(--color-error)"
-    );
 }
 
 function irARegistro() {
