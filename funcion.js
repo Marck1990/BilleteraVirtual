@@ -2988,7 +2988,96 @@ function abrirBilletera() {
     );
 }
 
-function abrirPanelAdmin() {
+
+
+async function cargarUsuariosParaAdministracion() {
+    if (
+        sesion.origen !== "supabase" ||
+        typeof window.usuariosRepository ===
+            "undefined"
+    ) {
+        return true;
+    }
+
+    const resultado =
+        await window
+            .usuariosRepository
+            .listarUsuarios();
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            resultado.mensaje,
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+
+    const usuariosRemotos =
+        resultado.usuarios;
+
+    const usuariosCombinados = [];
+
+    for (
+        let i = 0;
+        i < usuarios.length;
+        i++
+    ) {
+        let existeEnSupabase = false;
+
+        for (
+            let j = 0;
+            j < usuariosRemotos.length;
+            j++
+        ) {
+            if (
+                usuarios[i].usuario
+                    .toLowerCase() ===
+                usuariosRemotos[j].usuario
+                    .toLowerCase()
+            ) {
+                existeEnSupabase = true;
+                break;
+            }
+        }
+
+        if (
+            usuarios[i].autenticacion !==
+                "supabase" &&
+            !existeEnSupabase
+        ) {
+            usuariosCombinados.push(
+                usuarios[i]
+            );
+        }
+    }
+
+    for (
+        let i = 0;
+        i < usuariosRemotos.length;
+        i++
+    ) {
+        usuariosCombinados.push({
+            ...usuariosRemotos[i],
+            autenticacion:
+                "supabase"
+        });
+    }
+
+    usuarios = usuariosCombinados;
+
+    return true;
+}
+
+
+
+
+
+
+async function abrirPanelAdmin() {
+    await cargarUsuariosParaAdministracion();
+
     renderizarTodoAdmin();
 
     mostrarPantalla(
@@ -2996,14 +3085,22 @@ function abrirPanelAdmin() {
     );
 }
 
-function abrirPanelAdminSuperior() {
+async function abrirPanelAdminSuperior() {
     actualizarValesVencidos();
+
+    await cargarUsuariosParaAdministracion();
+
     renderizarTodoAdminSuperior();
 
     mostrarPantalla(
         "#pantallaAdminSuperior"
     );
 }
+
+
+
+
+
 
 async function salirSistema() {
     if (
