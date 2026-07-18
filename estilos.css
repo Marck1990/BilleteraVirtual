@@ -1716,7 +1716,6 @@ and (
 
     white-space: nowrap;
 
-    font-size: 22px !important;
     font-size: clamp(
         6px,
         3.3cqw,
@@ -1725,10 +1724,18 @@ and (
 
     line-height: 1.1 !important;
 
-    letter-spacing: 1px !important;
     letter-spacing: clamp(
         0.2px,
         0.15cqw,
         1px
     ) !important;
+
+    position: relative;
+    top: -10px;
+}
+
+@media (max-width: 600px) {
+    .tarjeta-estudiantil-superior p {
+        top: -7px;
+    }
 }
