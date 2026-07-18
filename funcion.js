@@ -4092,7 +4092,7 @@ function enviarAyudaAlumno() {
 // ACCIONES DEL ADMINISTRADOR
 // =======================================================
 
-function agregarDineroAUsuario(
+async function agregarDineroAUsuario(
     idUsuario
 ) {
     const usuario =
@@ -4121,18 +4121,43 @@ function agregarDineroAUsuario(
         return;
     }
 
+    if (
+        usuario.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await window
+                .usuariosRepository
+                .modificarSaldo(
+                    usuario.id,
+                    monto,
+                    "el administrador agregó saldo"
+                );
+
+        if (!resultado.correcto) {
+            console.error(
+                "No se pudo agregar saldo:",
+                resultado
+            );
+
+            return;
+        }
+
+        await cargarUsuariosParaAdministracion();
+
+        renderizarTodoAdmin();
+
+        return;
+    }
+
     usuario.saldo += monto;
 
     registrarMovimientoUsuario(
         usuario.id,
-
         "agregar_saldo",
-
         "el administrador agregó saldo por " +
             formatearMoneda(monto),
-
         monto,
-
         usuario.saldo
     );
 
@@ -4141,7 +4166,10 @@ function agregarDineroAUsuario(
     renderizarTodoAdmin();
 }
 
-function alternarBloqueoUsuario(
+
+
+
+async function alternarBloqueoUsuario(
     idUsuario
 ) {
     const usuario =
@@ -4153,17 +4181,48 @@ function alternarBloqueoUsuario(
         return;
     }
 
-    usuario.bloqueado =
+    const nuevoEstado =
         !usuario.bloqueado;
+
+    if (
+        usuario.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await window
+                .usuariosRepository
+                .cambiarBloqueo(
+                    usuario.id,
+                    nuevoEstado
+                );
+
+        if (!resultado.correcto) {
+            console.error(
+                "No se pudo cambiar el bloqueo:",
+                resultado
+            );
+
+            return;
+        }
+
+        await cargarUsuariosParaAdministracion();
+
+        renderizarTodoAdmin();
+
+        return;
+    }
+
+    usuario.bloqueado =
+        nuevoEstado;
 
     registrarMovimientoUsuario(
         usuario.id,
 
-        usuario.bloqueado
+        nuevoEstado
             ? "bloqueo_usuario"
             : "desbloqueo_usuario",
 
-        usuario.bloqueado
+        nuevoEstado
             ? "el administrador bloqueó el usuario"
             : "el administrador desbloqueó el usuario",
 
@@ -4172,10 +4231,14 @@ function alternarBloqueoUsuario(
         usuario.saldo
     );
 
-    guardarUsuarios(usuarios);
+    guardarUsuarios(
+        usuarios
+    );
 
     renderizarTodoAdmin();
 }
+
+
 
 function borrarUsuario(
     idUsuario
@@ -4456,7 +4519,7 @@ function guardarConfiguracionValesDesdePanel() {
     );
 }
 
-function agregarSaldoDesdeAdminSuperior(
+async function agregarSaldoDesdeAdminSuperior(
     idUsuario
 ) {
     const usuario =
@@ -4491,18 +4554,54 @@ function agregarSaldoDesdeAdminSuperior(
         return;
     }
 
+    if (
+        usuario.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await window
+                .usuariosRepository
+                .modificarSaldo(
+                    usuario.id,
+                    monto,
+                    "el admin superior agregó saldo"
+                );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                resultado.mensaje ||
+                    resultado.resultado,
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        usuario.saldo =
+            resultado.saldo;
+
+        await cargarUsuariosParaAdministracion();
+
+        renderizarTodoAdminSuperior();
+
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "saldo agregado correctamente",
+            "var(--color-exito)"
+        );
+
+        return;
+    }
+
     usuario.saldo += monto;
 
     registrarMovimientoUsuario(
         usuario.id,
-
         "agregar_saldo_admin_superior",
-
         "el admin superior agregó " +
             formatearMoneda(monto),
-
         monto,
-
         usuario.saldo
     );
 
@@ -4511,7 +4610,7 @@ function agregarSaldoDesdeAdminSuperior(
     renderizarTodoAdminSuperior();
 }
 
-function descontarSaldoDesdeAdminSuperior(
+async function descontarSaldoDesdeAdminSuperior(
     idUsuario
 ) {
     const usuario =
@@ -4535,12 +4634,67 @@ function descontarSaldoDesdeAdminSuperior(
 
     if (
         Number.isNaN(monto) ||
-        monto <= 0 ||
-        monto > usuario.saldo
+        monto <= 0
     ) {
         mostrarMensaje(
             mensajeAccionesAdminSuperior,
-            "monto inválido o superior al saldo disponible",
+            "monto inválido",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        usuario.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await window
+                .usuariosRepository
+                .modificarSaldo(
+                    usuario.id,
+                    -monto,
+                    "el admin superior descontó saldo"
+                );
+
+        if (!resultado.correcto) {
+            const mensaje =
+                resultado.resultado ===
+                "saldo_insuficiente"
+                    ? "monto superior al saldo disponible"
+                    : resultado.mensaje ||
+                      resultado.resultado;
+
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                mensaje,
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        usuario.saldo =
+            resultado.saldo;
+
+        await cargarUsuariosParaAdministracion();
+
+        renderizarTodoAdminSuperior();
+
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "saldo descontado correctamente",
+            "var(--color-exito)"
+        );
+
+        return;
+    }
+
+    if (monto > usuario.saldo) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "monto superior al saldo disponible",
             "var(--color-error)"
         );
 
@@ -4551,14 +4705,10 @@ function descontarSaldoDesdeAdminSuperior(
 
     registrarMovimientoUsuario(
         usuario.id,
-
         "descuento_saldo_admin_superior",
-
         "el admin superior descontó " +
             formatearMoneda(monto),
-
         -monto,
-
         usuario.saldo
     );
 
@@ -4567,7 +4717,7 @@ function descontarSaldoDesdeAdminSuperior(
     renderizarTodoAdminSuperior();
 }
 
-function alternarBloqueoDesdeAdminSuperior(
+async function alternarBloqueoDesdeAdminSuperior(
     idUsuario
 ) {
     const usuario =
@@ -4579,17 +4729,58 @@ function alternarBloqueoDesdeAdminSuperior(
         return;
     }
 
-    usuario.bloqueado =
+    const nuevoEstado =
         !usuario.bloqueado;
+
+    if (
+        usuario.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await window
+                .usuariosRepository
+                .cambiarBloqueo(
+                    usuario.id,
+                    nuevoEstado
+                );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                resultado.mensaje ||
+                    resultado.resultado,
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        await cargarUsuariosParaAdministracion();
+
+        renderizarTodoAdminSuperior();
+
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            nuevoEstado
+                ? "usuario bloqueado correctamente"
+                : "usuario desbloqueado correctamente",
+            "var(--color-exito)"
+        );
+
+        return;
+    }
+
+    usuario.bloqueado =
+        nuevoEstado;
 
     registrarMovimientoUsuario(
         usuario.id,
 
-        usuario.bloqueado
+        nuevoEstado
             ? "bloqueo_admin_superior"
             : "desbloqueo_admin_superior",
 
-        usuario.bloqueado
+        nuevoEstado
             ? "el admin superior bloqueó transacciones"
             : "el admin superior desbloqueó transacciones",
 
@@ -4598,7 +4789,9 @@ function alternarBloqueoDesdeAdminSuperior(
         usuario.saldo
     );
 
-    guardarUsuarios(usuarios);
+    guardarUsuarios(
+        usuarios
+    );
 
     renderizarTodoAdminSuperior();
 }
