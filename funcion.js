@@ -2336,7 +2336,7 @@ function validarPalabraAdminSuperior(
     );
 }
 
-function registrarCuenta() {
+async function registrarCuenta() {
     const tipo =
         selectTipoRegistro.value;
 
@@ -2416,67 +2416,52 @@ function registrarCuenta() {
             return;
         }
 
-        usuarios.push({
-            id:
-                siguienteIdUsuario,
-
-            tipo:
-                "titular",
-
-            usuario:
-                nombreUsuario,
-
-            nombre:
-                nombre,
-
-            curso:
-                curso,
-
-            contrasena:
-                contrasena,
-
-            saldo:
-                configuracionSistema
-                    .saldoInicialUsuarios,
-
-            bloqueado:
-                false,
-
-            historial:
-                []
-        });
-
-        registrarMovimientoUsuario(
-            siguienteIdUsuario,
-
-            "registro_usuario",
-
-            "se registró el usuario " +
-                nombre,
-
-            0,
-
-            configuracionSistema
-                .saldoInicialUsuarios
-        );
-
-        siguienteIdUsuario++;
-
         if (
-            !guardarUsuarios(
-                usuarios
-            )
+            typeof window.usuariosRepository ===
+            "undefined"
         ) {
-            usuarios.pop();
-            siguienteIdUsuario--;
-
             mostrarMensaje(
                 mensajeRegistro,
-                "no se pudo guardar el usuario",
+                "el servicio de usuarios no está disponible",
                 "var(--color-error)"
             );
 
             return;
+        }
+
+        botonRegistrarCuenta.disabled =
+            true;
+
+        try {
+            const resultado =
+                await window
+                    .usuariosRepository
+                    .crearTitular({
+                        usuario:
+                            nombreUsuario,
+
+                        nombre:
+                            nombre,
+
+                        curso:
+                            curso,
+
+                        contrasena:
+                            contrasena
+                    });
+
+            if (!resultado.correcto) {
+                mostrarMensaje(
+                    mensajeRegistro,
+                    resultado.mensaje,
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+        } finally {
+            botonRegistrarCuenta.disabled =
+                false;
         }
     } else if (
         tipo === "admin"
@@ -2564,7 +2549,6 @@ function registrarCuenta() {
         "var(--color-exito)"
     );
 }
-
 // =======================================================
 // LOGIN Y NAVEGACIÓN
 // =======================================================
