@@ -3634,7 +3634,14 @@ function renderizarCuentasAdminSuperior() {
         i < cuentas.length;
         i++
     ) {
-        const cuenta = cuentas[i];
+        const cuenta =
+            cuentas[i];
+
+        const idCuentaSeguro =
+            typeof cuenta.id === "number"
+                ? cuenta.id
+                : "'" + cuenta.id + "'";
+
         let acciones = "";
 
         if (
@@ -3646,35 +3653,39 @@ function renderizarCuentasAdminSuperior() {
 
                     <button
                         class="boton boton-chico"
-                        onclick="agregarSaldoDesdeAdminSuperior(${cuenta.id})"
+                        onclick="agregarSaldoDesdeAdminSuperior(${idCuentaSeguro})"
                     >
                         agregar saldo
                     </button>
 
                     <button
                         class="boton boton-chico"
-                        onclick="descontarSaldoDesdeAdminSuperior(${cuenta.id})"
+                        onclick="descontarSaldoDesdeAdminSuperior(${idCuentaSeguro})"
                     >
                         descontar saldo
                     </button>
 
                     <button
                         class="boton boton-advertencia boton-chico"
-                        onclick="alternarBloqueoDesdeAdminSuperior(${cuenta.id})"
+                        onclick="alternarBloqueoDesdeAdminSuperior(${idCuentaSeguro})"
                     >
-                        ${cuenta.bloqueado ? "desbloquear" : "bloquear"}
+                        ${
+                            cuenta.bloqueado
+                                ? "desbloquear"
+                                : "bloquear"
+                        }
                     </button>
 
                     <button
                         class="boton boton-secundario boton-chico"
-                        onclick="resetearContrasenaDesdeAdminSuperior('usuarios', ${cuenta.id})"
+                        onclick="resetearContrasenaDesdeAdminSuperior('usuarios', ${idCuentaSeguro})"
                     >
                         resetear contraseña
                     </button>
 
                     <button
                         class="boton boton-peligro boton-chico"
-                        onclick="eliminarCuentaDesdeAdminSuperior('usuarios', ${cuenta.id})"
+                        onclick="eliminarCuentaDesdeAdminSuperior('usuarios', ${idCuentaSeguro})"
                     >
                         eliminar cuenta
                     </button>
@@ -3690,14 +3701,14 @@ function renderizarCuentasAdminSuperior() {
 
                     <button
                         class="boton boton-secundario boton-chico"
-                        onclick="resetearContrasenaDesdeAdminSuperior('administradores', ${cuenta.id})"
+                        onclick="resetearContrasenaDesdeAdminSuperior('administradores', ${idCuentaSeguro})"
                     >
                         resetear contraseña
                     </button>
 
                     <button
                         class="boton boton-peligro boton-chico"
-                        onclick="eliminarCuentaDesdeAdminSuperior('administradores', ${cuenta.id})"
+                        onclick="eliminarCuentaDesdeAdminSuperior('administradores', ${idCuentaSeguro})"
                     >
                         eliminar cuenta
                     </button>
@@ -3715,7 +3726,7 @@ function renderizarCuentasAdminSuperior() {
 
                     <button
                         class="boton boton-secundario boton-chico"
-                        onclick="resetearContrasenaDesdeAdminSuperior('administradores', ${cuenta.id})"
+                        onclick="resetearContrasenaDesdeAdminSuperior('administradores', ${idCuentaSeguro})"
                     >
                         resetear mi contraseña
                     </button>
@@ -3756,7 +3767,9 @@ function renderizarCuentasAdminSuperior() {
                     saldo:
                     ${
                         cuenta.tipo === "titular"
-                            ? formatearMoneda(cuenta.saldo)
+                            ? formatearMoneda(
+                                cuenta.saldo
+                            )
                             : "-"
                     }
                 </p>
@@ -3764,7 +3777,8 @@ function renderizarCuentasAdminSuperior() {
                 <p class="admin-superior-dato">
                     estado:
                     ${
-                        cuenta.tipo === "titular" &&
+                        cuenta.tipo ===
+                            "titular" &&
                         cuenta.bloqueado
                             ? "bloqueado"
                             : "activo"
