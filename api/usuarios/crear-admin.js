@@ -191,7 +191,7 @@ export default async function handler(
                     encodeURIComponent(
                         datosSesion.id
                     ) +
-                    "&select=id,rol,bloqueado" +
+                    "&select=id,rol" +
                     "&limit=1",
                 {
                     method:
@@ -247,16 +247,7 @@ export default async function handler(
             });
         }
 
-        if (
-            perfil.bloqueado === true
-        ) {
-            return res.status(403).json({
-                ok: false,
-
-                mensaje:
-                    "cuenta bloqueada"
-            });
-        }
+   
 
         /* -----------------------------------------------
            VALIDAR DATOS DEL NUEVO ADMIN
