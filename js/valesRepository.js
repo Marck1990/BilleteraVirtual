@@ -31,6 +31,11 @@ function obtenerAdaptadorVales() {
     );
 }
 
+// =======================================================
+// GUARDAR VALE
+// Compatibilidad con usuarios locales antiguos
+// =======================================================
+
 async function guardarValeRepositorio(
     vale
 ) {
@@ -42,6 +47,38 @@ async function guardarValeRepositorio(
     );
 }
 
+// =======================================================
+// COMPRA ATÓMICA
+// Descuenta saldo y crea el vale en Supabase
+// =======================================================
+
+async function realizarCompraConValeRepositorio(
+    vale
+) {
+    const adaptador =
+        obtenerAdaptadorVales();
+
+    if (
+        typeof adaptador.realizarCompraConVale !==
+        "function"
+    ) {
+        return {
+            correcto: false,
+            resultado:
+                "operacion_no_disponible"
+        };
+    }
+
+    return await adaptador
+        .realizarCompraConVale(
+            vale
+        );
+}
+
+// =======================================================
+// CONSULTAR VALE
+// =======================================================
+
 async function obtenerValeRepositorio(
     tokenPublico
 ) {
@@ -52,6 +89,10 @@ async function obtenerValeRepositorio(
         tokenPublico
     );
 }
+
+// =======================================================
+// UTILIZAR VALE
+// =======================================================
 
 async function marcarValeComoUsadoRepositorio(
     tokenPublico
@@ -68,6 +109,9 @@ async function marcarValeComoUsadoRepositorio(
 window.valesRepository = {
     guardarVale:
         guardarValeRepositorio,
+
+    realizarCompraConVale:
+        realizarCompraConValeRepositorio,
 
     obtenerVale:
         obtenerValeRepositorio,

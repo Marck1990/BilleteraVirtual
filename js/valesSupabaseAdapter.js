@@ -4,7 +4,8 @@
 
 function obtenerClienteSupabase() {
     if (
-        typeof window.supabaseCliente === "undefined" ||
+        typeof window.supabaseCliente ===
+            "undefined" ||
         window.supabaseCliente === null
     ) {
         throw new Error(
@@ -15,7 +16,9 @@ function obtenerClienteSupabase() {
     return window.supabaseCliente;
 }
 
-function prepararProductosParaSupabase(productos) {
+function prepararProductosParaSupabase(
+    productos
+) {
     const productosPreparados = [];
 
     for (
@@ -37,6 +40,11 @@ function prepararProductosParaSupabase(productos) {
 
     return productosPreparados;
 }
+
+// =======================================================
+// GUARDAR VALE SIN MODIFICAR SALDO
+// Compatibilidad con usuarios locales antiguos
+// =======================================================
 
 async function guardarValeSupabase(vale) {
     try {
@@ -77,7 +85,8 @@ async function guardarValeSupabase(vale) {
 
             return {
                 correcto: false,
-                error: respuesta.error.message
+                error:
+                    respuesta.error.message
             };
         }
 
@@ -88,6 +97,7 @@ async function guardarValeSupabase(vale) {
         ) {
             return {
                 correcto: false,
+
                 resultado:
                     respuesta.data?.resultado ||
                     "respuesta_invalida"
@@ -127,10 +137,149 @@ async function guardarValeSupabase(vale) {
 
         return {
             correcto: false,
-            error: error.message
+            error:
+                error.message
         };
     }
 }
+
+// =======================================================
+// COMPRA ATÓMICA
+// Descuenta saldo, crea vale y registra movimiento
+// =======================================================
+
+async function realizarCompraConValeSupabase(
+    vale
+) {
+    try {
+        const cliente =
+            obtenerClienteSupabase();
+
+        const productos =
+            prepararProductosParaSupabase(
+                vale.productos
+            );
+
+        const respuesta =
+            await cliente.rpc(
+                "realizar_compra_con_vale",
+                {
+                    p_codigo:
+                        vale.id,
+
+                    p_total:
+                        vale.total,
+
+                    p_vence_en:
+                        vale.fechaVencimiento,
+
+                    p_productos:
+                        productos
+                }
+            );
+
+        if (respuesta.error) {
+            console.error(
+                "Error al realizar la compra:",
+                respuesta.error
+            );
+
+            return {
+                correcto: false,
+
+                resultado:
+                    "error_supabase",
+
+                error:
+                    respuesta.error.message
+            };
+        }
+
+        const datos =
+            respuesta.data;
+
+        if (
+            datos === null ||
+            datos.resultado !==
+                "compra_realizada"
+        ) {
+            return {
+                correcto: false,
+
+                resultado:
+                    datos?.resultado ||
+                    "respuesta_invalida",
+
+                datos:
+                    datos
+            };
+        }
+
+        const valeRemoto =
+            datos.vale;
+
+        return {
+            correcto: true,
+
+            resultado:
+                datos.resultado,
+
+            saldo:
+                Number(
+                    datos.saldo
+                ),
+
+            vale: {
+                ...vale,
+
+                id:
+                    valeRemoto.codigo,
+
+                idInterno:
+                    valeRemoto.id,
+
+                tokenPublico:
+                    valeRemoto
+                        .token_publico,
+
+                estado:
+                    valeRemoto.estado,
+
+                total:
+                    Number(
+                        valeRemoto.total
+                    ),
+
+                fechaCreacion:
+                    valeRemoto
+                        .creado_en,
+
+                fechaVencimiento:
+                    valeRemoto
+                        .vence_en
+            }
+        };
+    } catch (error) {
+        console.error(
+            "Error inesperado al realizar la compra:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            resultado:
+                "error_inesperado",
+
+            error:
+                error.message
+        };
+    }
+}
+
+// =======================================================
+// CONSULTAR VALE
+// =======================================================
 
 async function obtenerValeSupabase(
     tokenPublico
@@ -156,7 +305,8 @@ async function obtenerValeSupabase(
 
             return {
                 correcto: false,
-                error: respuesta.error.message
+                error:
+                    respuesta.error.message
             };
         }
 
@@ -174,7 +324,8 @@ async function obtenerValeSupabase(
         return {
             correcto: true,
             existe: true,
-            vale: respuesta.data
+            vale:
+                respuesta.data
         };
     } catch (error) {
         console.error(
@@ -184,10 +335,15 @@ async function obtenerValeSupabase(
 
         return {
             correcto: false,
-            error: error.message
+            error:
+                error.message
         };
     }
 }
+
+// =======================================================
+// UTILIZAR VALE
+// =======================================================
 
 async function marcarValeComoUsadoSupabase(
     tokenPublico
@@ -213,7 +369,8 @@ async function marcarValeComoUsadoSupabase(
 
             return {
                 correcto: false,
-                error: respuesta.error.message
+                error:
+                    respuesta.error.message
             };
         }
 
@@ -237,7 +394,8 @@ async function marcarValeComoUsadoSupabase(
 
         return {
             correcto: false,
-            error: error.message
+            error:
+                error.message
         };
     }
 }
@@ -245,6 +403,9 @@ async function marcarValeComoUsadoSupabase(
 window.valesSupabaseAdapter = {
     guardarVale:
         guardarValeSupabase,
+
+    realizarCompraConVale:
+        realizarCompraConValeSupabase,
 
     obtenerVale:
         obtenerValeSupabase,

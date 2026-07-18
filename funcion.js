@@ -1610,112 +1610,335 @@ async function procesarCompraConVale() {
         return null;
     }
 
-    const idVale =
-        generarIdVale();
+    const esUsuarioSupabase =
+        sesion.origen === "supabase" ||
+        usuarioActivo.autenticacion ===
+            "supabase";
 
-    if (idVale === null) {
+    botonConfirmarCompra.disabled =
+        true;
+
+    try {
+        let valeGuardado = null;
+
+        // ===============================================
+        // COMPRA DE USUARIO SUPABASE
+        // ===============================================
+
+        if (esUsuarioSupabase) {
+            if (
+                typeof window.valesRepository ===
+                    "undefined" ||
+                typeof window
+                    .valesRepository
+                    .realizarCompraConVale !==
+                    "function"
+            ) {
+                mostrarMensaje(
+                    mensajeCompra,
+                    "el servicio de compras no está disponible",
+                    "var(--color-error)"
+                );
+
+                return null;
+            }
+
+            let resultadoSupabase = null;
+            let vale = null;
+
+            for (
+                let intento = 0;
+                intento < 100;
+                intento++
+            ) {
+                const idVale =
+                    generarIdVale();
+
+                if (idVale === null) {
+                    mostrarMensaje(
+                        mensajeCompra,
+                        "no se pudo generar el código del vale",
+                        "var(--color-error)"
+                    );
+
+                    return null;
+                }
+
+                vale = crearVale({
+                    id:
+                        idVale,
+
+                    titular:
+                        usuarioActivo,
+
+                    fechaCreacion:
+                        new Date()
+                            .toISOString(),
+
+                    productos:
+                        agruparProductosDelCarrito(),
+
+                    total:
+                        validacion.total
+                });
+
+                resultadoSupabase =
+                    await window
+                        .valesRepository
+                        .realizarCompraConVale(
+                            vale
+                        );
+
+                if (
+                    resultadoSupabase.correcto
+                ) {
+                    break;
+                }
+
+                if (
+                    resultadoSupabase.resultado !==
+                    "codigo_duplicado"
+                ) {
+                    break;
+                }
+            }
+
+            if (
+                resultadoSupabase === null ||
+                !resultadoSupabase.correcto
+            ) {
+                let mensajeError =
+                    "no se pudo realizar la compra";
+
+                const resultadoError =
+                    resultadoSupabase
+                        ?.resultado;
+
+                if (
+                    resultadoError ===
+                    "saldo_insuficiente"
+                ) {
+                    mensajeError =
+                        "saldo insuficiente";
+                } else if (
+                    resultadoError ===
+                    "billetera_bloqueada"
+                ) {
+                    mensajeError =
+                        "usuario bloqueado: no puede realizar compras";
+                } else if (
+                    resultadoError ===
+                    "usuario_inactivo"
+                ) {
+                    mensajeError =
+                        "la cuenta está deshabilitada";
+                } else if (
+                    resultadoError ===
+                    "no_autenticado"
+                ) {
+                    mensajeError =
+                        "la sesión venció. Iniciá sesión nuevamente";
+                } else if (
+                    resultadoError ===
+                    "codigo_duplicado"
+                ) {
+                    mensajeError =
+                        "no se pudo generar un código de vale disponible";
+                }
+
+                mostrarMensaje(
+                    mensajeCompra,
+                    mensajeError,
+                    "var(--color-error)"
+                );
+
+                return null;
+            }
+
+            usuarioActivo.saldo =
+                resultadoSupabase.saldo;
+
+            registrarMovimientoUsuario(
+                usuarioActivo.id,
+
+                "compra",
+
+                "compra " +
+                    resultadoSupabase
+                        .vale
+                        .id +
+                    " por " +
+                    formatearMoneda(
+                        resultadoSupabase
+                            .vale
+                            .total
+                    ),
+
+                -resultadoSupabase
+                    .vale
+                    .total,
+
+                usuarioActivo.saldo
+            );
+
+            valeGuardado =
+                resultadoSupabase.vale;
+        }
+
+        // ===============================================
+        // COMPRA DE USUARIO LOCAL ANTIGUO
+        // ===============================================
+
+        else {
+            const idVale =
+                generarIdVale();
+
+            if (idVale === null) {
+                mostrarMensaje(
+                    mensajeCompra,
+                    "no se pudo generar el código del vale",
+                    "var(--color-error)"
+                );
+
+                return null;
+            }
+
+            const vale = crearVale({
+                id:
+                    idVale,
+
+                titular:
+                    usuarioActivo,
+
+                fechaCreacion:
+                    new Date()
+                        .toISOString(),
+
+                productos:
+                    agruparProductosDelCarrito(),
+
+                total:
+                    validacion.total
+            });
+
+            const saldoAnterior =
+                usuarioActivo.saldo;
+
+            const historialAnterior =
+                clonarDato(
+                    usuarioActivo.historial
+                );
+
+            usuarioActivo.saldo -=
+                validacion.total;
+
+            registrarMovimientoUsuario(
+                usuarioActivo.id,
+
+                "compra",
+
+                "compra " +
+                    vale.id +
+                    " por " +
+                    formatearMoneda(
+                        vale.total
+                    ),
+
+                -vale.total,
+
+                usuarioActivo.saldo
+            );
+
+            if (
+                !guardarUsuarios(
+                    usuarios
+                )
+            ) {
+                usuarioActivo.saldo =
+                    saldoAnterior;
+
+                usuarioActivo.historial =
+                    historialAnterior;
+
+                mostrarMensaje(
+                    mensajeCompra,
+                    "no se pudo guardar el saldo",
+                    "var(--color-error)"
+                );
+
+                return null;
+            }
+
+            const resultadoSupabase =
+                await window
+                    .valesRepository
+                    .guardarVale(
+                        vale
+                    );
+
+            if (
+                !resultadoSupabase.correcto
+            ) {
+                usuarioActivo.saldo =
+                    saldoAnterior;
+
+                usuarioActivo.historial =
+                    historialAnterior;
+
+                guardarUsuarios(
+                    usuarios
+                );
+
+                mostrarMensaje(
+                    mensajeCompra,
+                    "no se pudo guardar el vale en Supabase",
+                    "var(--color-error)"
+                );
+
+                return null;
+            }
+
+            valeGuardado =
+                resultadoSupabase.vale;
+        }
+
+        guardarVale(
+            valeGuardado
+        );
+
+        carrito = [];
+
+        renderizarTodoTitular();
+
         mostrarMensaje(
             mensajeCompra,
-            "no se pudo generar el código del vale",
+            "compra aprobada. Vale generado: " +
+                valeGuardado.id,
+            "var(--color-exito)"
+        );
+
+        mostrarValeGenerado(
+            valeGuardado
+        );
+
+        return valeGuardado;
+    } catch (error) {
+        console.error(
+            "Error al procesar la compra:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeCompra,
+            "ocurrió un error al procesar la compra",
             "var(--color-error)"
         );
 
         return null;
+    } finally {
+        botonConfirmarCompra.disabled =
+            false;
     }
-
-    const vale = crearVale({
-        id: idVale,
-        titular: usuarioActivo,
-        fechaCreacion:
-            new Date().toISOString(),
-        productos:
-            agruparProductosDelCarrito(),
-        total: validacion.total
-    });
-
-    const saldoAnterior =
-        usuarioActivo.saldo;
-
-    const historialAnterior =
-        clonarDato(
-            usuarioActivo.historial
-        );
-
-    usuarioActivo.saldo -=
-        validacion.total;
-
-    registrarMovimientoUsuario(
-        usuarioActivo.id,
-        "compra",
-        "compra " +
-            vale.id +
-            " por " +
-            formatearMoneda(
-                vale.total
-            ),
-        -vale.total,
-        usuarioActivo.saldo
-    );
-
-    if (!guardarUsuarios(usuarios)) {
-        usuarioActivo.saldo =
-            saldoAnterior;
-
-        usuarioActivo.historial =
-            historialAnterior;
-
-        mostrarMensaje(
-            mensajeCompra,
-            "no se pudo guardar el saldo",
-            "var(--color-error)"
-        );
-
-        return null;
-    }
-
-    const resultadoSupabase =
-        await window.valesRepository
-            .guardarVale(vale);
-
-    if (!resultadoSupabase.correcto) {
-        usuarioActivo.saldo =
-            saldoAnterior;
-
-        usuarioActivo.historial =
-            historialAnterior;
-
-        guardarUsuarios(usuarios);
-
-        mostrarMensaje(
-            mensajeCompra,
-            "no se pudo guardar el vale en Supabase",
-            "var(--color-error)"
-        );
-
-        return null;
-    }
-
-    const valeGuardado =
-        resultadoSupabase.vale;
-
-    guardarVale(valeGuardado);
-
-    carrito = [];
-
-    renderizarTodoTitular();
-
-    mostrarMensaje(
-        mensajeCompra,
-        "compra aprobada. Vale generado: " +
-            valeGuardado.id,
-        "var(--color-exito)"
-    );
-
-    mostrarValeGenerado(
-        valeGuardado
-    );
-
-    return valeGuardado;
 }
 // =======================================================
 // GENERACIÓN DEL QR
