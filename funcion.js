@@ -5267,6 +5267,219 @@ function borrarAdministradorComun(
     );
 }
 
+
+
+
+
+
+
+async function crearAdministradorDesdePanelSuperior() {
+    const inputUsuario =
+        document.querySelector(
+            "#inputUsuarioNuevoAdmin"
+        );
+
+    const inputNombre =
+        document.querySelector(
+            "#inputNombreNuevoAdmin"
+        );
+
+    const inputContrasena =
+        document.querySelector(
+            "#inputContrasenaNuevoAdmin"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonCrearNuevoAdmin"
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeCrearNuevoAdmin"
+        );
+
+    if (
+        inputUsuario === null ||
+        inputNombre === null ||
+        inputContrasena === null ||
+        boton === null ||
+        mensaje === null
+    ) {
+        console.error(
+            "No se encontraron los controles para crear administradores."
+        );
+
+        return;
+    }
+
+    const usuario =
+        inputUsuario.value
+            .trim()
+            .toLowerCase();
+
+    const nombre =
+        inputNombre.value.trim();
+
+    const contrasena =
+        inputContrasena.value.trim();
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        usuario === "" ||
+        nombre === "" ||
+        contrasena === ""
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "completá todos los campos",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        typeof window.supabaseCliente ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "Supabase no está disponible",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    boton.disabled =
+        true;
+
+    try {
+        const respuestaSesion =
+            await window
+                .supabaseCliente
+                .auth
+                .getSession();
+
+        const sesionSupabase =
+            respuestaSesion
+                .data
+                ?.session;
+
+        if (
+            respuestaSesion.error ||
+            sesionSupabase === null ||
+            typeof sesionSupabase ===
+                "undefined"
+        ) {
+            mostrarMensaje(
+                mensaje,
+                "la sesión del administrador superior no es válida",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        const respuesta =
+            await fetch(
+                "/api/usuarios/crear-admin",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        Authorization:
+                            "Bearer " +
+                            sesionSupabase
+                                .access_token
+                    },
+
+                    body:
+                        JSON.stringify({
+                            usuario:
+                                usuario,
+
+                            nombre:
+                                nombre,
+
+                            contrasena:
+                                contrasena
+                        })
+                }
+            );
+
+        const textoRespuesta =
+            await respuesta.text();
+
+        let resultado = {};
+
+        try {
+            resultado =
+                JSON.parse(
+                    textoRespuesta
+                );
+        } catch (error) {
+            resultado = {};
+        }
+
+        if (
+            !respuesta.ok ||
+            resultado.ok !== true
+        ) {
+            mostrarMensaje(
+                mensaje,
+                resultado.mensaje ||
+                    "no se pudo crear el administrador",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        inputUsuario.value =
+            "";
+
+        inputNombre.value =
+            "";
+
+        inputContrasena.value =
+            "";
+
+        mostrarMensaje(
+            mensaje,
+            "administrador creado correctamente",
+            "var(--color-exito)"
+        );
+    } catch (error) {
+        console.error(
+            "Error al crear administrador:",
+            error
+        );
+
+        mostrarMensaje(
+            mensaje,
+            "no se pudo conectar con el servidor",
+            "var(--color-error)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+
+
+
+
+
 // =======================================================
 // APOYO
 // =======================================================
