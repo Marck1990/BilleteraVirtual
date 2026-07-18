@@ -1697,3 +1697,38 @@ and (
             );
     }
 }
+
+
+
+
+/* AJUSTE DE TARJETA CON LETRAS QUE SE SOLAPAN EN RESOLUCIONES PEQUEÑAS */
+
+
+/* corrección definitiva del texto sobre el chip */
+
+.tarjeta-estudiantil {
+    container-type: inline-size;
+}
+
+.tarjeta-estudiantil-superior p {
+    width: max-content;
+    max-width: none;
+
+    white-space: nowrap;
+
+    font-size: 22px !important;
+    font-size: clamp(
+        6px,
+        3.3cqw,
+        22px
+    ) !important;
+
+    line-height: 1.1 !important;
+
+    letter-spacing: 1px !important;
+    letter-spacing: clamp(
+        0.2px,
+        0.15cqw,
+        1px
+    ) !important;
+}
