@@ -5,6 +5,10 @@
 const DOMINIO_USUARIOS_SUPABASE =
     "billetera.test";
 
+// =======================================================
+// FUNCIONES AUXILIARES
+// =======================================================
+
 function obtenerClienteUsuariosSupabase() {
     if (
         typeof window.supabaseCliente ===
@@ -59,6 +63,251 @@ async function leerRespuestaJson(
         return await respuesta.json();
     } catch (error) {
         return {};
+    }
+}
+
+function convertirNumeroSeguro(
+    valor
+) {
+    const numero =
+        Number(valor);
+
+    if (Number.isNaN(numero)) {
+        return 0;
+    }
+
+    return numero;
+}
+
+function formatearFechaMovimientoSupabase(
+    fechaTexto
+) {
+    if (
+        typeof fechaTexto !== "string" ||
+        fechaTexto.trim() === ""
+    ) {
+        return "";
+    }
+
+    const fecha =
+        new Date(
+            fechaTexto
+        );
+
+    if (
+        Number.isNaN(
+            fecha.getTime()
+        )
+    ) {
+        return fechaTexto;
+    }
+
+    return fecha.toLocaleString(
+        "es-UY",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+}
+
+function normalizarMovimientoSupabase(
+    movimiento
+) {
+    if (
+        movimiento === null ||
+        typeof movimiento !== "object"
+    ) {
+        return null;
+    }
+
+    const detalle =
+        typeof movimiento.detalle ===
+            "string"
+            ? movimiento.detalle
+            : "";
+
+    const fechaOriginal =
+        movimiento.creado_en ||
+        movimiento.creadoEn ||
+        movimiento.fecha ||
+        "";
+
+    return {
+        id:
+            movimiento.id || null,
+
+        tipo:
+            movimiento.tipo || "",
+
+        detalle:
+            detalle,
+
+        descripcion:
+            detalle,
+
+        monto:
+            convertirNumeroSeguro(
+                movimiento.monto
+            ),
+
+        saldoResultante:
+            convertirNumeroSeguro(
+                movimiento
+                    .saldo_resultante ??
+                movimiento
+                    .saldoResultante
+            ),
+
+        fecha:
+            formatearFechaMovimientoSupabase(
+                fechaOriginal
+            ),
+
+        creadoEn:
+            fechaOriginal
+    };
+}
+
+function normalizarListaMovimientosSupabase(
+    movimientosOriginales
+) {
+    const movimientos = [];
+
+    if (
+        !Array.isArray(
+            movimientosOriginales
+        )
+    ) {
+        return movimientos;
+    }
+
+    for (
+        let i = 0;
+        i < movimientosOriginales.length;
+        i++
+    ) {
+        const movimiento =
+            normalizarMovimientoSupabase(
+                movimientosOriginales[i]
+            );
+
+        if (movimiento !== null) {
+            movimientos.push(
+                movimiento
+            );
+        }
+    }
+
+    return movimientos;
+}
+
+async function obtenerMovimientosAdministracion(
+    cliente
+) {
+    try {
+        const respuesta =
+            await cliente
+                .from(
+                    "movimientos_billetera"
+                )
+                .select(
+                    "id, perfil_id, tipo, detalle, monto, saldo_resultante, creado_en"
+                )
+                .order(
+                    "creado_en",
+                    {
+                        ascending: false
+                    }
+                )
+                .limit(1000);
+
+        if (respuesta.error) {
+            console.error(
+                "Error al consultar movimientos:",
+                respuesta.error
+            );
+
+            return {
+                correcto: false,
+                movimientosPorPerfil: {}
+            };
+        }
+
+        const movimientosOriginales =
+            Array.isArray(
+                respuesta.data
+            )
+                ? respuesta.data
+                : [];
+
+        const movimientosPorPerfil = {};
+
+        for (
+            let i = 0;
+            i < movimientosOriginales.length;
+            i++
+        ) {
+            const movimientoOriginal =
+                movimientosOriginales[i];
+
+            const perfilId =
+                movimientoOriginal
+                    .perfil_id;
+
+            if (
+                typeof perfilId !==
+                    "string" ||
+                perfilId.trim() ===
+                    ""
+            ) {
+                continue;
+            }
+
+            if (
+                !Array.isArray(
+                    movimientosPorPerfil[
+                        perfilId
+                    ]
+                )
+            ) {
+                movimientosPorPerfil[
+                    perfilId
+                ] = [];
+            }
+
+            const movimiento =
+                normalizarMovimientoSupabase(
+                    movimientoOriginal
+                );
+
+            if (movimiento !== null) {
+                movimientosPorPerfil[
+                    perfilId
+                ].push(
+                    movimiento
+                );
+            }
+        }
+
+        return {
+            correcto: true,
+            movimientosPorPerfil:
+                movimientosPorPerfil
+        };
+    } catch (error) {
+        console.error(
+            "Error al cargar movimientos administrativos:",
+            error
+        );
+
+        return {
+            correcto: false,
+            movimientosPorPerfil: {}
+        };
     }
 }
 
@@ -132,6 +381,7 @@ async function crearTitularSupabase(
 
         return {
             correcto: false,
+
             mensaje:
                 "no se pudo conectar con el servidor"
         };
@@ -169,6 +419,7 @@ async function iniciarSesionSupabase(
         if (respuesta.error) {
             return {
                 correcto: false,
+
                 mensaje:
                     "usuario o contraseña incorrectos"
             };
@@ -178,12 +429,16 @@ async function iniciarSesionSupabase(
             await obtenerMiBilleteraSupabase();
 
         if (!resultadoBilletera.correcto) {
-            await cliente.auth.signOut();
+            await cliente
+                .auth
+                .signOut();
 
             return {
                 correcto: false,
+
                 mensaje:
-                    resultadoBilletera.mensaje
+                    resultadoBilletera
+                        .mensaje
             };
         }
 
@@ -204,6 +459,7 @@ async function iniciarSesionSupabase(
 
         return {
             correcto: false,
+
             mensaje:
                 "no se pudo conectar con Supabase"
         };
@@ -216,7 +472,9 @@ async function cerrarSesionSupabase() {
             obtenerClienteUsuariosSupabase();
 
         const respuesta =
-            await cliente.auth.signOut();
+            await cliente
+                .auth
+                .signOut();
 
         return {
             correcto:
@@ -235,6 +493,7 @@ async function cerrarSesionSupabase() {
 
         return {
             correcto: false,
+
             mensaje:
                 error.message
         };
@@ -258,6 +517,7 @@ async function obtenerMiBilleteraSupabase() {
         if (respuesta.error) {
             return {
                 correcto: false,
+
                 mensaje:
                     respuesta.error.message
             };
@@ -270,8 +530,10 @@ async function obtenerMiBilleteraSupabase() {
         ) {
             return {
                 correcto: false,
+
                 mensaje:
-                    respuesta.data?.resultado ||
+                    respuesta.data
+                        ?.resultado ||
                     "no se pudo obtener la billetera"
             };
         }
@@ -283,11 +545,9 @@ async function obtenerMiBilleteraSupabase() {
             respuesta.data.billetera;
 
         const movimientos =
-            Array.isArray(
+            normalizarListaMovimientosSupabase(
                 respuesta.data.movimientos
-            )
-                ? respuesta.data.movimientos
-                : [];
+            );
 
         return {
             correcto: true,
@@ -309,8 +569,8 @@ async function obtenerMiBilleteraSupabase() {
                     perfil.curso || "",
 
                 saldo:
-                    Number(
-                        billetera?.saldo || 0
+                    convertirNumeroSeguro(
+                        billetera?.saldo
                     ),
 
                 bloqueado:
@@ -329,6 +589,7 @@ async function obtenerMiBilleteraSupabase() {
 
         return {
             correcto: false,
+
             mensaje:
                 "no se pudo consultar la billetera"
         };
@@ -352,8 +613,10 @@ async function listarUsuariosSupabase() {
         if (respuesta.error) {
             return {
                 correcto: false,
+
                 mensaje:
                     respuesta.error.message,
+
                 usuarios: []
             };
         }
@@ -365,9 +628,12 @@ async function listarUsuariosSupabase() {
         ) {
             return {
                 correcto: false,
+
                 mensaje:
-                    respuesta.data?.resultado ||
+                    respuesta.data
+                        ?.resultado ||
                     "no se pudieron listar los usuarios",
+
                 usuarios: []
             };
         }
@@ -379,6 +645,15 @@ async function listarUsuariosSupabase() {
                 ? respuesta.data.usuarios
                 : [];
 
+        const resultadoMovimientos =
+            await obtenerMovimientosAdministracion(
+                cliente
+            );
+
+        const movimientosPorPerfil =
+            resultadoMovimientos
+                .movimientosPorPerfil;
+
         const usuarios = [];
 
         for (
@@ -386,46 +661,60 @@ async function listarUsuariosSupabase() {
             i < listaOriginal.length;
             i++
         ) {
+            const usuarioOriginal =
+                listaOriginal[i];
+
+            const historial =
+                Array.isArray(
+                    movimientosPorPerfil[
+                        usuarioOriginal.id
+                    ]
+                )
+                    ? movimientosPorPerfil[
+                        usuarioOriginal.id
+                    ]
+                    : [];
+
             usuarios.push({
                 id:
-                    listaOriginal[i].id,
+                    usuarioOriginal.id,
 
                 tipo:
                     "titular",
 
                 usuario:
-                    listaOriginal[i]
+                    usuarioOriginal
                         .usuario,
 
                 nombre:
-                    listaOriginal[i]
+                    usuarioOriginal
                         .nombre,
 
                 curso:
-                    listaOriginal[i]
+                    usuarioOriginal
                         .curso || "",
 
                 saldo:
-                    Number(
-                        listaOriginal[i]
-                            .saldo || 0
+                    convertirNumeroSeguro(
+                        usuarioOriginal.saldo
                     ),
 
                 bloqueado:
-                    listaOriginal[i]
+                    usuarioOriginal
                         .bloqueada === true,
 
                 activo:
-                    listaOriginal[i]
+                    usuarioOriginal
                         .activo !== false,
 
                 historial:
-                    []
+                    historial
             });
         }
 
         return {
             correcto: true,
+
             usuarios:
                 usuarios
         };
@@ -437,12 +726,18 @@ async function listarUsuariosSupabase() {
 
         return {
             correcto: false,
+
             mensaje:
                 "no se pudieron consultar los usuarios",
+
             usuarios: []
         };
     }
 }
+
+// =======================================================
+// MODIFICAR SALDO
+// =======================================================
 
 async function modificarSaldoSupabase(
     perfilId,
@@ -471,6 +766,7 @@ async function modificarSaldoSupabase(
         if (respuesta.error) {
             return {
                 correcto: false,
+
                 mensaje:
                     respuesta.error.message
             };
@@ -478,15 +774,17 @@ async function modificarSaldoSupabase(
 
         return {
             correcto:
-                respuesta.data?.resultado ===
+                respuesta.data
+                    ?.resultado ===
                 "modificado_correctamente",
 
             resultado:
-                respuesta.data?.resultado,
+                respuesta.data
+                    ?.resultado,
 
             saldo:
-                Number(
-                    respuesta.data?.saldo || 0
+                convertirNumeroSeguro(
+                    respuesta.data?.saldo
                 )
         };
     } catch (error) {
@@ -497,11 +795,16 @@ async function modificarSaldoSupabase(
 
         return {
             correcto: false,
+
             mensaje:
                 "no se pudo modificar el saldo"
         };
     }
 }
+
+// =======================================================
+// BLOQUEAR O DESBLOQUEAR
+// =======================================================
 
 async function cambiarBloqueoSupabase(
     perfilId,
@@ -526,6 +829,7 @@ async function cambiarBloqueoSupabase(
         if (respuesta.error) {
             return {
                 correcto: false,
+
                 mensaje:
                     respuesta.error.message
             };
@@ -533,15 +837,17 @@ async function cambiarBloqueoSupabase(
 
         return {
             correcto:
-                respuesta.data?.resultado ===
+                respuesta.data
+                    ?.resultado ===
                 "modificado_correctamente",
 
             resultado:
-                respuesta.data?.resultado,
+                respuesta.data
+                    ?.resultado,
 
             bloqueada:
-                respuesta.data?.bloqueada ===
-                true
+                respuesta.data
+                    ?.bloqueada === true
         };
     } catch (error) {
         console.error(
@@ -551,11 +857,16 @@ async function cambiarBloqueoSupabase(
 
         return {
             correcto: false,
+
             mensaje:
                 "no se pudo modificar el estado"
         };
     }
 }
+
+// =======================================================
+// API PÚBLICA DEL ADAPTADOR
+// =======================================================
 
 window.usuariosSupabaseAdapter = {
     crearTitular:
