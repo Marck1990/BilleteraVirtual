@@ -98,14 +98,6 @@ function crearEncabezadosSecretos(
             "application/json"
     };
 
-    /*
-        Las claves antiguas service_role
-        son JWT y pueden enviarse como Bearer.
-
-        Las nuevas claves sb_secret_
-        se envían como apikey.
-    */
-
     if (
         !claveSecreta.startsWith(
             "sb_secret_"
@@ -497,8 +489,9 @@ export default async function handler(
                         "GET",
 
                     headers:
-                        crearEncabezadosSecretos(
-                            claveSecreta
+                        crearEncabezadosUsuario(
+                            claveSecreta,
+                            tokenUsuario
                         )
                 }
             );
@@ -554,8 +547,9 @@ export default async function handler(
                         "GET",
 
                     headers:
-                        crearEncabezadosSecretos(
-                            claveSecreta
+                        crearEncabezadosUsuario(
+                            claveSecreta,
+                            tokenUsuario
                         )
                 }
             );
