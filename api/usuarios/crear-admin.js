@@ -638,7 +638,10 @@ export default async function handler(
                                     "",
 
                                 rol:
-                                    "admin"
+                                    "admin",
+
+                                debe_cambiar_contrasena:
+                                    true
                             }
                         })
                 }
@@ -802,6 +805,84 @@ export default async function handler(
         }
 
         // ===================================================
+        // MARCAR CONTRASEÑA COMO TEMPORAL
+        // ===================================================
+
+        const encabezadosCambioContrasena =
+            crearEncabezadosSecretos(
+                claveSecreta,
+                true
+            );
+
+        encabezadosCambioContrasena.Prefer =
+            "return=representation";
+
+        const respuestaCambioContrasena =
+            await fetch(
+                supabaseUrl +
+                    "/rest/v1/perfiles" +
+                    "?id=eq." +
+                    encodeURIComponent(
+                        usuarioId
+                    ) +
+                    "&select=id,debe_cambiar_contrasena",
+                {
+                    method:
+                        "PATCH",
+
+                    headers:
+                        encabezadosCambioContrasena,
+
+                    body:
+                        JSON.stringify({
+                            debe_cambiar_contrasena:
+                                true
+                        })
+                }
+            );
+
+        const datosCambioContrasena =
+            await convertirRespuestaJson(
+                respuestaCambioContrasena
+            );
+
+        const perfilActualizado =
+            Array.isArray(
+                datosCambioContrasena
+            ) &&
+            datosCambioContrasena
+                .length > 0
+                ? datosCambioContrasena[0]
+                : null;
+
+        if (
+            !respuestaCambioContrasena.ok ||
+            perfilActualizado === null ||
+            perfilActualizado
+                .debe_cambiar_contrasena !==
+                true
+        ) {
+            console.error(
+                "Error al marcar contraseña temporal:",
+                respuestaCambioContrasena.status,
+                datosCambioContrasena
+            );
+
+            await eliminarUsuarioAuth(
+                supabaseUrl,
+                claveSecreta,
+                usuarioId
+            );
+
+            return res.status(500).json({
+                ok: false,
+
+                mensaje:
+                    "no se pudo configurar la contraseña temporal"
+            });
+        }
+
+        // ===================================================
         // RESPUESTA CORRECTA
         // ===================================================
 
@@ -832,6 +913,9 @@ export default async function handler(
 
                 bloqueado:
                     false,
+
+                debeCambiarContrasena:
+                    true,
 
                 autenticacion:
                     "supabase"
