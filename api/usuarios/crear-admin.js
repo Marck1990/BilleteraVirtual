@@ -82,13 +82,9 @@ function obtenerCuerpoPeticion(req) {
     return {};
 }
 
-/*
-    Las claves nuevas sb_secret_ no son JWT
-    y no deben enviarse como Bearer.
-
-    Las claves antiguas service_role sí son JWT
-    y necesitan Authorization.
-*/
+// =======================================================
+// ENCABEZADOS DE SUPABASE
+// =======================================================
 
 function crearEncabezadosSecretos(
     claveSecreta,
@@ -102,6 +98,14 @@ function crearEncabezadosSecretos(
             "application/json"
     };
 
+    /*
+        Las claves antiguas service_role
+        son JWT y pueden enviarse como Bearer.
+
+        Las nuevas claves sb_secret_
+        se envían como apikey.
+    */
+
     if (
         !claveSecreta.startsWith(
             "sb_secret_"
@@ -111,6 +115,31 @@ function crearEncabezadosSecretos(
             "Bearer " +
             claveSecreta;
     }
+
+    if (incluirContenido) {
+        encabezados["Content-Type"] =
+            "application/json";
+    }
+
+    return encabezados;
+}
+
+function crearEncabezadosUsuario(
+    claveApi,
+    tokenUsuario,
+    incluirContenido = false
+) {
+    const encabezados = {
+        apikey:
+            claveApi,
+
+        Authorization:
+            "Bearer " +
+            tokenUsuario,
+
+        Accept:
+            "application/json"
+    };
 
     if (incluirContenido) {
         encabezados["Content-Type"] =
@@ -272,17 +301,11 @@ export default async function handler(
                     method:
                         "GET",
 
-                    headers: {
-                        apikey:
+                    headers:
+                        crearEncabezadosUsuario(
                             claveSecreta,
-
-                        Authorization:
-                            "Bearer " +
-                            tokenUsuario,
-
-                        Accept:
-                            "application/json"
-                    }
+                            tokenUsuario
+                        )
                 }
             );
 
@@ -336,8 +359,9 @@ export default async function handler(
                         "GET",
 
                     headers:
-                        crearEncabezadosSecretos(
-                            claveSecreta
+                        crearEncabezadosUsuario(
+                            claveSecreta,
+                            tokenUsuario
                         )
                 }
             );
@@ -455,7 +479,7 @@ export default async function handler(
         }
 
         // ===================================================
-        // VERIFICAR USUARIO REPETIDO EN PERFILES
+        // VERIFICAR USUARIO REPETIDO
         // ===================================================
 
         const respuestaUsuarioExistente =
