@@ -5306,10 +5306,6 @@ async function crearAdministradorDesdePanelSuperior() {
         boton === null ||
         mensaje === null
     ) {
-        console.error(
-            "No se encontraron los controles para crear administradores."
-        );
-
         return;
     }
 
@@ -5342,19 +5338,6 @@ async function crearAdministradorDesdePanelSuperior() {
         return;
     }
 
-    if (
-        typeof window.supabaseCliente ===
-        "undefined"
-    ) {
-        mostrarMensaje(
-            mensaje,
-            "Supabase no está disponible",
-            "var(--color-error)"
-        );
-
-        return;
-    }
-
     boton.disabled =
         true;
 
@@ -5372,9 +5355,7 @@ async function crearAdministradorDesdePanelSuperior() {
 
         if (
             respuestaSesion.error ||
-            sesionSupabase === null ||
-            typeof sesionSupabase ===
-                "undefined"
+            !sesionSupabase
         ) {
             mostrarMensaje(
                 mensaje,
@@ -5416,19 +5397,8 @@ async function crearAdministradorDesdePanelSuperior() {
                 }
             );
 
-        const textoRespuesta =
-            await respuesta.text();
-
-        let resultado = {};
-
-        try {
-            resultado =
-                JSON.parse(
-                    textoRespuesta
-                );
-        } catch (error) {
-            resultado = {};
-        }
+        const resultado =
+            await respuesta.json();
 
         if (
             !respuesta.ok ||
@@ -5444,6 +5414,71 @@ async function crearAdministradorDesdePanelSuperior() {
             return;
         }
 
+        const nuevoAdmin =
+            resultado.administrador;
+
+        let indiceAdmin = -1;
+
+        for (
+            let i = 0;
+            i < administradores.length;
+            i++
+        ) {
+            if (
+                administradores[i]
+                    .usuario
+                    .toLowerCase() ===
+                nuevoAdmin
+                    .usuario
+                    .toLowerCase()
+            ) {
+                indiceAdmin = i;
+                break;
+            }
+        }
+
+        if (indiceAdmin === -1) {
+            administradores.push({
+                id:
+                    nuevoAdmin.id,
+
+                tipo:
+                    "admin",
+
+                usuario:
+                    nuevoAdmin.usuario,
+
+                nombre:
+                    nuevoAdmin.nombre,
+
+                contrasena:
+                    "",
+
+                autenticacion:
+                    "supabase"
+            });
+        } else {
+            administradores[indiceAdmin] = {
+                id:
+                    nuevoAdmin.id,
+
+                tipo:
+                    "admin",
+
+                usuario:
+                    nuevoAdmin.usuario,
+
+                nombre:
+                    nuevoAdmin.nombre,
+
+                contrasena:
+                    "",
+
+                autenticacion:
+                    "supabase"
+            };
+        }
+
         inputUsuario.value =
             "";
 
@@ -5452,6 +5487,8 @@ async function crearAdministradorDesdePanelSuperior() {
 
         inputContrasena.value =
             "";
+
+        renderizarTodoAdminSuperior();
 
         mostrarMensaje(
             mensaje,
@@ -5474,7 +5511,6 @@ async function crearAdministradorDesdePanelSuperior() {
             false;
     }
 }
-
 
 
 
