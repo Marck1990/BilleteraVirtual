@@ -3347,6 +3347,192 @@ async function cargarUsuariosParaAdministracion() {
 }
 
 
+async function cargarAdministradoresDesdeSupabase() {
+    if (
+        sesion.tipo !==
+            "adminSuperior" ||
+        sesion.origen !==
+            "supabase"
+    ) {
+        return true;
+    }
+
+    if (
+        typeof window.supabaseCliente ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "el servicio de Supabase no está disponible",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+
+    try {
+        const respuesta =
+            await window
+                .supabaseCliente
+                .rpc(
+                    "listar_administradores_admin_superior"
+                );
+
+        if (respuesta.error) {
+            console.error(
+                "Error al cargar administradores:",
+                respuesta.error
+            );
+
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                "no se pudieron cargar los administradores",
+                "var(--color-error)"
+            );
+
+            return false;
+        }
+
+        const administradoresRemotos =
+            Array.isArray(
+                respuesta.data
+            )
+                ? respuesta.data
+                : [];
+
+        const administradoresCombinados =
+            [];
+
+        /*
+            Conservamos el admin superior
+            y los administradores locales antiguos.
+        */
+
+        for (
+            let i = 0;
+            i < administradores.length;
+            i++
+        ) {
+            const adminActual =
+                administradores[i];
+
+            if (
+                adminActual.tipo ===
+                "adminSuperior"
+            ) {
+                administradoresCombinados.push(
+                    adminActual
+                );
+
+                continue;
+            }
+
+            if (
+                adminActual.tipo ===
+                    "admin" &&
+                adminActual.autenticacion !==
+                    "supabase"
+            ) {
+                let existeRemoto =
+                    false;
+
+                for (
+                    let j = 0;
+                    j <
+                    administradoresRemotos
+                        .length;
+                    j++
+                ) {
+                    if (
+                        String(
+                            administradoresRemotos[j]
+                                .usuario
+                        ).toLowerCase() ===
+                        String(
+                            adminActual.usuario
+                        ).toLowerCase()
+                    ) {
+                        existeRemoto =
+                            true;
+
+                        break;
+                    }
+                }
+
+                if (!existeRemoto) {
+                    administradoresCombinados.push(
+                        adminActual
+                    );
+                }
+            }
+        }
+
+        /*
+            Agregamos todos los administradores
+            guardados realmente en Supabase.
+        */
+
+        for (
+            let i = 0;
+            i <
+            administradoresRemotos.length;
+            i++
+        ) {
+            const adminRemoto =
+                administradoresRemotos[i];
+
+            administradoresCombinados.push({
+                id:
+                    adminRemoto.id,
+
+                tipo:
+                    "admin",
+
+                usuario:
+                    adminRemoto.usuario,
+
+                nombre:
+                    adminRemoto.nombre,
+
+                contrasena:
+                    "",
+
+                debeCambiarContrasena:
+                    adminRemoto
+                        .debe_cambiar_contrasena ===
+                    true,
+
+                autenticacion:
+                    "supabase"
+            });
+        }
+
+        administradores =
+            administradoresCombinados;
+
+        return true;
+    } catch (error) {
+        console.error(
+            "Error inesperado al cargar administradores:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "no se pudo conectar con Supabase",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+}
+
+
+
+
+
+
+
 
 
 async function abrirPanelAdmin() {
@@ -3367,11 +3553,12 @@ async function abrirPanelAdmin() {
 
 
 
-
 async function abrirPanelAdminSuperior() {
     actualizarValesVencidos();
 
     await cargarUsuariosParaAdministracion();
+
+    await cargarAdministradoresDesdeSupabase();
 
     await cargarProductosDesdeSupabase();
 
@@ -3381,7 +3568,6 @@ async function abrirPanelAdminSuperior() {
         "#pantallaAdminSuperior"
     );
 }
-
 
 
 
@@ -4081,6 +4267,11 @@ function renderizarCuentasAdminSuperior() {
     }
 }
 
+
+
+
+
+
 function renderizarAdministradoresAdminSuperior() {
     listaAdministradoresAdminSuperior.innerHTML =
         "";
@@ -4104,6 +4295,11 @@ function renderizarAdministradoresAdminSuperior() {
         const admin =
             administradores[i];
 
+        const idAdministradorSeguro =
+            JSON.stringify(
+                admin.id
+            );
+
         listaAdministradoresAdminSuperior.innerHTML += `
             <div class="item-admin-superior">
 
@@ -4125,14 +4321,14 @@ function renderizarAdministradoresAdminSuperior() {
 
                     <button
                         class="boton boton-chico"
-                        onclick="resetearContrasenaAdministrador(${admin.id})"
+                        onclick='resetearContrasenaAdministrador(${idAdministradorSeguro})'
                     >
                         resetear contraseña
                     </button>
 
                     <button
                         class="boton boton-peligro boton-chico"
-                        onclick="borrarAdministradorComun(${admin.id})"
+                        onclick='borrarAdministradorComun(${idAdministradorSeguro})'
                     >
                         borrar admin
                     </button>
@@ -4148,6 +4344,12 @@ function renderizarAdministradoresAdminSuperior() {
             '<p class="lista-vacia">no hay administradores comunes registrados</p>';
     }
 }
+
+
+
+
+
+
 
 function renderizarEstadisticasAdminSuperior() {
     let admins = 0;
@@ -5272,7 +5474,6 @@ function borrarAdministradorComun(
 
 
 
-
 async function crearAdministradorDesdePanelSuperior() {
     const inputUsuario =
         document.querySelector(
@@ -5414,71 +5615,6 @@ async function crearAdministradorDesdePanelSuperior() {
             return;
         }
 
-        const nuevoAdmin =
-            resultado.administrador;
-
-        let indiceAdmin = -1;
-
-        for (
-            let i = 0;
-            i < administradores.length;
-            i++
-        ) {
-            if (
-                administradores[i]
-                    .usuario
-                    .toLowerCase() ===
-                nuevoAdmin
-                    .usuario
-                    .toLowerCase()
-            ) {
-                indiceAdmin = i;
-                break;
-            }
-        }
-
-        if (indiceAdmin === -1) {
-            administradores.push({
-                id:
-                    nuevoAdmin.id,
-
-                tipo:
-                    "admin",
-
-                usuario:
-                    nuevoAdmin.usuario,
-
-                nombre:
-                    nuevoAdmin.nombre,
-
-                contrasena:
-                    "",
-
-                autenticacion:
-                    "supabase"
-            });
-        } else {
-            administradores[indiceAdmin] = {
-                id:
-                    nuevoAdmin.id,
-
-                tipo:
-                    "admin",
-
-                usuario:
-                    nuevoAdmin.usuario,
-
-                nombre:
-                    nuevoAdmin.nombre,
-
-                contrasena:
-                    "",
-
-                autenticacion:
-                    "supabase"
-            };
-        }
-
         inputUsuario.value =
             "";
 
@@ -5487,6 +5623,8 @@ async function crearAdministradorDesdePanelSuperior() {
 
         inputContrasena.value =
             "";
+
+        await cargarAdministradoresDesdeSupabase();
 
         renderizarTodoAdminSuperior();
 
