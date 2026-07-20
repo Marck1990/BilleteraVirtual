@@ -4700,9 +4700,184 @@ async function alternarBloqueoUsuario(
 
 
 
-function borrarUsuario(
+async function eliminarCuentaRealSupabase(
+    idCuenta
+) {
+    if (
+        typeof window.supabaseCliente ===
+        "undefined"
+    ) {
+        return {
+            correcto: false,
+
+            mensaje:
+                "el servicio de Supabase no está disponible"
+        };
+    }
+
+    try {
+        const respuestaSesion =
+            await window
+                .supabaseCliente
+                .auth
+                .getSession();
+
+        const sesionSupabase =
+            respuestaSesion
+                .data
+                ?.session;
+
+        if (
+            respuestaSesion.error ||
+            !sesionSupabase
+        ) {
+            return {
+                correcto: false,
+
+                mensaje:
+                    "la sesión no es válida"
+            };
+        }
+
+        const respuesta =
+            await fetch(
+                "/api/usuarios/eliminar-cuenta",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        Authorization:
+                            "Bearer " +
+                            sesionSupabase
+                                .access_token
+                    },
+
+                    body:
+                        JSON.stringify({
+                            usuarioId:
+                                idCuenta
+                        })
+                }
+            );
+
+        let resultado = {};
+
+        try {
+            resultado =
+                await respuesta.json();
+        } catch (error) {
+            resultado = {};
+        }
+
+        if (
+            !respuesta.ok ||
+            resultado.ok !== true
+        ) {
+            return {
+                correcto: false,
+
+                mensaje:
+                    resultado.mensaje ||
+                    "no se pudo eliminar la cuenta"
+            };
+        }
+
+        return {
+            correcto: true,
+
+            mensaje:
+                resultado.mensaje
+        };
+    } catch (error) {
+        console.error(
+            "Error al eliminar cuenta:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            mensaje:
+                "no se pudo conectar con el servidor"
+        };
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function borrarUsuario(
     idUsuario
 ) {
+    const usuario =
+        buscarUsuarioPorId(
+            idUsuario
+        );
+
+    if (usuario === null) {
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Seguro que querés eliminar la cuenta de " +
+            usuario.nombre +
+            "? Esta acción no se puede deshacer."
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    if (
+        usuario.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await eliminarCuentaRealSupabase(
+                usuario.id
+            );
+
+        if (!resultado.correcto) {
+            alert(
+                resultado.mensaje
+            );
+
+            return;
+        }
+
+        await cargarUsuariosParaAdministracion();
+
+        if (
+            sesion.tipo ===
+            "adminSuperior"
+        ) {
+            renderizarTodoAdminSuperior();
+        } else {
+            renderizarTodoAdmin();
+        }
+
+        alert(
+            "usuario eliminado correctamente"
+        );
+
+        return;
+    }
+
     for (
         let i = 0;
         i < usuarios.length;
@@ -4721,10 +4896,19 @@ function borrarUsuario(
         }
     }
 
-    guardarUsuarios(usuarios);
+    guardarUsuarios(
+        usuarios
+    );
 
     renderizarTodoAdmin();
 }
+
+
+
+
+
+
+
 
 
 async function agregarProducto() {
@@ -5377,10 +5561,101 @@ function resetearContrasenaDesdeAdminSuperior(
     renderizarTodoAdminSuperior();
 }
 
-function eliminarCuentaDesdeAdminSuperior(
+
+
+
+
+
+
+
+async function eliminarCuentaDesdeAdminSuperior(
     origen,
     idCuenta
 ) {
+    let cuenta = null;
+
+    if (origen === "usuarios") {
+        cuenta =
+            buscarUsuarioPorId(
+                idCuenta
+            );
+    } else {
+        cuenta =
+            buscarAdministradorPorId(
+                idCuenta
+            );
+    }
+
+    if (cuenta === null) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "la cuenta no fue encontrada",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        origen ===
+            "administradores" &&
+        cuenta.tipo ===
+            "adminSuperior"
+    ) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "no se puede eliminar una cuenta de admin superior",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Seguro que querés eliminar la cuenta de " +
+            cuenta.nombre +
+            "? Esta acción no se puede deshacer."
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    if (
+        cuenta.autenticacion ===
+        "supabase"
+    ) {
+        const resultado =
+            await eliminarCuentaRealSupabase(
+                cuenta.id
+            );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                resultado.mensaje,
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        await cargarUsuariosParaAdministracion();
+
+        await cargarAdministradoresDesdeSupabase();
+
+        renderizarTodoAdminSuperior();
+
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "cuenta eliminada correctamente",
+            "var(--color-exito)"
+        );
+
+        return;
+    }
+
     if (origen === "usuarios") {
         for (
             let i = 0;
@@ -5400,56 +5675,48 @@ function eliminarCuentaDesdeAdminSuperior(
             }
         }
 
-        guardarUsuarios(usuarios);
-
-        renderizarTodoAdminSuperior();
-
-        return;
-    }
-
-    const admin =
-        buscarAdministradorPorId(
-            idCuenta
+        guardarUsuarios(
+            usuarios
         );
-
-    if (
-        admin === null ||
-        admin.tipo ===
-            "adminSuperior"
-    ) {
-        mostrarMensaje(
-            mensajeAccionesAdminSuperior,
-            "no se puede eliminar una cuenta de admin superior",
-            "var(--color-error)"
-        );
-
-        return;
-    }
-
-    for (
-        let i = 0;
-        i < administradores.length;
-        i++
-    ) {
-        if (
-            administradores[i].id ===
-            idCuenta
+    } else {
+        for (
+            let i = 0;
+            i < administradores.length;
+            i++
         ) {
-            administradores.splice(
-                i,
-                1
-            );
+            if (
+                administradores[i].id ===
+                idCuenta
+            ) {
+                administradores.splice(
+                    i,
+                    1
+                );
 
-            break;
+                break;
+            }
         }
-    }
 
-    guardarAdministradores(
-        administradores
-    );
+        guardarAdministradores(
+            administradores
+        );
+    }
 
     renderizarTodoAdminSuperior();
+
+    mostrarMensaje(
+        mensajeAccionesAdminSuperior,
+        "cuenta local eliminada correctamente",
+        "var(--color-exito)"
+    );
 }
+
+
+
+
+
+
+
 
 function resetearContrasenaAdministrador(
     idAdministrador
@@ -5460,14 +5727,22 @@ function resetearContrasenaAdministrador(
     );
 }
 
-function borrarAdministradorComun(
+
+
+
+
+async function borrarAdministradorComun(
     idAdministrador
 ) {
-    eliminarCuentaDesdeAdminSuperior(
+    await eliminarCuentaDesdeAdminSuperior(
         "administradores",
         idAdministrador
     );
 }
+
+
+
+
 
 
 
