@@ -147,6 +147,21 @@ const pantallaInicio =
 const pantallaRegistro =
     document.querySelector("#pantallaRegistro");
 
+
+
+
+const pantallaCambioContrasena =
+    document.querySelector(
+        "#pantallaCambioContrasena"
+    );
+
+
+
+
+
+
+
+
 const pantallaBilletera =
     document.querySelector("#pantallaBilletera");
 
@@ -219,6 +234,41 @@ const botonVolverInicioDesdeRegistro =
 
 const mensajeRegistro =
     document.querySelector("#mensajeRegistro");
+
+
+
+
+
+// cambio obligatorio de contraseña
+
+const inputNuevaContrasenaObligatoria =
+    document.querySelector(
+        "#inputNuevaContrasenaObligatoria"
+    );
+
+const inputConfirmarContrasenaObligatoria =
+    document.querySelector(
+        "#inputConfirmarContrasenaObligatoria"
+    );
+
+const botonGuardarContrasenaObligatoria =
+    document.querySelector(
+        "#botonGuardarContrasenaObligatoria"
+    );
+
+const botonSalirCambioContrasena =
+    document.querySelector(
+        "#botonSalirCambioContrasena"
+    );
+
+const mensajeCambioContrasena =
+    document.querySelector(
+        "#mensajeCambioContrasena"
+    );
+
+
+
+
 
 // titular
 
@@ -412,10 +462,23 @@ function escuchar(
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
 function mostrarPantalla(idPantalla) {
     const pantallas = [
         pantallaInicio,
         pantallaRegistro,
+        pantallaCambioContrasena,
         pantallaBilletera,
         pantallaAdmin,
         pantallaAdminSuperior
@@ -443,6 +506,14 @@ function mostrarPantalla(idPantalla) {
     }
 }
 
+
+
+
+
+
+
+
+
 function mostrarMensaje(
     elemento,
     texto,
@@ -469,6 +540,7 @@ function limpiarMensajesPrincipales() {
     limpiarMensaje(mensajeRegistro);
     limpiarMensaje(mensajeCompra);
     limpiarMensaje(estadoTitular);
+    limpiarMensaje(mensajeCambioContrasena);
 
     limpiarMensaje(
         mensajeAdminSuperiorRegistro
@@ -486,6 +558,15 @@ function limpiarMensajesPrincipales() {
         mensajeAyudaAlumno
     );
 }
+
+
+
+
+
+
+
+
+
 
 function obtenerFechaActual() {
     return new Date().toLocaleString(
@@ -3017,6 +3098,11 @@ async function ingresarAlSistema() {
                 historial:
                     usuarioSupabase.historial,
 
+                debeCambiarContrasena:
+                    usuarioSupabase
+                        .debeCambiarContrasena ===
+                    true,
+
                 autenticacion:
                     "supabase"
             };
@@ -3063,6 +3149,14 @@ async function ingresarAlSistema() {
                 "supabase";
 
             carrito = [];
+
+            if (
+                usuarioAplicacion
+                    .debeCambiarContrasena
+            ) {
+                abrirCambioContrasenaObligatorio();
+                return;
+            }
 
             abrirBilletera();
 
@@ -3127,6 +3221,11 @@ async function ingresarAlSistema() {
                 contrasena:
                     "",
 
+                debeCambiarContrasena:
+                    usuarioSupabase
+                        .debeCambiarContrasena ===
+                    true,
+
                 autenticacion:
                     "supabase"
             };
@@ -3143,6 +3242,11 @@ async function ingresarAlSistema() {
             adminAplicacion.nombre =
                 usuarioSupabase.nombre;
 
+            adminAplicacion.debeCambiarContrasena =
+                usuarioSupabase
+                    .debeCambiarContrasena ===
+                true;
+
             adminAplicacion.autenticacion =
                 "supabase";
         }
@@ -3158,6 +3262,14 @@ async function ingresarAlSistema() {
 
         sesion.origen =
             "supabase";
+
+        if (
+            adminAplicacion
+                .debeCambiarContrasena
+        ) {
+            abrirCambioContrasenaObligatorio();
+            return;
+        }
 
         if (
             tipoAdministrador ===
@@ -3183,6 +3295,155 @@ async function ingresarAlSistema() {
             false;
     }
 }
+
+
+
+
+
+function abrirCambioContrasenaObligatorio() {
+    inputNuevaContrasenaObligatoria.value =
+        "";
+
+    inputConfirmarContrasenaObligatoria.value =
+        "";
+
+    limpiarMensaje(
+        mensajeCambioContrasena
+    );
+
+    mostrarPantalla(
+        "#pantallaCambioContrasena"
+    );
+}
+
+async function guardarContrasenaObligatoria() {
+    const nuevaContrasena =
+        inputNuevaContrasenaObligatoria
+            .value;
+
+    const confirmacion =
+        inputConfirmarContrasenaObligatoria
+            .value;
+
+    limpiarMensaje(
+        mensajeCambioContrasena
+    );
+
+    if (
+        nuevaContrasena.length < 6 ||
+        nuevaContrasena.length > 72
+    ) {
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "la contraseña debe tener entre 6 y 72 caracteres",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        nuevaContrasena !==
+        confirmacion
+    ) {
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "las contraseñas no coinciden",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    botonGuardarContrasenaObligatoria.disabled =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .usuariosRepository
+                .cambiarContrasenaObligatoria(
+                    nuevaContrasena
+                );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensajeCambioContrasena,
+                resultado.mensaje,
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        const usuarioActivo =
+            obtenerUsuarioActivo();
+
+        if (usuarioActivo !== null) {
+            usuarioActivo
+                .debeCambiarContrasena =
+                false;
+        }
+
+        const administradorActivo =
+            obtenerAdministradorActivo();
+
+        if (
+            administradorActivo !==
+            null
+        ) {
+            administradorActivo
+                .debeCambiarContrasena =
+                false;
+        }
+
+        inputNuevaContrasenaObligatoria.value =
+            "";
+
+        inputConfirmarContrasenaObligatoria.value =
+            "";
+
+        alert(
+            "contraseña actualizada correctamente"
+        );
+
+        if (
+            sesion.tipo ===
+            "titular"
+        ) {
+            await abrirBilletera();
+        } else if (
+            sesion.tipo ===
+            "adminSuperior"
+        ) {
+            await abrirPanelAdminSuperior();
+        } else {
+            await abrirPanelAdmin();
+        }
+    } catch (error) {
+        console.error(
+            "Error al guardar contraseña:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "no se pudo cambiar la contraseña",
+            "var(--color-error)"
+        );
+    } finally {
+        botonGuardarContrasenaObligatoria.disabled =
+            false;
+    }
+}
+
+
+
+
+
+
+
+
 
 function irARegistro() {
     limpiarMensajesPrincipales();
@@ -5952,6 +6213,21 @@ function mostrarSoporte() {
 // =======================================================
 // EVENTOS
 // =======================================================
+
+escuchar(
+    botonGuardarContrasenaObligatoria,
+    "click",
+    guardarContrasenaObligatoria
+);
+
+escuchar(
+    botonSalirCambioContrasena,
+    "click",
+    salirSistema
+);
+
+
+
 
 escuchar(
     botonIngresarSistema,
