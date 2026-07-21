@@ -147,6 +147,12 @@ const pantallaInicio =
 const pantallaRegistro =
     document.querySelector("#pantallaRegistro");
 
+
+    const pantallaCambioContrasena =
+    document.querySelector(
+        "#pantallaCambioContrasena"
+    );
+
 const pantallaBilletera =
     document.querySelector("#pantallaBilletera");
 
@@ -179,7 +185,45 @@ const botonSoporte =
 const mensajeInicio =
     document.querySelector("#mensajeInicio");
 
+
+
+// cambio obligatorio de contraseña
+
+const inputNuevaContrasenaObligatoria =
+    document.querySelector(
+        "#inputNuevaContrasenaObligatoria"
+    );
+
+const inputConfirmarContrasenaObligatoria =
+    document.querySelector(
+        "#inputConfirmarContrasenaObligatoria"
+    );
+
+const botonGuardarContrasenaObligatoria =
+    document.querySelector(
+        "#botonGuardarContrasenaObligatoria"
+    );
+
+const botonSalirCambioContrasena =
+    document.querySelector(
+        "#botonSalirCambioContrasena"
+    );
+
+const mensajeCambioContrasena =
+    document.querySelector(
+        "#mensajeCambioContrasena"
+    );
+
+
+
+
+
+
 // registro
+
+
+
+
 
 const selectTipoRegistro =
     document.querySelector("#selectTipoRegistro");
@@ -416,6 +460,7 @@ function mostrarPantalla(idPantalla) {
     const pantallas = [
         pantallaInicio,
         pantallaRegistro,
+        pantallaCambioContrasena,
         pantallaBilletera,
         pantallaAdmin,
         pantallaAdminSuperior
@@ -442,6 +487,15 @@ function mostrarPantalla(idPantalla) {
         );
     }
 }
+
+
+
+
+
+
+
+
+
 
 function mostrarMensaje(
     elemento,
@@ -471,6 +525,10 @@ function limpiarMensajesPrincipales() {
     limpiarMensaje(estadoTitular);
 
     limpiarMensaje(
+        mensajeCambioContrasena
+    );
+
+    limpiarMensaje(
         mensajeAdminSuperiorRegistro
     );
 
@@ -486,6 +544,9 @@ function limpiarMensajesPrincipales() {
         mensajeAyudaAlumno
     );
 }
+
+
+
 
 function obtenerFechaActual() {
     return new Date().toLocaleString(
@@ -2772,9 +2833,193 @@ async function registrarCuenta() {
         "var(--color-exito)"
     );
 }
+
+
 // =======================================================
 // LOGIN Y NAVEGACIÓN
 // =======================================================
+
+function abrirCambioContrasenaObligatorio() {
+    if (
+        inputNuevaContrasenaObligatoria !==
+        null
+    ) {
+        inputNuevaContrasenaObligatoria.value =
+            "";
+    }
+
+    if (
+        inputConfirmarContrasenaObligatoria !==
+        null
+    ) {
+        inputConfirmarContrasenaObligatoria.value =
+            "";
+    }
+
+    limpiarMensaje(
+        mensajeCambioContrasena
+    );
+
+    mostrarPantalla(
+        "#pantallaCambioContrasena"
+    );
+}
+
+async function guardarCambioContrasenaObligatorio() {
+    const nuevaContrasena =
+        inputNuevaContrasenaObligatoria
+            .value
+            .trim();
+
+    const confirmacion =
+        inputConfirmarContrasenaObligatoria
+            .value
+            .trim();
+
+    limpiarMensaje(
+        mensajeCambioContrasena
+    );
+
+    if (
+        nuevaContrasena === "" ||
+        confirmacion === ""
+    ) {
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "completá los dos campos",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        nuevaContrasena.length < 6 ||
+        nuevaContrasena.length > 72
+    ) {
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "la contraseña debe tener entre 6 y 72 caracteres",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        nuevaContrasena !==
+        confirmacion
+    ) {
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "las contraseñas no coinciden",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        typeof window.usuariosRepository ===
+            "undefined" ||
+        typeof window
+            .usuariosRepository
+            .cambiarContrasenaObligatoria !==
+            "function"
+    ) {
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "el servicio de cambio de contraseña no está disponible",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    botonGuardarContrasenaObligatoria.disabled =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .usuariosRepository
+                .cambiarContrasenaObligatoria(
+                    nuevaContrasena
+                );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensajeCambioContrasena,
+                resultado.mensaje ||
+                    "no se pudo cambiar la contraseña",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        const usuarioActivo =
+            obtenerUsuarioActivo();
+
+        if (usuarioActivo !== null) {
+            usuarioActivo
+                .debeCambiarContrasena =
+                false;
+        }
+
+        const administradorActivo =
+            obtenerAdministradorActivo();
+
+        if (
+            administradorActivo !==
+            null
+        ) {
+            administradorActivo
+                .debeCambiarContrasena =
+                false;
+        }
+
+        inputNuevaContrasenaObligatoria.value =
+            "";
+
+        inputConfirmarContrasenaObligatoria.value =
+            "";
+
+        if (
+            sesion.tipo ===
+            "titular"
+        ) {
+            await abrirBilletera();
+        } else if (
+            sesion.tipo ===
+            "adminSuperior"
+        ) {
+            await abrirPanelAdminSuperior();
+        } else if (
+            sesion.tipo ===
+            "admin"
+        ) {
+            await abrirPanelAdmin();
+        }
+    } catch (error) {
+        console.error(
+            "Error al cambiar contraseña:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeCambioContrasena,
+            "no se pudo conectar con el servidor",
+            "var(--color-error)"
+        );
+    } finally {
+        botonGuardarContrasenaObligatoria.disabled =
+            false;
+    }
+}
+
+
+
 
 async function ingresarAlSistema() {
     const nombreUsuario =
@@ -2848,9 +3093,9 @@ async function ingresarAlSistema() {
                 adminLocal.tipo ===
                 "adminSuperior"
             ) {
-                abrirPanelAdminSuperior();
+                await abrirPanelAdminSuperior();
             } else {
-                abrirPanelAdmin();
+                await abrirPanelAdmin();
             }
 
             return;
@@ -2903,7 +3148,7 @@ async function ingresarAlSistema() {
 
             carrito = [];
 
-            abrirBilletera();
+            await abrirBilletera();
 
             return;
         }
@@ -3018,7 +3263,12 @@ async function ingresarAlSistema() {
                     usuarioSupabase.historial,
 
                 autenticacion:
-                    "supabase"
+                    "supabase",
+
+                debeCambiarContrasena:
+                    usuarioSupabase
+                        .debeCambiarContrasena ===
+                    true
             };
 
             let indiceUsuario = -1;
@@ -3064,7 +3314,16 @@ async function ingresarAlSistema() {
 
             carrito = [];
 
-            abrirBilletera();
+            if (
+                usuarioAplicacion
+                    .debeCambiarContrasena
+            ) {
+                abrirCambioContrasenaObligatorio();
+
+                return;
+            }
+
+            await abrirBilletera();
 
             return;
         }
@@ -3113,12 +3372,13 @@ async function ingresarAlSistema() {
         if (adminAplicacion === null) {
             adminAplicacion = {
                 id:
-                    siguienteIdAdmin,
+                    usuarioSupabase.id,
 
                 tipo:
                     tipoAdministrador,
 
                 usuario:
+                    usuarioSupabase.usuario ||
                     nombreUsuario,
 
                 nombre:
@@ -3128,23 +3388,39 @@ async function ingresarAlSistema() {
                     "",
 
                 autenticacion:
-                    "supabase"
+                    "supabase",
+
+                debeCambiarContrasena:
+                    usuarioSupabase
+                        .debeCambiarContrasena ===
+                    true
             };
 
             administradores.push(
                 adminAplicacion
             );
-
-            siguienteIdAdmin++;
         } else {
+            adminAplicacion.id =
+                usuarioSupabase.id;
+
             adminAplicacion.tipo =
                 tipoAdministrador;
+
+            adminAplicacion.usuario =
+                usuarioSupabase.usuario ||
+                nombreUsuario;
 
             adminAplicacion.nombre =
                 usuarioSupabase.nombre;
 
             adminAplicacion.autenticacion =
                 "supabase";
+
+            adminAplicacion
+                .debeCambiarContrasena =
+                usuarioSupabase
+                    .debeCambiarContrasena ===
+                true;
         }
 
         sesion.tipo =
@@ -3160,12 +3436,21 @@ async function ingresarAlSistema() {
             "supabase";
 
         if (
+            adminAplicacion
+                .debeCambiarContrasena
+        ) {
+            abrirCambioContrasenaObligatorio();
+
+            return;
+        }
+
+        if (
             tipoAdministrador ===
             "adminSuperior"
         ) {
-            abrirPanelAdminSuperior();
+            await abrirPanelAdminSuperior();
         } else {
-            abrirPanelAdmin();
+            await abrirPanelAdmin();
         }
     } catch (error) {
         console.error(
@@ -3183,6 +3468,9 @@ async function ingresarAlSistema() {
             false;
     }
 }
+
+
+
 
 function irARegistro() {
     limpiarMensajesPrincipales();
@@ -5952,6 +6240,21 @@ function mostrarSoporte() {
 // =======================================================
 // EVENTOS
 // =======================================================
+
+
+escuchar(
+    botonGuardarContrasenaObligatoria,
+    "click",
+    guardarCambioContrasenaObligatorio
+);
+
+escuchar(
+    botonSalirCambioContrasena,
+    "click",
+    salirSistema
+);
+
+
 
 escuchar(
     botonIngresarSistema,

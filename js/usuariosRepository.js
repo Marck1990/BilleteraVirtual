@@ -90,6 +90,18 @@ async function cambiarBloqueoRepositorio(
     );
 }
 
+async function cambiarContrasenaObligatoriaRepositorio(
+    nuevaContrasena
+) {
+    const adaptador =
+        obtenerAdaptadorUsuarios();
+
+    return await adaptador
+        .cambiarContrasenaObligatoria(
+            nuevaContrasena
+        );
+}
+
 window.usuariosRepository = {
     crearTitular:
         crearTitularRepositorio,
@@ -110,5 +122,8 @@ window.usuariosRepository = {
         modificarSaldoRepositorio,
 
     cambiarBloqueo:
-        cambiarBloqueoRepositorio
+        cambiarBloqueoRepositorio,
+
+    cambiarContrasenaObligatoria:
+        cambiarContrasenaObligatoriaRepositorio
 };

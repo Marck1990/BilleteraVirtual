@@ -442,6 +442,37 @@ async function iniciarSesionSupabase(
             };
         }
 
+        const resultadoEstado =
+            await cliente.rpc(
+                "obtener_estado_cambio_contrasena"
+            );
+
+        if (
+            resultadoEstado.error ||
+            resultadoEstado.data === null ||
+            resultadoEstado.data.resultado !==
+                "correcto"
+        ) {
+            await cliente
+                .auth
+                .signOut();
+
+            return {
+                correcto: false,
+
+                mensaje:
+                    "no se pudo verificar el estado de la contraseña"
+            };
+        }
+
+        resultadoBilletera
+            .usuario
+            .debeCambiarContrasena =
+            resultadoEstado
+                .data
+                .debe_cambiar_contrasena ===
+            true;
+
         return {
             correcto: true,
 
@@ -465,6 +496,16 @@ async function iniciarSesionSupabase(
         };
     }
 }
+
+
+
+
+
+
+
+
+
+
 
 async function cerrarSesionSupabase() {
     try {
@@ -864,6 +905,99 @@ async function cambiarBloqueoSupabase(
     }
 }
 
+
+
+
+
+async function cambiarContrasenaObligatoriaSupabase(
+    nuevaContrasena
+) {
+    if (
+        typeof nuevaContrasena !==
+            "string" ||
+        nuevaContrasena.length < 6 ||
+        nuevaContrasena.length > 72
+    ) {
+        return {
+            correcto: false,
+
+            mensaje:
+                "la nueva contraseña debe tener entre 6 y 72 caracteres"
+        };
+    }
+
+    try {
+        const cliente =
+            obtenerClienteUsuariosSupabase();
+
+        const respuestaCambio =
+            await cliente
+                .auth
+                .updateUser({
+                    password:
+                        nuevaContrasena
+                });
+
+        if (respuestaCambio.error) {
+            return {
+                correcto: false,
+
+                mensaje:
+                    respuestaCambio
+                        .error
+                        .message ||
+                    "no se pudo cambiar la contraseña"
+            };
+        }
+
+        const respuestaConfirmacion =
+            await cliente.rpc(
+                "confirmar_cambio_contrasena"
+            );
+
+        if (
+            respuestaConfirmacion.error ||
+            respuestaConfirmacion.data ===
+                null ||
+            respuestaConfirmacion
+                .data
+                .resultado !==
+                "actualizado_correctamente"
+        ) {
+            return {
+                correcto: false,
+
+                mensaje:
+                    "la contraseña cambió, pero no se pudo confirmar el proceso"
+            };
+        }
+
+        return {
+            correcto: true,
+
+            mensaje:
+                "contraseña actualizada correctamente"
+        };
+    } catch (error) {
+        console.error(
+            "Error al cambiar contraseña:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            mensaje:
+                "no se pudo conectar con Supabase"
+        };
+    }
+}
+
+
+
+
+
+
 // =======================================================
 // API PÚBLICA DEL ADAPTADOR
 // =======================================================
@@ -888,5 +1022,8 @@ window.usuariosSupabaseAdapter = {
         modificarSaldoSupabase,
 
     cambiarBloqueo:
-        cambiarBloqueoSupabase
+        cambiarBloqueoSupabase,
+
+    cambiarContrasenaObligatoria:
+        cambiarContrasenaObligatoriaSupabase
 };
