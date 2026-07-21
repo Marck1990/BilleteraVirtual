@@ -325,6 +325,89 @@
             </div>
         </section>
 
+
+
+<!-- =======================================================
+     CAMBIO OBLIGATORIO DE CONTRASEÑA
+======================================================== -->
+
+<section
+    id="pantallaCambioContrasena"
+    class="pantalla oculto"
+>
+    <div class="contenedor-secundario">
+
+        <article class="tarjeta-formulario">
+
+            <h2 class="titulo-seccion">
+                cambiar contraseña
+            </h2>
+
+            <p class="texto-suave">
+                debés crear una contraseña nueva antes de continuar
+            </p>
+
+            <label
+                for="inputNuevaContrasenaObligatoria"
+                class="etiqueta-control"
+            >
+                nueva contraseña
+            </label>
+
+            <input
+                type="password"
+                id="inputNuevaContrasenaObligatoria"
+                class="input-control"
+                placeholder="mínimo 6 caracteres"
+                autocomplete="new-password"
+            >
+
+            <label
+                for="inputConfirmarContrasenaObligatoria"
+                class="etiqueta-control"
+            >
+                confirmar contraseña
+            </label>
+
+            <input
+                type="password"
+                id="inputConfirmarContrasenaObligatoria"
+                class="input-control"
+                placeholder="repetir contraseña"
+                autocomplete="new-password"
+            >
+
+            <div class="acciones-formulario">
+
+                <button
+                    type="button"
+                    id="botonGuardarContrasenaObligatoria"
+                    class="boton"
+                >
+                    guardar contraseña
+                </button>
+
+                <button
+                    type="button"
+                    id="botonSalirCambioContrasena"
+                    class="boton boton-secundario"
+                >
+                    cerrar sesión
+                </button>
+
+            </div>
+
+            <p
+                id="mensajeCambioContrasena"
+                class="mensaje"
+                aria-live="polite"
+            ></p>
+
+        </article>
+
+    </div>
+</section>
+
         <!-- =======================================================
              BILLETERA DEL TITULAR
         ======================================================== -->
