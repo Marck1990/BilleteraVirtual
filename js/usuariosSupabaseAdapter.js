@@ -578,7 +578,12 @@ async function obtenerMiBilleteraSupabase() {
                     true,
 
                 historial:
-                    movimientos
+                    movimientos,
+
+                debeCambiarContrasena:
+                    perfil
+                        .debe_cambiar_contrasena ===
+                    true
             }
         };
     } catch (error) {
