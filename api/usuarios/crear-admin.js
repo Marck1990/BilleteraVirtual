@@ -459,14 +459,14 @@ export default async function handler(
         }
 
         if (
-            contrasena.length < 3 ||
+            contrasena.length < 6 ||
             contrasena.length > 72
         ) {
             return res.status(400).json({
                 ok: false,
 
                 mensaje:
-                    "la contraseña debe tener entre 3 y 72 caracteres"
+                   "la contraseña debe tener entre 6 y 72 caracteres"
             });
         }
 
@@ -641,7 +641,7 @@ export default async function handler(
                                     "admin",
 
                                 debe_cambiar_contrasena:
-                                    true
+                                    false
                             }
                         })
                 }
@@ -836,7 +836,7 @@ export default async function handler(
                     body:
                         JSON.stringify({
                             debe_cambiar_contrasena:
-                                true
+                                false
                         })
                 }
             );
@@ -860,7 +860,7 @@ export default async function handler(
             perfilActualizado === null ||
             perfilActualizado
                 .debe_cambiar_contrasena !==
-                true
+                false
         ) {
             console.error(
                 "Error al marcar contraseña temporal:",
@@ -915,7 +915,7 @@ export default async function handler(
                     false,
 
                 debeCambiarContrasena:
-                    true,
+                    false,
 
                 autenticacion:
                     "supabase"
