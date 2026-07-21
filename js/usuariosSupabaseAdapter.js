@@ -869,6 +869,102 @@ async function cambiarBloqueoSupabase(
     }
 }
 
+
+
+
+
+
+// =======================================================
+// CAMBIO OBLIGATORIO DE CONTRASEÑA
+// =======================================================
+
+async function cambiarContrasenaObligatoriaSupabase(
+    nuevaContrasena
+) {
+    if (
+        typeof nuevaContrasena !==
+            "string" ||
+        nuevaContrasena.length < 6 ||
+        nuevaContrasena.length > 72
+    ) {
+        return {
+            correcto: false,
+
+            mensaje:
+                "la contraseña debe tener entre 6 y 72 caracteres"
+        };
+    }
+
+    try {
+        const cliente =
+            obtenerClienteUsuariosSupabase();
+
+        const respuestaCambio =
+            await cliente
+                .auth
+                .updateUser({
+                    password:
+                        nuevaContrasena
+                });
+
+        if (respuestaCambio.error) {
+            return {
+                correcto: false,
+
+                mensaje:
+                    respuestaCambio
+                        .error
+                        .message ||
+                    "no se pudo cambiar la contraseña"
+            };
+        }
+
+        const respuestaConfirmacion =
+            await cliente.rpc(
+                "confirmar_cambio_contrasena"
+            );
+
+        if (
+            respuestaConfirmacion.error ||
+            respuestaConfirmacion.data ===
+                null ||
+            respuestaConfirmacion
+                .data
+                .resultado !==
+                "actualizado_correctamente"
+        ) {
+            return {
+                correcto: false,
+
+                mensaje:
+                    "la contraseña cambió, pero no se pudo completar la confirmación"
+            };
+        }
+
+        return {
+            correcto: true,
+
+            mensaje:
+                "contraseña actualizada correctamente"
+        };
+    } catch (error) {
+        console.error(
+            "Error al cambiar contraseña:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            mensaje:
+                "no se pudo conectar con Supabase"
+        };
+    }
+}
+
+
+
+
 // =======================================================
 // API PÚBLICA DEL ADAPTADOR
 // =======================================================
@@ -893,5 +989,8 @@ window.usuariosSupabaseAdapter = {
         modificarSaldoSupabase,
 
     cambiarBloqueo:
-        cambiarBloqueoSupabase
+        cambiarBloqueoSupabase,
+
+    cambiarContrasenaObligatoria:
+        cambiarContrasenaObligatoriaSupabase
 };
