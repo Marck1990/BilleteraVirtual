@@ -4066,7 +4066,7 @@ function renderizarAdministradorActivo() {
     textoAdminActual.textContent =
         admin === null
             ? "sin administrador activo"
-            : "administrador activo: " +
+            : "Hola!! Bienvenido!!! <br> administrador activo: " +
               admin.nombre +
               " (" +
               admin.usuario +
