@@ -13,8 +13,19 @@
     --color-advertencia: #d97706;
     --color-saldo: #0f766e;
 
+    --color-verde-inicio: #315b20;
+    --color-verde-inicio-hover: #264818;
+    --color-verde-claro: #7d9e58;
+    --color-crema-inicio: #fffdf6;
+    --color-borde-inicio: #ded8c8;
+    --color-texto-inicio: #21351b;
+    --color-texto-suave-inicio: #6b7365;
+
     --sombra-panel:
         0 12px 30px rgba(15, 23, 42, 0.08);
+
+    --sombra-inicio:
+        0 18px 42px rgba(73, 79, 55, 0.12);
 
     --radio-grande: 20px;
     --radio-base: 14px;
@@ -97,6 +108,640 @@ canvas {
 
 .oculto {
     display: none !important;
+}
+
+/* =======================================================
+   NUEVA PANTALLA PROFESIONAL DE INICIO
+======================================================= */
+
+#pantallaInicio {
+    position: relative;
+
+    min-height: 100vh;
+
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+
+    background:
+        linear-gradient(
+            180deg,
+            #fffdf8 0%,
+            #f8f6ed 65%,
+            #eef0df 100%
+        );
+}
+
+#pantallaInicio::before {
+    content: "";
+
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    height: 250px;
+
+    background-image:
+        linear-gradient(
+            to top,
+            rgba(255, 253, 246, 0.05),
+            rgba(255, 253, 246, 0.92)
+        ),
+        url("img/fondo _tarjeta.png");
+
+    background-size: cover;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+
+    opacity: 0.72;
+
+    pointer-events: none;
+}
+
+#pantallaInicio::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            circle at 16% 14%,
+            rgba(202, 218, 173, 0.22),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 86% 22%,
+            rgba(241, 220, 158, 0.16),
+            transparent 25%
+        );
+
+    pointer-events: none;
+}
+
+#pantallaInicio .contenedor-inicio {
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+    max-width: 1340px;
+    min-height: auto;
+
+    margin: 0 auto;
+
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1.45fr)
+        minmax(330px, 0.85fr);
+
+    gap: 56px;
+    align-items: center;
+}
+
+#pantallaInicio .panel-izquierdo,
+#pantallaInicio .panel-derecho {
+    background:
+        rgba(
+            255,
+            253,
+            247,
+            0.94
+        );
+
+    border:
+        1px solid
+        var(--color-borde-inicio);
+
+    box-shadow:
+        var(--sombra-inicio);
+
+    backdrop-filter:
+        blur(10px);
+}
+
+#pantallaInicio .panel-izquierdo {
+    min-height: 620px;
+
+    padding:
+        clamp(
+            34px,
+            5vw,
+            58px
+        );
+
+    gap: 30px;
+
+    border-radius: 26px;
+}
+
+#pantallaInicio .panel-derecho {
+    min-height: 470px;
+
+    padding:
+        34px;
+
+    gap: 28px;
+
+    border-radius: 26px;
+}
+
+/* =======================================================
+   MARCA DEL INICIO
+======================================================= */
+
+.marca-inicio {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+
+.logo-inicio {
+    width: 92px;
+    height: 92px;
+
+    flex-shrink: 0;
+
+    display: grid;
+    place-items: center;
+
+    color:
+        var(--color-verde-claro);
+}
+
+.logo-inicio svg {
+    width: 100%;
+    height: 100%;
+
+    fill: none;
+
+    stroke:
+        currentColor;
+
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#pantallaInicio .titulo-app {
+    margin: 0;
+
+    color:
+        var(--color-texto-inicio);
+
+    font-family:
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    font-size:
+        clamp(
+            2.1rem,
+            4vw,
+            3.25rem
+        );
+
+    font-weight: 700;
+    line-height: 1.05;
+}
+
+#pantallaInicio .subtitulo-app {
+    margin-top: 8px;
+
+    color:
+        var(--color-texto-suave-inicio);
+
+    font-size:
+        clamp(
+            0.95rem,
+            1.8vw,
+            1.12rem
+        );
+}
+
+/* =======================================================
+   FORMULARIO DE ACCESO
+======================================================= */
+
+#pantallaInicio .tarjeta-acceso {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.encabezado-acceso {
+    margin-bottom: 8px;
+}
+
+.encabezado-acceso .titulo-seccion {
+    color:
+        var(--color-texto-inicio);
+
+    font-size:
+        clamp(
+            1.55rem,
+            3vw,
+            2rem
+        );
+}
+
+.encabezado-acceso span {
+    width: 48px;
+    height: 4px;
+
+    margin-top: 12px;
+
+    display: block;
+
+    background:
+        var(--color-verde-claro);
+
+    border-radius: 999px;
+}
+
+#pantallaInicio .etiqueta-control {
+    margin-top: 8px;
+
+    color:
+        var(--color-texto-inicio);
+
+    font-size: 1rem;
+}
+
+.campo-inicio {
+    position: relative;
+
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+}
+
+.campo-inicio > svg:first-child {
+    position: absolute;
+    left: 18px;
+    z-index: 2;
+
+    width: 24px;
+    height: 24px;
+
+    color:
+        #6d913f;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    pointer-events: none;
+}
+
+#pantallaInicio .campo-inicio .input-control {
+    min-height: 60px;
+
+    padding:
+        15px 52px;
+
+    color:
+        var(--color-texto-inicio);
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.72
+        );
+
+    border:
+        1px solid
+        #d8d4c8;
+
+    border-radius: 14px;
+
+    font-size: 1rem;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+#pantallaInicio .campo-inicio .input-control::placeholder {
+    color:
+        #858b82;
+}
+
+#pantallaInicio .campo-inicio .input-control:focus {
+    background-color:
+        #ffffff;
+
+    border-color:
+        var(--color-verde-claro);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(
+            125,
+            158,
+            88,
+            0.15
+        );
+}
+
+.icono-ojo-inicio {
+    position: absolute;
+    right: 18px;
+
+    width: 23px;
+    height: 23px;
+
+    color:
+        #788079;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    pointer-events: none;
+}
+
+.acciones-acceso-inicio {
+    margin-top: 12px;
+
+    display: grid !important;
+    grid-template-columns:
+        minmax(130px, 1fr)
+        minmax(130px, 1fr);
+
+    gap: 16px !important;
+}
+
+#pantallaInicio .acciones-acceso-inicio .boton {
+    min-height: 58px;
+
+    border-radius: 13px;
+
+    font-size: 1.05rem;
+}
+
+#pantallaInicio #botonIngresarSistema {
+    color:
+        #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #3d6b25 0%,
+            #2b571c 100%
+        );
+
+    border:
+        1px solid
+        #315a21;
+
+    box-shadow:
+        0 8px 18px
+        rgba(
+            49,
+            91,
+            32,
+            0.22
+        );
+}
+
+#pantallaInicio #botonIngresarSistema:hover {
+    background:
+        linear-gradient(
+            135deg,
+            #315a20 0%,
+            #234716 100%
+        );
+
+    transform:
+        translateY(-1px);
+}
+
+#pantallaInicio #botonIrRegistro {
+    color:
+        var(--color-verde-inicio);
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.45
+        );
+
+    border:
+        1px solid
+        #578044;
+}
+
+#pantallaInicio #botonIrRegistro:hover {
+    color:
+        #ffffff;
+
+    background:
+        var(--color-verde-inicio);
+}
+
+#pantallaInicio #mensajeInicio {
+    margin-top: 4px;
+}
+
+/* =======================================================
+   ENLACES INFERIORES DEL INICIO
+======================================================= */
+
+#pantallaInicio .acciones-inferiores {
+    margin-top: auto;
+
+    padding-top: 22px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+
+    border-top:
+        1px solid
+        #ded9ca;
+}
+
+#pantallaInicio .enlace-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    color:
+        #2563c7;
+
+    font-size: 0.98rem;
+}
+
+#pantallaInicio .enlace-boton svg {
+    width: 21px;
+    height: 21px;
+
+    color:
+        #68767f;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.separador-enlaces-inicio {
+    width: 1px;
+    height: 28px;
+
+    background-color:
+        #d9d4c6;
+}
+
+/* =======================================================
+   PANEL DEL QR DEL INICIO
+======================================================= */
+
+.icono-movil-inicio {
+    width: 64px;
+    height: 64px;
+
+    display: grid;
+    place-items: center;
+
+    color:
+        var(--color-verde-inicio);
+
+    background:
+        #edf1df;
+
+    border-radius: 50%;
+}
+
+.icono-movil-inicio svg {
+    width: 27px;
+    height: 27px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#pantallaInicio .contenedor-qr {
+    width: min(
+        100%,
+        300px
+    );
+
+    padding: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color:
+        #fffefa;
+
+    border:
+        1px solid
+        #ddd7c7;
+
+    border-radius: 20px;
+
+    box-shadow:
+        inset 0 0 0 1px
+        rgba(
+            255,
+            255,
+            255,
+            0.7
+        );
+
+    text-decoration: none;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+#pantallaInicio .contenedor-qr:hover {
+    transform:
+        translateY(-3px);
+
+    box-shadow:
+        0 14px 26px
+        rgba(
+            65,
+            75,
+            55,
+            0.12
+        );
+}
+
+.imagen-qr-app {
+    width: 100%;
+    max-width: 245px;
+    height: auto;
+
+    display: block;
+
+    image-rendering:
+        pixelated;
+}
+
+.pie-qr-inicio {
+    width: 100%;
+    max-width: 330px;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pie-qr-inicio::before {
+    content: "";
+
+    position: absolute;
+}
+
+.pie-qr-inicio svg {
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    color:
+        #628a45;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+#pantallaInicio .texto-panel {
+    color:
+        #394537;
+
+    font-size: 1rem;
+    line-height: 1.45;
+}
+
+#pantallaInicio .texto-panel strong {
+    color:
+        #24391d;
 }
 
 /* =======================================================
@@ -419,42 +1064,6 @@ textarea.input-control {
 .texto-normal,
 .texto-panel {
     line-height: 1.5;
-}
-
-/* =======================================================
-   QR DECORATIVO DE INICIO
-======================================================= */
-
-.contenedor-qr {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.codigo-qr {
-    width: 180px;
-    height: 180px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    color:
-        var(--color-texto-suave);
-
-    background-color:
-        #f8fbff;
-
-    border:
-        3px dashed
-        var(--color-borde);
-
-    border-radius:
-        var(--radio-base);
-
-    font-size: 1.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
 }
 
 /* =======================================================
@@ -1335,6 +1944,31 @@ textarea.input-control {
 and (
     max-width: 1450px
 ) {
+    #pantallaInicio .contenedor-inicio {
+        max-width: 1180px;
+
+        grid-template-columns:
+            minmax(0, 1.35fr)
+            minmax(300px, 0.8fr);
+
+        gap: 34px;
+    }
+
+    #pantallaInicio .panel-izquierdo {
+        min-height: 570px;
+        padding: 36px;
+    }
+
+    #pantallaInicio .panel-derecho {
+        min-height: 430px;
+        padding: 28px;
+    }
+
+    .logo-inicio {
+        width: 74px;
+        height: 74px;
+    }
+
     .layout-alumno {
         grid-template-columns:
             230px
@@ -1461,9 +2095,39 @@ and (
 
     #pantallaInicio,
     #pantallaRegistro,
+    #pantallaCambioContrasena,
     #pantallaAdmin,
     #pantallaAdminSuperior {
         padding: 18px;
+    }
+
+    #pantallaInicio {
+        align-items: flex-start;
+    }
+
+    #pantallaInicio::before {
+        height: 200px;
+        opacity: 0.5;
+    }
+
+    #pantallaInicio .contenedor-inicio {
+        min-height: auto;
+
+        grid-template-columns: 1fr;
+
+        gap: 22px;
+    }
+
+    #pantallaInicio .panel-izquierdo {
+        min-height: auto;
+    }
+
+    #pantallaInicio .panel-derecho {
+        min-height: auto;
+    }
+
+    #pantallaInicio .contenedor-qr {
+        max-width: 280px;
     }
 
     .layout-alumno {
@@ -1506,6 +2170,77 @@ and (
 @media (
     max-width: 600px
 ) {
+    #pantallaInicio {
+        padding: 12px;
+    }
+
+    #pantallaInicio .panel-izquierdo,
+    #pantallaInicio .panel-derecho {
+        padding: 24px;
+
+        border-radius: 22px;
+    }
+
+    .marca-inicio {
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .logo-inicio {
+        width: 58px;
+        height: 58px;
+    }
+
+    #pantallaInicio .titulo-app {
+        font-size:
+            clamp(
+                1.65rem,
+                8vw,
+                2.2rem
+            );
+    }
+
+    #pantallaInicio .subtitulo-app {
+        font-size: 0.9rem;
+    }
+
+    .acciones-acceso-inicio {
+        grid-template-columns: 1fr;
+    }
+
+    #pantallaInicio .acciones-inferiores {
+        align-items: flex-start;
+        flex-wrap: wrap;
+
+        gap: 14px;
+    }
+
+    .separador-enlaces-inicio {
+        display: none;
+    }
+
+    #pantallaInicio .enlace-boton {
+        width: 100%;
+    }
+
+    #pantallaInicio .panel-derecho {
+        padding:
+            28px 20px;
+    }
+
+    .icono-movil-inicio {
+        width: 56px;
+        height: 56px;
+    }
+
+    .pie-qr-inicio {
+        justify-content: center;
+    }
+
+    #pantallaInicio .texto-panel {
+        font-size: 0.95rem;
+    }
+
     .panel-izquierdo,
     .panel-derecho,
     .tarjeta,
@@ -1633,9 +2368,47 @@ and (
 ) {
     #pantallaInicio,
     #pantallaRegistro,
+    #pantallaCambioContrasena,
     #pantallaAdmin,
     #pantallaAdminSuperior {
         padding: 10px;
+    }
+
+    #pantallaInicio .panel-izquierdo,
+    #pantallaInicio .panel-derecho {
+        padding: 19px;
+    }
+
+    .logo-inicio {
+        width: 48px;
+        height: 48px;
+    }
+
+    #pantallaInicio .titulo-app {
+        font-size: 1.55rem;
+    }
+
+    #pantallaInicio .campo-inicio .input-control {
+        min-height: 54px;
+
+        padding-left: 46px;
+        padding-right: 44px;
+
+        font-size: 0.92rem;
+    }
+
+    .campo-inicio > svg:first-child {
+        left: 14px;
+
+        width: 21px;
+        height: 21px;
+    }
+
+    .icono-ojo-inicio {
+        right: 14px;
+
+        width: 21px;
+        height: 21px;
     }
 
     .contenido-alumno {
@@ -1698,13 +2471,9 @@ and (
     }
 }
 
-
-
-
-/* AJUSTE DE TARJETA CON LETRAS QUE SE SOLAPAN EN RESOLUCIONES PEQUEÑAS */
-
-
-/* corrección definitiva del texto sobre el chip */
+/* =======================================================
+   AJUSTE DE TARJETA EN RESOLUCIONES PEQUEÑAS
+======================================================= */
 
 .tarjeta-estudiantil {
     container-type: inline-size;
@@ -1716,25 +2485,29 @@ and (
 
     white-space: nowrap;
 
-    font-size: clamp(
-        6px,
-        3.3cqw,
-        22px
-    ) !important;
+    font-size:
+        clamp(
+            6px,
+            3.3cqw,
+            22px
+        ) !important;
 
     line-height: 1.1 !important;
 
-    letter-spacing: clamp(
-        0.2px,
-        0.15cqw,
-        1px
-    ) !important;
+    letter-spacing:
+        clamp(
+            0.2px,
+            0.15cqw,
+            1px
+        ) !important;
 
     position: relative;
     top: -10px;
 }
 
-@media (max-width: 600px) {
+@media (
+    max-width: 600px
+) {
     .tarjeta-estudiantil-superior p {
         top: -7px;
     }
