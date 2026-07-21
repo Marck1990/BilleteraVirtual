@@ -5759,7 +5759,13 @@ async function alternarBloqueoDesdeAdminSuperior(
     renderizarTodoAdminSuperior();
 }
 
-function resetearContrasenaDesdeAdminSuperior(
+
+
+
+
+
+
+async function resetearContrasenaDesdeAdminSuperior(
     origen,
     idCuenta
 ) {
@@ -5778,16 +5784,18 @@ function resetearContrasenaDesdeAdminSuperior(
     }
 
     if (cuenta === null) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "la cuenta no fue encontrada",
+            "var(--color-error)"
+        );
+
         return;
     }
 
     if (
-        origen ===
-            "administradores" &&
-
-        cuenta.tipo ===
-            "adminSuperior" &&
-
+        origen === "administradores" &&
+        cuenta.tipo === "adminSuperior" &&
         !esAdministradorSuperiorPropio(
             origen,
             idCuenta
@@ -5802,11 +5810,141 @@ function resetearContrasenaDesdeAdminSuperior(
         return;
     }
 
+    const confirmado =
+        confirm(
+            "¿Resetear la contraseña de " +
+            cuenta.nombre +
+            " a cambio321?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    // ===================================================
+    // CUENTA REAL DE SUPABASE
+    // ===================================================
+
+    if (
+        cuenta.autenticacion ===
+        "supabase"
+    ) {
+        try {
+            const respuestaSesion =
+                await window
+                    .supabaseCliente
+                    .auth
+                    .getSession();
+
+            const sesionSupabase =
+                respuestaSesion
+                    .data
+                    ?.session;
+
+            if (
+                respuestaSesion.error ||
+                !sesionSupabase
+            ) {
+                mostrarMensaje(
+                    mensajeAccionesAdminSuperior,
+                    "la sesión no es válida",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            const respuesta =
+                await fetch(
+                    "/api/usuarios/resetear-contrasena",
+                    {
+                        method:
+                            "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json",
+
+                            Authorization:
+                                "Bearer " +
+                                sesionSupabase
+                                    .access_token
+                        },
+
+                        body:
+                            JSON.stringify({
+                                usuarioId:
+                                    cuenta.id
+                            })
+                    }
+                );
+
+            let resultado = {};
+
+            try {
+                resultado =
+                    await respuesta.json();
+            } catch (error) {
+                resultado = {};
+            }
+
+            if (
+                !respuesta.ok ||
+                resultado.ok !== true
+            ) {
+                mostrarMensaje(
+                    mensajeAccionesAdminSuperior,
+                    resultado.mensaje ||
+                        "no se pudo resetear la contraseña",
+                    "var(--color-error)"
+                );
+
+                return;
+            }
+
+            cuenta.debeCambiarContrasena =
+                true;
+
+            await cargarUsuariosParaAdministracion();
+
+            await cargarAdministradoresDesdeSupabase();
+
+            renderizarTodoAdminSuperior();
+
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                "contraseña reseteada a cambio321. Válida durante 2 minutos",
+                "var(--color-exito)"
+            );
+
+            return;
+        } catch (error) {
+            console.error(
+                "Error al resetear contraseña:",
+                error
+            );
+
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                "no se pudo conectar con el servidor",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+    }
+
+    // ===================================================
+    // CUENTA LOCAL ANTIGUA
+    // ===================================================
+
     cuenta.contrasena =
         "1234";
 
     if (origen === "usuarios") {
-        guardarUsuarios(usuarios);
+        guardarUsuarios(
+            usuarios
+        );
     } else {
         guardarAdministradores(
             administradores
@@ -5815,13 +5953,12 @@ function resetearContrasenaDesdeAdminSuperior(
 
     mostrarMensaje(
         mensajeAccionesAdminSuperior,
-        "contraseña reseteada correctamente a 1234",
+        "contraseña local reseteada a 1234",
         "var(--color-exito)"
     );
 
     renderizarTodoAdminSuperior();
 }
-
 
 
 
