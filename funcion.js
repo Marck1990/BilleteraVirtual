@@ -4828,11 +4828,15 @@ function confirmarCompra() {
     procesarCompraConVale();
 }
 
-function enviarAyudaAlumno() {
+async function enviarAyudaAlumno() {
     const texto =
         inputMensajeAyudaAlumno
             .value
             .trim();
+
+    limpiarMensaje(
+        mensajeAyudaAlumno
+    );
 
     if (texto === "") {
         mostrarMensaje(
@@ -4844,14 +4848,88 @@ function enviarAyudaAlumno() {
         return;
     }
 
-    inputMensajeAyudaAlumno.value =
-        "";
+    botonEnviarAyudaAlumno.disabled =
+        true;
 
     mostrarMensaje(
         mensajeAyudaAlumno,
-        "mensaje enviado al administrador",
-        "var(--color-exito)"
+        "la inteligencia artificial está revisando tu consulta...",
+        "var(--color-texto-suave)"
     );
+
+    try {
+        const respuesta =
+            await fetch(
+                "/api/consultas/evaluar",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            consulta:
+                                texto
+                        })
+                }
+            );
+
+        const resultado =
+            await respuesta.json();
+
+        if (
+            !respuesta.ok ||
+            resultado.ok !== true
+        ) {
+            mostrarMensaje(
+                mensajeAyudaAlumno,
+                resultado.mensaje ||
+                    resultado.devolucion ||
+                    "no se pudo evaluar la consulta",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        if (
+            resultado.aprobada !==
+            true
+        ) {
+            mostrarMensaje(
+                mensajeAyudaAlumno,
+                resultado.devolucion ||
+                    "la consulta necesita más información antes de enviarse",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        mostrarMensaje(
+            mensajeAyudaAlumno,
+            "consulta bien estructurada. Está lista para enviarse",
+            "var(--color-exito)"
+        );
+    } catch (error) {
+        console.error(
+            "Error al evaluar consulta:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeAyudaAlumno,
+            "no se pudo conectar con el servicio de evaluación",
+            "var(--color-error)"
+        );
+    } finally {
+        botonEnviarAyudaAlumno.disabled =
+            false;
+    }
 }
 
 // =======================================================
