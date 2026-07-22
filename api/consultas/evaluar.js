@@ -117,7 +117,7 @@ ${consulta}
     try {
         const respuesta =
             await fetch(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=" +
+                "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=" +
                     encodeURIComponent(
                         claveGemini
                     ),
