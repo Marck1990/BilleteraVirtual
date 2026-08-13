@@ -72,19 +72,9 @@ async function verificarPermisoUtilizacion() {
 
 function actualizarBotonUtilizacion() {
     if (
-        botonMarcarUtilizado === null
-    ) {
-        return;
-    }
-
-    if (
-        !usuarioPuedeUtilizarVale ||
+        botonMarcarUtilizado === null ||
         valeActual === null
     ) {
-        ocultarElemento(
-            botonMarcarUtilizado
-        );
-
         return;
     }
 
@@ -121,8 +111,13 @@ function actualizarBotonUtilizacion() {
     botonMarcarUtilizado.disabled =
         false;
 
-    botonMarcarUtilizado.textContent =
-        "marcar como utilizado";
+    if (usuarioPuedeUtilizarVale) {
+        botonMarcarUtilizado.textContent =
+            "marcar como utilizado";
+    } else {
+        botonMarcarUtilizado.textContent =
+            "iniciar sesión para confirmar";
+    }
 }
 
 // =======================================================
