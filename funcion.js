@@ -147,20 +147,10 @@ const pantallaInicio =
 const pantallaRegistro =
     document.querySelector("#pantallaRegistro");
 
-
-
-
 const pantallaCambioContrasena =
     document.querySelector(
         "#pantallaCambioContrasena"
     );
-
-
-
-
-
-
-
 
 const pantallaBilletera =
     document.querySelector("#pantallaBilletera");
@@ -170,6 +160,9 @@ const pantallaAdmin =
 
 const pantallaAdminSuperior =
     document.querySelector("#pantallaAdminSuperior");
+
+let pantallaAlmacenero =
+    document.querySelector("#pantallaAlmacenero");
 
 // inicio
 
@@ -235,10 +228,6 @@ const botonVolverInicioDesdeRegistro =
 const mensajeRegistro =
     document.querySelector("#mensajeRegistro");
 
-
-
-
-
 // cambio obligatorio de contraseña
 
 const inputNuevaContrasenaObligatoria =
@@ -265,10 +254,6 @@ const mensajeCambioContrasena =
     document.querySelector(
         "#mensajeCambioContrasena"
     );
-
-
-
-
 
 // titular
 
@@ -388,6 +373,38 @@ const listaAdministradoresAdminSuperior =
         "#listaAdministradoresAdminSuperior"
     );
 
+// almaceneros
+
+const inputUsuarioNuevoAlmacenero =
+    document.querySelector(
+        "#inputUsuarioNuevoAlmacenero"
+    );
+
+const inputNombreNuevoAlmacenero =
+    document.querySelector(
+        "#inputNombreNuevoAlmacenero"
+    );
+
+const inputContrasenaNuevoAlmacenero =
+    document.querySelector(
+        "#inputContrasenaNuevoAlmacenero"
+    );
+
+const botonCrearNuevoAlmacenero =
+    document.querySelector(
+        "#botonCrearNuevoAlmacenero"
+    );
+
+const mensajeCrearNuevoAlmacenero =
+    document.querySelector(
+        "#mensajeCrearNuevoAlmacenero"
+    );
+
+const listaAlmacenerosAdminSuperior =
+    document.querySelector(
+        "#listaAlmacenerosAdminSuperior"
+    );
+
 const inputSaldoInicialSistema =
     document.querySelector("#inputSaldoInicialSistema");
 
@@ -462,18 +479,6 @@ function escuchar(
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 function mostrarPantalla(idPantalla) {
     const pantallas = [
         pantallaInicio,
@@ -481,7 +486,8 @@ function mostrarPantalla(idPantalla) {
         pantallaCambioContrasena,
         pantallaBilletera,
         pantallaAdmin,
-        pantallaAdminSuperior
+        pantallaAdminSuperior,
+        pantallaAlmacenero
     ];
 
     for (
@@ -505,14 +511,6 @@ function mostrarPantalla(idPantalla) {
         );
     }
 }
-
-
-
-
-
-
-
-
 
 function mostrarMensaje(
     elemento,
@@ -557,16 +555,11 @@ function limpiarMensajesPrincipales() {
     limpiarMensaje(
         mensajeAyudaAlumno
     );
+
+    limpiarMensaje(
+        mensajeCrearNuevoAlmacenero
+    );
 }
-
-
-
-
-
-
-
-
-
 
 function obtenerFechaActual() {
     return new Date().toLocaleString(
@@ -1091,7 +1084,8 @@ function obtenerUsuarioActivo() {
 function obtenerAdministradorActivo() {
     if (
         sesion.tipo !== "admin" &&
-        sesion.tipo !== "adminSuperior"
+        sesion.tipo !== "adminSuperior" &&
+        sesion.tipo !== "operadorVales"
     ) {
         return null;
     }
@@ -1542,11 +1536,6 @@ function validarCompraParaVale(
     };
 }
 
-
-
-
-
-
 async function sincronizarValesLocalesConSupabase() {
     if (
         typeof window.valesRepository ===
@@ -1655,19 +1644,6 @@ async function sincronizarValesLocalesConSupabase() {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 async function procesarCompraConVale() {
     const usuarioActivo =
         obtenerUsuarioActivo();
@@ -1701,10 +1677,6 @@ async function procesarCompraConVale() {
 
     try {
         let valeGuardado = null;
-
-        // ===============================================
-        // COMPRA DE USUARIO SUPABASE
-        // ===============================================
 
         if (esUsuarioSupabase) {
             if (
@@ -1864,13 +1836,7 @@ async function procesarCompraConVale() {
 
             valeGuardado =
                 resultadoSupabase.vale;
-        }
-
-        // ===============================================
-        // COMPRA DE USUARIO LOCAL ANTIGUO
-        // ===============================================
-
-        else {
+        } else {
             const idVale =
                 generarIdVale();
 
@@ -2021,6 +1987,7 @@ async function procesarCompraConVale() {
             false;
     }
 }
+
 // =======================================================
 // GENERACIÓN DEL QR
 // =======================================================
@@ -2853,6 +2820,7 @@ async function registrarCuenta() {
         "var(--color-exito)"
     );
 }
+
 // =======================================================
 // LOGIN Y NAVEGACIÓN
 // =======================================================
@@ -2884,10 +2852,6 @@ async function ingresarAlSistema() {
     limpiarMensaje(
         mensajeInicio
     );
-
-    // ===================================================
-    // CUENTAS LOCALES ANTIGUAS
-    // ===================================================
 
     if (!nombreUsuario.includes("@")) {
         const adminLocal =
@@ -2930,6 +2894,11 @@ async function ingresarAlSistema() {
                 "adminSuperior"
             ) {
                 abrirPanelAdminSuperior();
+            } else if (
+                adminLocal.tipo ===
+                "operadorVales"
+            ) {
+                abrirPanelAlmacenero();
             } else {
                 abrirPanelAdmin();
             }
@@ -2990,10 +2959,6 @@ async function ingresarAlSistema() {
         }
     }
 
-    // ===================================================
-    // CUENTAS DE SUPABASE
-    // ===================================================
-
     if (
         typeof window.usuariosRepository ===
         "undefined"
@@ -3045,10 +3010,6 @@ async function ingresarAlSistema() {
 
             return;
         }
-
-        // ===============================================
-        // TITULAR DE SUPABASE
-        // ===============================================
 
         if (
             usuarioSupabase.tipo ===
@@ -3163,10 +3124,6 @@ async function ingresarAlSistema() {
             return;
         }
 
-        // ===============================================
-        // ADMINISTRADORES DE SUPABASE
-        // ===============================================
-
         let tipoAdministrador = "";
 
         if (
@@ -3177,12 +3134,16 @@ async function ingresarAlSistema() {
                 "adminSuperior";
         } else if (
             usuarioSupabase.tipo ===
-                "admin" ||
+                "admin"
+        ) {
+            tipoAdministrador =
+                "admin";
+        } else if (
             usuarioSupabase.tipo ===
                 "operador_vales"
         ) {
             tipoAdministrador =
-                "admin";
+                "operadorVales";
         }
 
         if (tipoAdministrador === "") {
@@ -3276,6 +3237,11 @@ async function ingresarAlSistema() {
             "adminSuperior"
         ) {
             abrirPanelAdminSuperior();
+        } else if (
+            tipoAdministrador ===
+            "operadorVales"
+        ) {
+            abrirPanelAlmacenero();
         } else {
             abrirPanelAdmin();
         }
@@ -3295,10 +3261,6 @@ async function ingresarAlSistema() {
             false;
     }
 }
-
-
-
-
 
 function abrirCambioContrasenaObligatorio() {
     inputNuevaContrasenaObligatoria.value =
@@ -3417,6 +3379,11 @@ async function guardarContrasenaObligatoria() {
             "adminSuperior"
         ) {
             await abrirPanelAdminSuperior();
+        } else if (
+            sesion.tipo ===
+            "operadorVales"
+        ) {
+            abrirPanelAlmacenero();
         } else {
             await abrirPanelAdmin();
         }
@@ -3437,14 +3404,6 @@ async function guardarContrasenaObligatoria() {
     }
 }
 
-
-
-
-
-
-
-
-
 function irARegistro() {
     limpiarMensajesPrincipales();
     actualizarFormularioRegistro();
@@ -3463,9 +3422,158 @@ function volverAInicio() {
     );
 }
 
+// =======================================================
+// PANEL DEL ALMACENERO
+// =======================================================
 
+function asegurarPantallaAlmacenero() {
+    if (pantallaAlmacenero !== null) {
+        return true;
+    }
 
+    const aplicacion =
+        document.querySelector(
+            ".aplicacion"
+        );
 
+    if (aplicacion === null) {
+        return false;
+    }
+
+    const seccion =
+        document.createElement(
+            "section"
+        );
+
+    seccion.id =
+        "pantallaAlmacenero";
+
+    seccion.className =
+        "pantalla oculto";
+
+    seccion.innerHTML = `
+        <div class="contenedor-secundario">
+
+            <article class="tarjeta-formulario">
+
+                <h2 class="titulo-seccion">
+                    panel almacenero
+                </h2>
+
+                <p
+                    id="textoAlmaceneroActual"
+                    class="texto-suave"
+                >
+                    sin almacenero activo
+                </p>
+
+                <div class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
+                        validar vales
+                    </h3>
+
+                    <p class="texto-suave">
+                        escaneá el código QR que te muestre
+                        el estudiante. El comprobante se abrirá
+                        en este mismo dispositivo.
+                    </p>
+
+                    <p class="texto-suave">
+                        desde el comprobante podrás consultar
+                        los datos del vale y marcarlo como utilizado.
+                    </p>
+
+                    <p class="texto-ayuda-panel">
+                        esta cuenta no tiene acceso a usuarios,
+                        saldos, productos, estadísticas ni
+                        funciones administrativas.
+                    </p>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="botonSalirAlmacenero"
+                    class="boton boton-secundario"
+                >
+                    cerrar sesión
+                </button>
+
+            </article>
+
+        </div>
+    `;
+
+    aplicacion.appendChild(
+        seccion
+    );
+
+    pantallaAlmacenero =
+        seccion;
+
+    const botonSalir =
+        seccion.querySelector(
+            "#botonSalirAlmacenero"
+        );
+
+    escuchar(
+        botonSalir,
+        "click",
+        salirSistema
+    );
+
+    return true;
+}
+
+function renderizarAlmaceneroActivo() {
+    if (!asegurarPantallaAlmacenero()) {
+        return;
+    }
+
+    const texto =
+        document.querySelector(
+            "#textoAlmaceneroActual"
+        );
+
+    if (texto === null) {
+        return;
+    }
+
+    const almacenero =
+        obtenerAdministradorActivo();
+
+    texto.textContent =
+        almacenero === null
+            ? "sin almacenero activo"
+            : "almacenero activo: " +
+              almacenero.nombre +
+              " (" +
+              almacenero.usuario +
+              ")";
+}
+
+function abrirPanelAlmacenero() {
+    if (!asegurarPantallaAlmacenero()) {
+        mostrarMensaje(
+            mensajeInicio,
+            "no se pudo abrir el panel del almacenero",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    renderizarAlmaceneroActivo();
+
+    mostrarPantalla(
+        "#pantallaAlmacenero"
+    );
+}
+
+// =======================================================
+// CARGA DESDE SUPABASE
+// =======================================================
 
 async function cargarProductosDesdeSupabase() {
     if (
@@ -3498,12 +3606,6 @@ async function cargarProductosDesdeSupabase() {
     return true;
 }
 
-
-
-
-
-
-
 async function abrirBilletera() {
     actualizarValesVencidos();
 
@@ -3524,8 +3626,6 @@ async function abrirBilletera() {
         "#pantallaBilletera"
     );
 }
-
-
 
 async function cargarUsuariosParaAdministracion() {
     if (
@@ -3607,7 +3707,6 @@ async function cargarUsuariosParaAdministracion() {
     return true;
 }
 
-
 async function cargarAdministradoresDesdeSupabase() {
     if (
         sesion.tipo !==
@@ -3664,11 +3763,6 @@ async function cargarAdministradoresDesdeSupabase() {
         const administradoresCombinados =
             [];
 
-        /*
-            Conservamos el admin superior
-            y los administradores locales antiguos.
-        */
-
         for (
             let i = 0;
             i < administradores.length;
@@ -3680,6 +3774,17 @@ async function cargarAdministradoresDesdeSupabase() {
             if (
                 adminActual.tipo ===
                 "adminSuperior"
+            ) {
+                administradoresCombinados.push(
+                    adminActual
+                );
+
+                continue;
+            }
+
+            if (
+                adminActual.tipo ===
+                "operadorVales"
             ) {
                 administradoresCombinados.push(
                     adminActual
@@ -3727,11 +3832,6 @@ async function cargarAdministradoresDesdeSupabase() {
                 }
             }
         }
-
-        /*
-            Agregamos todos los administradores
-            guardados realmente en Supabase.
-        */
 
         for (
             let i = 0;
@@ -3788,13 +3888,188 @@ async function cargarAdministradoresDesdeSupabase() {
     }
 }
 
+async function cargarAlmacenerosDesdeSupabase() {
+    if (
+        sesion.tipo !==
+            "adminSuperior" ||
+        sesion.origen !==
+            "supabase"
+    ) {
+        return true;
+    }
 
+    if (
+        typeof window.supabaseCliente ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "el servicio de Supabase no está disponible",
+            "var(--color-error)"
+        );
 
+        return false;
+    }
 
+    try {
+        const respuesta =
+            await window
+                .supabaseCliente
+                .from(
+                    "perfiles"
+                )
+                .select(
+                    "id,usuario,nombre,activo,debe_cambiar_contrasena"
+                )
+                .eq(
+                    "rol",
+                    "operador_vales"
+                )
+                .order(
+                    "nombre",
+                    {
+                        ascending: true
+                    }
+                );
 
+        if (respuesta.error) {
+            console.error(
+                "Error al cargar almaceneros:",
+                respuesta.error
+            );
 
+            mostrarMensaje(
+                mensajeAccionesAdminSuperior,
+                "no se pudieron cargar los almaceneros",
+                "var(--color-error)"
+            );
 
+            return false;
+        }
 
+        const almacenerosRemotos =
+            Array.isArray(
+                respuesta.data
+            )
+                ? respuesta.data
+                : [];
+
+        const administradoresCombinados =
+            [];
+
+        for (
+            let i = 0;
+            i < administradores.length;
+            i++
+        ) {
+            const cuenta =
+                administradores[i];
+
+            if (
+                cuenta.tipo !==
+                "operadorVales"
+            ) {
+                administradoresCombinados.push(
+                    cuenta
+                );
+
+                continue;
+            }
+
+            if (
+                cuenta.autenticacion !==
+                "supabase"
+            ) {
+                let existeRemoto =
+                    false;
+
+                for (
+                    let j = 0;
+                    j <
+                    almacenerosRemotos.length;
+                    j++
+                ) {
+                    if (
+                        String(
+                            almacenerosRemotos[j]
+                                .usuario
+                        ).toLowerCase() ===
+                        String(
+                            cuenta.usuario
+                        ).toLowerCase()
+                    ) {
+                        existeRemoto =
+                            true;
+
+                        break;
+                    }
+                }
+
+                if (!existeRemoto) {
+                    administradoresCombinados.push(
+                        cuenta
+                    );
+                }
+            }
+        }
+
+        for (
+            let i = 0;
+            i < almacenerosRemotos.length;
+            i++
+        ) {
+            const almacenero =
+                almacenerosRemotos[i];
+
+            administradoresCombinados.push({
+                id:
+                    almacenero.id,
+
+                tipo:
+                    "operadorVales",
+
+                usuario:
+                    almacenero.usuario,
+
+                nombre:
+                    almacenero.nombre,
+
+                contrasena:
+                    "",
+
+                activo:
+                    almacenero.activo !==
+                    false,
+
+                debeCambiarContrasena:
+                    almacenero
+                        .debe_cambiar_contrasena ===
+                    true,
+
+                autenticacion:
+                    "supabase"
+            });
+        }
+
+        administradores =
+            administradoresCombinados;
+
+        return true;
+    } catch (error) {
+        console.error(
+            "Error inesperado al cargar almaceneros:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeAccionesAdminSuperior,
+            "no se pudo conectar con Supabase",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+}
 
 async function abrirPanelAdmin() {
     await cargarUsuariosParaAdministracion();
@@ -3807,19 +4082,14 @@ async function abrirPanelAdmin() {
     );
 }
 
-
-
-
-
-
-
-
 async function abrirPanelAdminSuperior() {
     actualizarValesVencidos();
 
     await cargarUsuariosParaAdministracion();
 
     await cargarAdministradoresDesdeSupabase();
+
+    await cargarAlmacenerosDesdeSupabase();
 
     await cargarProductosDesdeSupabase();
 
@@ -3829,10 +4099,6 @@ async function abrirPanelAdminSuperior() {
         "#pantallaAdminSuperior"
     );
 }
-
-
-
-
 
 async function salirSistema() {
     if (
@@ -3848,6 +4114,7 @@ async function salirSistema() {
     sesion.tipo = "";
     sesion.usuarioId = null;
     sesion.adminId = null;
+    sesion.origen = "";
 
     carrito = [];
 
@@ -4073,9 +4340,6 @@ function renderizarAdministradorActivo() {
               ")";
 }
 
-
-
-
 function renderizarUsuariosAdmin() {
     listaUsuariosAdmin.innerHTML = "";
 
@@ -4150,10 +4414,6 @@ function renderizarUsuariosAdmin() {
         `;
     }
 }
-
-
-
-
 
 function renderizarProductosAdmin() {
     listaProductosAdmin.innerHTML = "";
@@ -4430,7 +4690,9 @@ function renderizarCuentasAdminSuperior() {
             `;
         } else if (
             cuenta.tipo ===
-            "admin"
+                "admin" ||
+            cuenta.tipo ===
+                "operadorVales"
         ) {
             acciones = `
                 <div class="acciones-usuario-admin">
@@ -4477,6 +4739,12 @@ function renderizarCuentasAdminSuperior() {
             `;
         }
 
+        const tipoVisible =
+            cuenta.tipo ===
+            "operadorVales"
+                ? "almacenero"
+                : cuenta.tipo;
+
         listaCuentasAdminSuperior.innerHTML += `
             <div class="item-admin-superior">
 
@@ -4486,7 +4754,7 @@ function renderizarCuentasAdminSuperior() {
 
                 <p class="admin-superior-dato">
                     tipo:
-                    ${cuenta.tipo}
+                    ${tipoVisible}
                 </p>
 
                 <p class="admin-superior-dato">
@@ -4527,11 +4795,6 @@ function renderizarCuentasAdminSuperior() {
         `;
     }
 }
-
-
-
-
-
 
 function renderizarAdministradoresAdminSuperior() {
     listaAdministradoresAdminSuperior.innerHTML =
@@ -4606,15 +4869,93 @@ function renderizarAdministradoresAdminSuperior() {
     }
 }
 
+function renderizarAlmacenerosAdminSuperior() {
+    if (
+        listaAlmacenerosAdminSuperior ===
+        null
+    ) {
+        return;
+    }
 
+    listaAlmacenerosAdminSuperior.innerHTML =
+        "";
 
+    let cantidad = 0;
 
+    for (
+        let i = 0;
+        i < administradores.length;
+        i++
+    ) {
+        if (
+            administradores[i].tipo !==
+            "operadorVales"
+        ) {
+            continue;
+        }
 
+        cantidad++;
 
+        const almacenero =
+            administradores[i];
+
+        const idSeguro =
+            JSON.stringify(
+                almacenero.id
+            );
+
+        listaAlmacenerosAdminSuperior.innerHTML += `
+            <div class="item-admin-superior">
+
+                <p class="admin-superior-nombre">
+                    ${almacenero.nombre}
+                </p>
+
+                <p class="admin-superior-dato">
+                    usuario:
+                    ${almacenero.usuario}
+                </p>
+
+                <p class="admin-superior-dato">
+                    tipo: almacenero
+                </p>
+
+                <p class="admin-superior-dato">
+                    permiso: validar vales
+                </p>
+
+                <div class="acciones-usuario-admin">
+
+                    <button
+                        class="boton boton-chico"
+                        onclick='resetearContrasenaAlmacenero(${idSeguro})'
+                    >
+                        resetear contraseña
+                    </button>
+
+                    <button
+                        class="boton boton-peligro boton-chico"
+                        onclick='borrarAlmacenero(${idSeguro})'
+                    >
+                        borrar almacenero
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+    }
+
+    if (cantidad === 0) {
+        listaAlmacenerosAdminSuperior.innerHTML =
+            '<p class="lista-vacia">no hay almaceneros registrados</p>';
+    }
+}
 
 function renderizarEstadisticasAdminSuperior() {
     let admins = 0;
     let adminsSuperiores = 0;
+    let almaceneros = 0;
     let bloqueados = 0;
     let saldoTotal = 0;
 
@@ -4633,6 +4974,11 @@ function renderizarEstadisticasAdminSuperior() {
             "adminSuperior"
         ) {
             adminsSuperiores++;
+        } else if (
+            administradores[i].tipo ===
+            "operadorVales"
+        ) {
+            almaceneros++;
         }
     }
 
@@ -4668,6 +5014,13 @@ function renderizarEstadisticasAdminSuperior() {
             <p>admins superiores</p>
             <p class="estadistica-valor">
                 ${adminsSuperiores}
+            </p>
+        </div>
+
+        <div class="item-estadistica-admin-superior">
+            <p>almaceneros</p>
+            <p class="estadistica-valor">
+                ${almaceneros}
             </p>
         </div>
 
@@ -4743,6 +5096,8 @@ function renderizarTodoAdminSuperior() {
     renderizarCuentasAdminSuperior();
 
     renderizarAdministradoresAdminSuperior();
+
+    renderizarAlmacenerosAdminSuperior();
 
     renderizarHistorialEnContenedor(
         listaHistorialGlobalAdminSuperior
@@ -4989,14 +5344,6 @@ async function agregarDineroAUsuario(
     renderizarTodoAdmin();
 }
 
-
-
-
-
-
-
-
-
 async function alternarBloqueoUsuario(
     idUsuario
 ) {
@@ -5033,11 +5380,6 @@ async function alternarBloqueoUsuario(
 
     renderizarTodoAdmin();
 }
-
-
-
-
-
 
 async function eliminarCuentaRealSupabase(
     idCuenta
@@ -5146,19 +5488,6 @@ async function eliminarCuentaRealSupabase(
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 async function borrarUsuario(
     idUsuario
 ) {
@@ -5242,14 +5571,6 @@ async function borrarUsuario(
     renderizarTodoAdmin();
 }
 
-
-
-
-
-
-
-
-
 async function agregarProducto() {
     const nombre =
         inputNombreProducto
@@ -5321,13 +5642,6 @@ async function agregarProducto() {
 
     renderizarTodoAdmin();
 }
-
-
-
-
-
-
-
 
 async function quitarProducto(
     idProducto
@@ -5837,12 +6151,6 @@ async function alternarBloqueoDesdeAdminSuperior(
     renderizarTodoAdminSuperior();
 }
 
-
-
-
-
-
-
 async function resetearContrasenaDesdeAdminSuperior(
     origen,
     idCuenta
@@ -5898,10 +6206,6 @@ async function resetearContrasenaDesdeAdminSuperior(
     if (!confirmado) {
         return;
     }
-
-    // ===================================================
-    // CUENTA REAL DE SUPABASE
-    // ===================================================
 
     if (
         cuenta.autenticacion ===
@@ -5987,6 +6291,8 @@ async function resetearContrasenaDesdeAdminSuperior(
 
             await cargarAdministradoresDesdeSupabase();
 
+            await cargarAlmacenerosDesdeSupabase();
+
             renderizarTodoAdminSuperior();
 
             mostrarMensaje(
@@ -6012,10 +6318,6 @@ async function resetearContrasenaDesdeAdminSuperior(
         }
     }
 
-    // ===================================================
-    // CUENTA LOCAL ANTIGUA
-    // ===================================================
-
     cuenta.contrasena =
         "1234";
 
@@ -6037,12 +6339,6 @@ async function resetearContrasenaDesdeAdminSuperior(
 
     renderizarTodoAdminSuperior();
 }
-
-
-
-
-
-
 
 async function eliminarCuentaDesdeAdminSuperior(
     origen,
@@ -6121,6 +6417,8 @@ async function eliminarCuentaDesdeAdminSuperior(
 
         await cargarAdministradoresDesdeSupabase();
 
+        await cargarAlmacenerosDesdeSupabase();
+
         renderizarTodoAdminSuperior();
 
         mostrarMensaje(
@@ -6187,13 +6485,6 @@ async function eliminarCuentaDesdeAdminSuperior(
     );
 }
 
-
-
-
-
-
-
-
 function resetearContrasenaAdministrador(
     idAdministrador
 ) {
@@ -6202,10 +6493,6 @@ function resetearContrasenaAdministrador(
         idAdministrador
     );
 }
-
-
-
-
 
 async function borrarAdministradorComun(
     idAdministrador
@@ -6216,14 +6503,23 @@ async function borrarAdministradorComun(
     );
 }
 
+function resetearContrasenaAlmacenero(
+    idAlmacenero
+) {
+    resetearContrasenaDesdeAdminSuperior(
+        "administradores",
+        idAlmacenero
+    );
+}
 
-
-
-
-
-
-
-
+async function borrarAlmacenero(
+    idAlmacenero
+) {
+    await eliminarCuentaDesdeAdminSuperior(
+        "administradores",
+        idAlmacenero
+    );
+}
 
 async function crearAdministradorDesdePanelSuperior() {
     const inputUsuario =
@@ -6377,6 +6673,8 @@ async function crearAdministradorDesdePanelSuperior() {
 
         await cargarAdministradoresDesdeSupabase();
 
+        await cargarAlmacenerosDesdeSupabase();
+
         renderizarTodoAdminSuperior();
 
         mostrarMensaje(
@@ -6401,9 +6699,270 @@ async function crearAdministradorDesdePanelSuperior() {
     }
 }
 
+// =======================================================
+// CREAR ALMACENERO DESDE ADMIN SUPERIOR
+// =======================================================
 
+async function crearAlmaceneroDesdePanelSuperior() {
+    if (
+        inputUsuarioNuevoAlmacenero ===
+            null ||
+        inputNombreNuevoAlmacenero ===
+            null ||
+        inputContrasenaNuevoAlmacenero ===
+            null ||
+        botonCrearNuevoAlmacenero ===
+            null ||
+        mensajeCrearNuevoAlmacenero ===
+            null
+    ) {
+        return;
+    }
 
+    const usuario =
+        inputUsuarioNuevoAlmacenero
+            .value
+            .trim()
+            .toLowerCase();
 
+    const nombre =
+        inputNombreNuevoAlmacenero
+            .value
+            .trim();
+
+    const contrasena =
+        inputContrasenaNuevoAlmacenero
+            .value
+            .trim();
+
+    limpiarMensaje(
+        mensajeCrearNuevoAlmacenero
+    );
+
+    if (
+        usuario === "" ||
+        nombre === "" ||
+        contrasena === ""
+    ) {
+        mostrarMensaje(
+            mensajeCrearNuevoAlmacenero,
+            "completá todos los campos",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    botonCrearNuevoAlmacenero.disabled =
+        true;
+
+    try {
+        if (
+            typeof window.supabaseCliente ===
+            "undefined"
+        ) {
+            mostrarMensaje(
+                mensajeCrearNuevoAlmacenero,
+                "el servicio de Supabase no está disponible",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        const respuestaSesion =
+            await window
+                .supabaseCliente
+                .auth
+                .getSession();
+
+        const sesionSupabase =
+            respuestaSesion
+                .data
+                ?.session;
+
+        if (
+            respuestaSesion.error ||
+            !sesionSupabase
+        ) {
+            mostrarMensaje(
+                mensajeCrearNuevoAlmacenero,
+                "la sesión del administrador superior no es válida",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        const respuesta =
+            await fetch(
+                "/api/usuarios/crear-almacenero",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+
+                        Authorization:
+                            "Bearer " +
+                            sesionSupabase
+                                .access_token
+                    },
+
+                    body:
+                        JSON.stringify({
+                            usuario:
+                                usuario,
+
+                            nombre:
+                                nombre,
+
+                            contrasena:
+                                contrasena
+                        })
+                }
+            );
+
+        let resultado = {};
+
+        try {
+            resultado =
+                await respuesta.json();
+        } catch (error) {
+            resultado = {};
+        }
+
+        if (
+            !respuesta.ok ||
+            resultado.ok !== true
+        ) {
+            mostrarMensaje(
+                mensajeCrearNuevoAlmacenero,
+                resultado.mensaje ||
+                    "no se pudo crear el almacenero",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        const datosAlmacenero =
+            resultado.almacenero;
+
+        if (
+            datosAlmacenero !== null &&
+            typeof datosAlmacenero ===
+                "object"
+        ) {
+            let encontrado =
+                false;
+
+            for (
+                let i = 0;
+                i < administradores.length;
+                i++
+            ) {
+                if (
+                    administradores[i].id ===
+                        datosAlmacenero.id ||
+                    String(
+                        administradores[i]
+                            .usuario
+                    ).toLowerCase() ===
+                    usuario
+                ) {
+                    administradores[i] = {
+                        id:
+                            datosAlmacenero.id,
+
+                        tipo:
+                            "operadorVales",
+
+                        usuario:
+                            usuario,
+
+                        nombre:
+                            nombre,
+
+                        contrasena:
+                            "",
+
+                        debeCambiarContrasena:
+                            false,
+
+                        autenticacion:
+                            "supabase"
+                    };
+
+                    encontrado =
+                        true;
+
+                    break;
+                }
+            }
+
+            if (!encontrado) {
+                administradores.push({
+                    id:
+                        datosAlmacenero.id,
+
+                    tipo:
+                        "operadorVales",
+
+                    usuario:
+                        usuario,
+
+                    nombre:
+                        nombre,
+
+                    contrasena:
+                        "",
+
+                    debeCambiarContrasena:
+                        false,
+
+                    autenticacion:
+                        "supabase"
+                });
+            }
+        }
+
+        inputUsuarioNuevoAlmacenero.value =
+            "";
+
+        inputNombreNuevoAlmacenero.value =
+            "";
+
+        inputContrasenaNuevoAlmacenero.value =
+            "";
+
+        await cargarAlmacenerosDesdeSupabase();
+
+        renderizarTodoAdminSuperior();
+
+        mostrarMensaje(
+            mensajeCrearNuevoAlmacenero,
+            "almacenero creado correctamente",
+            "var(--color-exito)"
+        );
+    } catch (error) {
+        console.error(
+            "Error al crear almacenero:",
+            error
+        );
+
+        mostrarMensaje(
+            mensajeCrearNuevoAlmacenero,
+            "no se pudo conectar con el servidor",
+            "var(--color-error)"
+        );
+    } finally {
+        botonCrearNuevoAlmacenero.disabled =
+            false;
+    }
+}
 
 // =======================================================
 // APOYO
@@ -6420,7 +6979,7 @@ function recuperarAcceso() {
 function mostrarSoporte() {
     mostrarMensaje(
         mensajeInicio,
-        "soporte del proyecto escolar disponible con el docente",
+        "soporte del proyecto estudiantil disponible con el docente",
         "var(--color-principal)"
     );
 }
@@ -6440,9 +6999,6 @@ escuchar(
     "click",
     salirSistema
 );
-
-
-
 
 escuchar(
     botonIngresarSistema,
@@ -6558,6 +7114,12 @@ escuchar(
     guardarConfiguracionValesDesdePanel
 );
 
+escuchar(
+    botonCrearNuevoAlmacenero,
+    "click",
+    crearAlmaceneroDesdePanelSuperior
+);
+
 // =======================================================
 // INICIO DE LA APLICACIÓN
 // =======================================================
@@ -6611,7 +7173,6 @@ function iniciarAplicacion() {
 }
 
 iniciarAplicacion();
-
 
 const botonCrearNuevoAdmin =
     document.querySelector(
