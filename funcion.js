@@ -1101,11 +1101,11 @@ function esAdministradorSuperiorPropio(
 ) {
     return (
         sesion.tipo ===
-            "adminSuperior" &&
+        "adminSuperior" &&
         origen ===
-            "administradores" &&
+        "administradores" &&
         sesion.adminId ===
-            idCuenta
+        idCuenta
     );
 }
 
@@ -1319,7 +1319,7 @@ function actualizarEstadoPorVencimiento(
     if (
         vale === null ||
         vale.estado !==
-            ESTADOS_VALE.PENDIENTE
+        ESTADOS_VALE.PENDIENTE
     ) {
         return false;
     }
@@ -1376,7 +1376,7 @@ function marcarValeComoUsado(
     if (
         vale === null ||
         vale.estado !==
-            ESTADOS_VALE.PENDIENTE
+        ESTADOS_VALE.PENDIENTE
     ) {
         return null;
     }
@@ -1407,9 +1407,9 @@ function obtenerValesPendientesDelTitular(
     ) {
         if (
             vales[i].titularId ===
-                idTitular &&
+            idTitular &&
             vales[i].estado ===
-                ESTADOS_VALE.PENDIENTE
+            ESTADOS_VALE.PENDIENTE
         ) {
             pendientes.push(
                 vales[i]
@@ -1442,7 +1442,7 @@ function contarComprasDiariasDelTitular(
 
         if (
             vales[i].titularId ===
-                idTitular &&
+            idTitular &&
             claveVale === fechaClave
         ) {
             cantidad++;
@@ -1497,6 +1497,8 @@ function validarCompraParaVale(
                 new Date()
             )
         );
+
+
 
     if (
         comprasHoy >=
@@ -1560,11 +1562,11 @@ async function sincronizarValesLocalesConSupabase() {
 
             if (
                 vale.estado !==
-                    ESTADOS_VALE.PENDIENTE ||
+                ESTADOS_VALE.PENDIENTE ||
                 typeof vale.tokenPublico !==
-                    "string" ||
+                "string" ||
                 vale.tokenPublico.trim() ===
-                    ""
+                ""
             ) {
                 continue;
             }
@@ -1590,7 +1592,7 @@ async function sincronizarValesLocalesConSupabase() {
             if (
                 datosRemotos.vale !== null &&
                 typeof datosRemotos.vale ===
-                    "object"
+                "object"
             ) {
                 datosRemotos =
                     datosRemotos.vale;
@@ -1670,7 +1672,7 @@ async function procesarCompraConVale() {
     const esUsuarioSupabase =
         sesion.origen === "supabase" ||
         usuarioActivo.autenticacion ===
-            "supabase";
+        "supabase";
 
     botonConfirmarCompra.disabled =
         true;
@@ -1681,11 +1683,11 @@ async function procesarCompraConVale() {
         if (esUsuarioSupabase) {
             if (
                 typeof window.valesRepository ===
-                    "undefined" ||
+                "undefined" ||
                 typeof window
                     .valesRepository
                     .realizarCompraConVale !==
-                    "function"
+                "function"
             ) {
                 mostrarMensaje(
                     mensajeCompra,
@@ -1817,15 +1819,15 @@ async function procesarCompraConVale() {
                 "compra",
 
                 "compra " +
+                resultadoSupabase
+                    .vale
+                    .id +
+                " por " +
+                formatearMoneda(
                     resultadoSupabase
                         .vale
-                        .id +
-                    " por " +
-                    formatearMoneda(
-                        resultadoSupabase
-                            .vale
-                            .total
-                    ),
+                        .total
+                ),
 
                 -resultadoSupabase
                     .vale
@@ -1885,11 +1887,11 @@ async function procesarCompraConVale() {
                 "compra",
 
                 "compra " +
-                    vale.id +
-                    " por " +
-                    formatearMoneda(
-                        vale.total
-                    ),
+                vale.id +
+                " por " +
+                formatearMoneda(
+                    vale.total
+                ),
 
                 -vale.total,
 
@@ -1960,7 +1962,7 @@ async function procesarCompraConVale() {
         mostrarMensaje(
             mensajeCompra,
             "compra aprobada. Vale generado: " +
-                valeGuardado.id,
+            valeGuardado.id,
             "var(--color-exito)"
         );
 
@@ -2862,7 +2864,7 @@ async function ingresarAlSistema() {
         if (
             adminLocal !== null &&
             adminLocal.autenticacion !==
-                "supabase"
+            "supabase"
         ) {
             if (
                 adminLocal.contrasena !==
@@ -2914,7 +2916,7 @@ async function ingresarAlSistema() {
         if (
             usuarioLocal !== null &&
             usuarioLocal.autenticacion !==
-                "supabase"
+            "supabase"
         ) {
             if (
                 usuarioLocal.contrasena !==
@@ -2997,10 +2999,9 @@ async function ingresarAlSistema() {
         const usuarioSupabase =
             resultado.usuario;
 
-        if (
-            usuarioSupabase === null ||
+        if (usuarioSupabase === null ||
             typeof usuarioSupabase !==
-                "object"
+            "object"
         ) {
             mostrarMensaje(
                 mensajeInicio,
@@ -3077,11 +3078,11 @@ async function ingresarAlSistema() {
             ) {
                 if (
                     usuarios[i].id ===
-                        usuarioAplicacion.id ||
+                    usuarioAplicacion.id ||
                     usuarios[i].usuario
                         .toLowerCase() ===
-                        usuarioAplicacion.usuario
-                            .toLowerCase()
+                    usuarioAplicacion.usuario
+                        .toLowerCase()
                 ) {
                     indiceUsuario = i;
                     break;
@@ -3134,13 +3135,13 @@ async function ingresarAlSistema() {
                 "adminSuperior";
         } else if (
             usuarioSupabase.tipo ===
-                "admin"
+            "admin"
         ) {
             tipoAdministrador =
                 "admin";
         } else if (
             usuarioSupabase.tipo ===
-                "operador_vales"
+            "operador_vales"
         ) {
             tipoAdministrador =
                 "operadorVales";
@@ -3452,42 +3453,21 @@ function asegurarPantallaAlmacenero() {
         "pantalla oculto";
 
     seccion.innerHTML = `
-        <div class="contenedor-secundario">
+        <div class="contenedor-principal">
 
-            <article class="tarjeta-formulario">
+            <header class="encabezado-billetera">
 
-                <h2 class="titulo-seccion">
-                    panel almacenero
-                </h2>
+                <div>
 
-                <p
-                    id="textoAlmaceneroActual"
-                    class="texto-suave"
-                >
-                    sin almacenero activo
-                </p>
+                    <h2 class="titulo-seccion">
+                        panel almacenero
+                    </h2>
 
-                <div class="tarjeta">
-
-                    <h3 class="subtitulo-seccion">
-                        validar vales
-                    </h3>
-
-                    <p class="texto-suave">
-                        escaneá el código QR que te muestre
-                        el estudiante. El comprobante se abrirá
-                        en este mismo dispositivo.
-                    </p>
-
-                    <p class="texto-suave">
-                        desde el comprobante podrás consultar
-                        los datos del vale y marcarlo como utilizado.
-                    </p>
-
-                    <p class="texto-ayuda-panel">
-                        esta cuenta no tiene acceso a usuarios,
-                        saldos, productos, estadísticas ni
-                        funciones administrativas.
+                    <p
+                        id="textoAlmaceneroActual"
+                        class="texto-suave"
+                    >
+                        sin almacenero activo
                     </p>
 
                 </div>
@@ -3500,7 +3480,70 @@ function asegurarPantallaAlmacenero() {
                     cerrar sesión
                 </button>
 
-            </article>
+            </header>
+
+            <div class="grid-admin">
+
+                <article class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
+                        fondo disponible
+                    </h3>
+
+                    <p class="texto-suave">
+                        dinero disponible para respaldar
+                        las ventas del almacén
+                    </p>
+
+                    <p
+                        id="saldoFondoAlmacen"
+                        class="saldo-disponible"
+                    >
+                        $ 0
+                    </p>
+
+                    <p
+                        id="fechaFondoAlmacen"
+                        class="texto-ayuda-panel"
+                    >
+                        sin actualización registrada
+                    </p>
+
+                    <button
+                        type="button"
+                        id="botonActualizarFondoAlmacen"
+                        class="boton boton-secundario"
+                    >
+                        actualizar fondo
+                    </button>
+
+                    <p
+                        id="mensajeFondoAlmacen"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
+
+                </article>
+
+                <article class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
+                        validar vales
+                    </h3>
+
+                    <p class="texto-suave">
+                        escaneá el código QR que te muestre
+                        el estudiante
+                    </p>
+
+                    <p class="texto-suave">
+                        el comprobante permitirá consultar
+                        los datos del vale y marcarlo como utilizado
+                    </p>
+
+                </article>
+
+            </div>
 
         </div>
     `;
@@ -3517,10 +3560,21 @@ function asegurarPantallaAlmacenero() {
             "#botonSalirAlmacenero"
         );
 
+    const botonActualizarFondo =
+        seccion.querySelector(
+            "#botonActualizarFondoAlmacen"
+        );
+
     escuchar(
         botonSalir,
         "click",
         salirSistema
+    );
+
+    escuchar(
+        botonActualizarFondo,
+        "click",
+        cargarFondoAlmacenero
     );
 
     return true;
@@ -3547,13 +3601,144 @@ function renderizarAlmaceneroActivo() {
         almacenero === null
             ? "sin almacenero activo"
             : "almacenero activo: " +
-              almacenero.nombre +
-              " (" +
-              almacenero.usuario +
-              ")";
+            almacenero.nombre +
+            " (" +
+            almacenero.usuario +
+            ")";
 }
 
-function abrirPanelAlmacenero() {
+function formatearFechaFondoAlmacen(
+    fechaTexto
+) {
+    if (
+        typeof fechaTexto !== "string" ||
+        fechaTexto.trim() === ""
+    ) {
+        return "sin actualización registrada";
+    }
+
+    const fecha =
+        new Date(
+            fechaTexto
+        );
+
+    if (
+        Number.isNaN(
+            fecha.getTime()
+        )
+    ) {
+        return "sin actualización registrada";
+    }
+
+    return (
+        "última actualización: " +
+        fecha.toLocaleString(
+            "es-UY",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        )
+    );
+}
+
+async function cargarFondoAlmacenero() {
+    const saldo =
+        document.querySelector(
+            "#saldoFondoAlmacen"
+        );
+
+    const fecha =
+        document.querySelector(
+            "#fechaFondoAlmacen"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonActualizarFondoAlmacen"
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeFondoAlmacen"
+        );
+
+    if (
+        saldo === null ||
+        fecha === null ||
+        boton === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        typeof window.fondoAlmacenRepository ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "el servicio del fondo no está disponible",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    boton.disabled =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .fondoAlmacenRepository
+                .consultarFondo();
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensaje,
+                resultado.mensaje ||
+                "no se pudo consultar el fondo",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        saldo.textContent =
+            formatearMoneda(
+                resultado.saldo
+            );
+
+        fecha.textContent =
+            formatearFechaFondoAlmacen(
+                resultado.actualizadoEn
+            );
+    } catch (error) {
+        console.error(
+            "Error al cargar el fondo:",
+            error
+        );
+
+        mostrarMensaje(
+            mensaje,
+            "no se pudo consultar el fondo",
+            "var(--color-error)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+async function abrirPanelAlmacenero() {
     if (!asegurarPantallaAlmacenero()) {
         mostrarMensaje(
             mensajeInicio,
@@ -3569,6 +3754,8 @@ function abrirPanelAlmacenero() {
     mostrarPantalla(
         "#pantallaAlmacenero"
     );
+
+    await cargarFondoAlmacenero();
 }
 
 // =======================================================
@@ -3631,7 +3818,7 @@ async function cargarUsuariosParaAdministracion() {
     if (
         sesion.origen !== "supabase" ||
         typeof window.usuariosRepository ===
-            "undefined"
+        "undefined"
     ) {
         return true;
     }
@@ -3681,7 +3868,7 @@ async function cargarUsuariosParaAdministracion() {
 
         if (
             usuarios[i].autenticacion !==
-                "supabase" &&
+            "supabase" &&
             !existeEnSupabase
         ) {
             usuariosCombinados.push(
@@ -3710,9 +3897,9 @@ async function cargarUsuariosParaAdministracion() {
 async function cargarAdministradoresDesdeSupabase() {
     if (
         sesion.tipo !==
-            "adminSuperior" ||
+        "adminSuperior" ||
         sesion.origen !==
-            "supabase"
+        "supabase"
     ) {
         return true;
     }
@@ -3795,9 +3982,9 @@ async function cargarAdministradoresDesdeSupabase() {
 
             if (
                 adminActual.tipo ===
-                    "admin" &&
+                "admin" &&
                 adminActual.autenticacion !==
-                    "supabase"
+                "supabase"
             ) {
                 let existeRemoto =
                     false;
@@ -3891,9 +4078,9 @@ async function cargarAdministradoresDesdeSupabase() {
 async function cargarAlmacenerosDesdeSupabase() {
     if (
         sesion.tipo !==
-            "adminSuperior" ||
+        "adminSuperior" ||
         sesion.origen !==
-            "supabase"
+        "supabase"
     ) {
         return true;
     }
@@ -4334,10 +4521,10 @@ function renderizarAdministradorActivo() {
         admin === null
             ? "sin administrador activo"
             : "Hola!! Bienvenido!!! administrador activo: " +
-              admin.nombre +
-              " (" +
-              admin.usuario +
-              ")";
+            admin.nombre +
+            " (" +
+            admin.usuario +
+            ")";
 }
 
 function renderizarUsuariosAdmin() {
@@ -4542,10 +4729,10 @@ function renderizarAdminSuperiorActivo() {
         admin === null
             ? "sin admin superior activo"
             : "admin superior activo: " +
-              admin.nombre +
-              " (" +
-              admin.usuario +
-              ")";
+            admin.nombre +
+            " (" +
+            admin.usuario +
+            ")";
 }
 
 function obtenerTodasLasCuentasDelSistema() {
@@ -4665,11 +4852,10 @@ function renderizarCuentasAdminSuperior() {
                         class="boton boton-advertencia boton-chico"
                         onclick="alternarBloqueoDesdeAdminSuperior(${idCuentaSeguro})"
                     >
-                        ${
-                            cuenta.bloqueado
-                                ? "desbloquear"
-                                : "bloquear"
-                        }
+                        ${cuenta.bloqueado
+                    ? "desbloquear"
+                    : "bloquear"
+                }
                     </button>
 
                     <button
@@ -4690,9 +4876,9 @@ function renderizarCuentasAdminSuperior() {
             `;
         } else if (
             cuenta.tipo ===
-                "admin" ||
+            "admin" ||
             cuenta.tipo ===
-                "operadorVales"
+            "operadorVales"
         ) {
             acciones = `
                 <div class="acciones-usuario-admin">
@@ -4741,7 +4927,7 @@ function renderizarCuentasAdminSuperior() {
 
         const tipoVisible =
             cuenta.tipo ===
-            "operadorVales"
+                "operadorVales"
                 ? "almacenero"
                 : cuenta.tipo;
 
@@ -4769,24 +4955,22 @@ function renderizarCuentasAdminSuperior() {
 
                 <p class="admin-superior-dato">
                     saldo:
-                    ${
-                        cuenta.tipo === "titular"
-                            ? formatearMoneda(
-                                cuenta.saldo
-                            )
-                            : "-"
-                    }
+                    ${cuenta.tipo === "titular"
+                ? formatearMoneda(
+                    cuenta.saldo
+                )
+                : "-"
+            }
                 </p>
 
                 <p class="admin-superior-dato">
                     estado:
-                    ${
-                        cuenta.tipo ===
-                            "titular" &&
-                        cuenta.bloqueado
-                            ? "bloqueado"
-                            : "activo"
-                    }
+                    ${cuenta.tipo ===
+                "titular" &&
+                cuenta.bloqueado
+                ? "bloqueado"
+                : "activo"
+            }
                 </p>
 
                 ${acciones}
@@ -5243,8 +5427,8 @@ async function enviarAyudaAlumno() {
             mostrarMensaje(
                 mensajeAyudaAlumno,
                 resultado.mensaje ||
-                    resultado.devolucion ||
-                    "no se pudo evaluar la consulta",
+                resultado.devolucion ||
+                "no se pudo evaluar la consulta",
                 "var(--color-error)"
             );
 
@@ -5258,7 +5442,7 @@ async function enviarAyudaAlumno() {
             mostrarMensaje(
                 mensajeAyudaAlumno,
                 resultado.devolucion ||
-                    "la consulta necesita más información antes de enviarse",
+                "la consulta necesita más información antes de enviarse",
                 "var(--color-error)"
             );
 
@@ -5812,9 +5996,7 @@ function guardarConfiguracionValesDesdePanel() {
         !Number.isInteger(
             vigencia
         ) ||
-        vigencia < 1 ||
-
-        !Number.isInteger(
+        vigencia < 1 || !Number.isInteger(
             pendientes
         ) ||
         pendientes < 1
@@ -5926,7 +6108,7 @@ async function agregarSaldoDesdeAdminSuperior(
             mostrarMensaje(
                 mensajeAccionesAdminSuperior,
                 resultado.mensaje ||
-                    resultado.resultado,
+                resultado.resultado,
                 "var(--color-error)"
             );
 
@@ -5955,7 +6137,7 @@ async function agregarSaldoDesdeAdminSuperior(
         usuario.id,
         "agregar_saldo_admin_superior",
         "el admin superior agregó " +
-            formatearMoneda(monto),
+        formatearMoneda(monto),
         monto,
         usuario.saldo
     );
@@ -6016,10 +6198,10 @@ async function descontarSaldoDesdeAdminSuperior(
         if (!resultado.correcto) {
             const mensaje =
                 resultado.resultado ===
-                "saldo_insuficiente"
+                    "saldo_insuficiente"
                     ? "monto superior al saldo disponible"
                     : resultado.mensaje ||
-                      resultado.resultado;
+                    resultado.resultado;
 
             mostrarMensaje(
                 mensajeAccionesAdminSuperior,
@@ -6062,7 +6244,7 @@ async function descontarSaldoDesdeAdminSuperior(
         usuario.id,
         "descuento_saldo_admin_superior",
         "el admin superior descontó " +
-            formatearMoneda(monto),
+        formatearMoneda(monto),
         -monto,
         usuario.saldo
     );
@@ -6103,7 +6285,7 @@ async function alternarBloqueoDesdeAdminSuperior(
             mostrarMensaje(
                 mensajeAccionesAdminSuperior,
                 resultado.mensaje ||
-                    resultado.resultado,
+                resultado.resultado,
                 "var(--color-error)"
             );
 
@@ -6277,7 +6459,7 @@ async function resetearContrasenaDesdeAdminSuperior(
                 mostrarMensaje(
                     mensajeAccionesAdminSuperior,
                     resultado.mensaje ||
-                        "no se pudo resetear la contraseña",
+                    "no se pudo resetear la contraseña",
                     "var(--color-error)"
                 );
 
@@ -6370,9 +6552,9 @@ async function eliminarCuentaDesdeAdminSuperior(
 
     if (
         origen ===
-            "administradores" &&
+        "administradores" &&
         cuenta.tipo ===
-            "adminSuperior"
+        "adminSuperior"
     ) {
         mostrarMensaje(
             mensajeAccionesAdminSuperior,
@@ -6655,7 +6837,7 @@ async function crearAdministradorDesdePanelSuperior() {
             mostrarMensaje(
                 mensaje,
                 resultado.mensaje ||
-                    "no se pudo crear el administrador",
+                "no se pudo crear el administrador",
                 "var(--color-error)"
             );
 
@@ -6706,15 +6888,15 @@ async function crearAdministradorDesdePanelSuperior() {
 async function crearAlmaceneroDesdePanelSuperior() {
     if (
         inputUsuarioNuevoAlmacenero ===
-            null ||
+        null ||
         inputNombreNuevoAlmacenero ===
-            null ||
+        null ||
         inputContrasenaNuevoAlmacenero ===
-            null ||
+        null ||
         botonCrearNuevoAlmacenero ===
-            null ||
+        null ||
         mensajeCrearNuevoAlmacenero ===
-            null
+        null
     ) {
         return;
     }
@@ -6841,7 +7023,7 @@ async function crearAlmaceneroDesdePanelSuperior() {
             mostrarMensaje(
                 mensajeCrearNuevoAlmacenero,
                 resultado.mensaje ||
-                    "no se pudo crear el almacenero",
+                "no se pudo crear el almacenero",
                 "var(--color-error)"
             );
 
@@ -6854,7 +7036,7 @@ async function crearAlmaceneroDesdePanelSuperior() {
         if (
             datosAlmacenero !== null &&
             typeof datosAlmacenero ===
-                "object"
+            "object"
         ) {
             let encontrado =
                 false;
@@ -6866,7 +7048,7 @@ async function crearAlmaceneroDesdePanelSuperior() {
             ) {
                 if (
                     administradores[i].id ===
-                        datosAlmacenero.id ||
+                    datosAlmacenero.id ||
                     String(
                         administradores[i]
                             .usuario
