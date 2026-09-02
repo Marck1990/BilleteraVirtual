@@ -3528,6 +3528,64 @@ function asegurarPantallaAlmacenero() {
                 <article class="tarjeta">
 
                     <h3 class="subtitulo-seccion">
+                        gestionar productos
+                    </h3>
+
+                    <label for="inputNombreProductoAlmacenero">
+                        nombre del producto
+                    </label>
+
+                    <input
+                        type="text"
+                        id="inputNombreProductoAlmacenero"
+                        maxlength="120"
+                        placeholder="ejemplo: jugo natural"
+                    >
+
+                    <label for="inputPrecioProductoAlmacenero">
+                        precio
+                    </label>
+
+                    <input
+                        type="number"
+                        id="inputPrecioProductoAlmacenero"
+                        min="1"
+                        step="1"
+                        placeholder="ingresá el precio"
+                    >
+
+                    <button
+                        type="button"
+                        id="botonAgregarProductoAlmacenero"
+                        class="boton"
+                    >
+                        agregar producto
+                    </button>
+
+                    <button
+                        type="button"
+                        id="botonActualizarProductosAlmacenero"
+                        class="boton boton-secundario"
+                    >
+                        actualizar lista
+                    </button>
+
+                    <p
+                        id="mensajeProductosAlmacenero"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
+
+                    <div
+                        id="listaProductosAlmacenero"
+                        class="lista-productos-admin"
+                    ></div>
+
+                </article>
+
+                <article class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
                         validar vales
                     </h3>
 
@@ -3565,6 +3623,16 @@ function asegurarPantallaAlmacenero() {
             "#botonActualizarFondoAlmacen"
         );
 
+    const botonAgregarProducto =
+        seccion.querySelector(
+            "#botonAgregarProductoAlmacenero"
+        );
+
+    const botonActualizarProductos =
+        seccion.querySelector(
+            "#botonActualizarProductosAlmacenero"
+        );
+
     escuchar(
         botonSalir,
         "click",
@@ -3577,8 +3645,21 @@ function asegurarPantallaAlmacenero() {
         cargarFondoAlmacenero
     );
 
+    escuchar(
+        botonAgregarProducto,
+        "click",
+        agregarProductoDesdeAlmacenero
+    );
+
+    escuchar(
+        botonActualizarProductos,
+        "click",
+        actualizarListaProductosAlmacenero
+    );
+
     return true;
 }
+
 
 function renderizarAlmaceneroActivo() {
     if (!asegurarPantallaAlmacenero()) {
@@ -3738,6 +3819,426 @@ async function cargarFondoAlmacenero() {
     }
 }
 
+
+
+// =======================================================
+// PRODUCTOS DEL ALMACENERO
+// =======================================================
+
+function renderizarProductosAlmacenero() {
+    const contenedor =
+        document.querySelector(
+            "#listaProductosAlmacenero"
+        );
+
+    if (contenedor === null) {
+        return;
+    }
+
+    contenedor.innerHTML =
+        "";
+
+    if (productos.length === 0) {
+        contenedor.innerHTML =
+            '<p class="lista-vacia">no hay productos registrados</p>';
+
+        return;
+    }
+
+    for (
+        let i = 0;
+        i < productos.length;
+        i++
+    ) {
+        const producto =
+            productos[i];
+
+        contenedor.innerHTML += `
+            <div class="item-producto-admin">
+
+                <p class="producto-nombre">
+                    ${producto.nombre}
+                </p>
+
+                <label
+                    for="precioProductoAlmacenero-${producto.id}"
+                >
+                    precio
+                </label>
+
+                <input
+                    type="number"
+                    id="precioProductoAlmacenero-${producto.id}"
+                    min="1"
+                    step="1"
+                    value="${Number(producto.precio)}"
+                >
+
+                <div class="acciones-usuario-admin">
+
+                    <button
+                        type="button"
+                        class="boton boton-chico"
+                        onclick="actualizarPrecioProductoAlmacenero(${producto.id})"
+                    >
+                        guardar precio
+                    </button>
+
+                    <button
+                        type="button"
+                        class="boton boton-peligro boton-chico"
+                        onclick="quitarProductoDesdeAlmacenero(${producto.id})"
+                    >
+                        quitar producto
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+    }
+}
+
+// =======================================================
+// ACTUALIZAR LISTA DE PRODUCTOS
+// =======================================================
+
+async function actualizarListaProductosAlmacenero() {
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonActualizarProductosAlmacenero"
+        );
+
+    if (
+        mensaje === null ||
+        boton === null
+    ) {
+        return;
+    }
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    boton.disabled =
+        true;
+
+    try {
+        const cargados =
+            await cargarProductosDesdeSupabase();
+
+        if (!cargados) {
+            mostrarMensaje(
+                mensaje,
+                "no se pudieron cargar los productos",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        renderizarProductosAlmacenero();
+
+        mostrarMensaje(
+            mensaje,
+            "lista actualizada correctamente",
+            "var(--color-exito)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+// =======================================================
+// AGREGAR PRODUCTO DESDE ALMACENERO
+// =======================================================
+
+async function agregarProductoDesdeAlmacenero() {
+    const inputNombre =
+        document.querySelector(
+            "#inputNombreProductoAlmacenero"
+        );
+
+    const inputPrecio =
+        document.querySelector(
+            "#inputPrecioProductoAlmacenero"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonAgregarProductoAlmacenero"
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    if (
+        inputNombre === null ||
+        inputPrecio === null ||
+        boton === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    const nombre =
+        inputNombre.value.trim();
+
+    const precio =
+        Number(
+            inputPrecio.value
+        );
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        nombre === "" ||
+        Number.isNaN(precio) ||
+        precio <= 0
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "ingresá un nombre y un precio válido",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        typeof window.productosRepository ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "el servicio de productos no está disponible",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    boton.disabled =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .productosRepository
+                .crearProducto(
+                    nombre,
+                    precio
+                );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensaje,
+                resultado.mensaje ||
+                    "no se pudo crear el producto",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        inputNombre.value =
+            "";
+
+        inputPrecio.value =
+            "";
+
+        await cargarProductosDesdeSupabase();
+
+        renderizarProductosAlmacenero();
+
+        mostrarMensaje(
+            mensaje,
+            "producto agregado correctamente",
+            "var(--color-exito)"
+        );
+    } catch (error) {
+        console.error(
+            "Error al crear producto desde almacenero:",
+            error
+        );
+
+        mostrarMensaje(
+            mensaje,
+            "no se pudo crear el producto",
+            "var(--color-error)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+// =======================================================
+// ACTUALIZAR PRECIO DESDE ALMACENERO
+// =======================================================
+
+async function actualizarPrecioProductoAlmacenero(
+    idProducto
+) {
+    const producto =
+        buscarProductoPorId(
+            idProducto
+        );
+
+    const input =
+        document.querySelector(
+            "#precioProductoAlmacenero-" +
+                idProducto
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    if (
+        producto === null ||
+        input === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    const precio =
+        Number(
+            input.value
+        );
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        Number.isNaN(precio) ||
+        precio <= 0
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "ingresá un precio válido",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const resultado =
+        await window
+            .productosRepository
+            .actualizarProducto(
+                producto.id,
+                producto.nombre,
+                precio,
+                true
+            );
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensaje,
+            resultado.mensaje ||
+                "no se pudo actualizar el precio",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    await cargarProductosDesdeSupabase();
+
+    renderizarProductosAlmacenero();
+
+    mostrarMensaje(
+        mensaje,
+        "precio actualizado correctamente",
+        "var(--color-exito)"
+    );
+}
+
+// =======================================================
+// QUITAR PRODUCTO DESDE ALMACENERO
+// =======================================================
+
+async function quitarProductoDesdeAlmacenero(
+    idProducto
+) {
+    const producto =
+        buscarProductoPorId(
+            idProducto
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    if (
+        producto === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Quitar el producto " +
+            producto.nombre +
+            "?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    const resultado =
+        await window
+            .productosRepository
+            .eliminarProducto(
+                producto.id
+            );
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensaje,
+            resultado.mensaje ||
+                "no se pudo quitar el producto",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    await cargarProductosDesdeSupabase();
+
+    renderizarProductosAlmacenero();
+
+    mostrarMensaje(
+        mensaje,
+        "producto quitado correctamente",
+        "var(--color-exito)"
+    );
+}
+
+
+
+
 async function abrirPanelAlmacenero() {
     if (!asegurarPantallaAlmacenero()) {
         mostrarMensaje(
@@ -3755,9 +4256,26 @@ async function abrirPanelAlmacenero() {
         "#pantallaAlmacenero"
     );
 
+    const productosCargados =
+        await cargarProductosDesdeSupabase();
+
+    renderizarProductosAlmacenero();
+
+    if (!productosCargados) {
+        const mensajeProductos =
+            document.querySelector(
+                "#mensajeProductosAlmacenero"
+            );
+
+        mostrarMensaje(
+            mensajeProductos,
+            "no se pudieron cargar los productos",
+            "var(--color-error)"
+        );
+    }
+
     await cargarFondoAlmacenero();
 }
-
 // =======================================================
 // CARGA DESDE SUPABASE
 // =======================================================
