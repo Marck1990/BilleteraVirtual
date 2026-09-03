@@ -12,6 +12,18 @@ if (typeof emailjs !== "undefined") {
     });
 }
 
+
+// =======================================================
+// ESTADO DEL LECTOR QR DEL ALMACENERO
+// =======================================================
+
+let lectorQrAlmacenero = null;
+let lectorQrAlmaceneroActivo = false;
+let lectorQrAlmaceneroIniciando = false;
+let qrAlmaceneroProcesado = false;
+
+
+
 // =======================================================
 // DATOS INICIALES
 // =======================================================
@@ -3423,6 +3435,369 @@ function volverAInicio() {
     );
 }
 
+
+// =======================================================
+// MENSAJES DEL LECTOR QR
+// =======================================================
+
+function mostrarMensajeLectorQrAlmacenero(
+    texto,
+    tipo = ""
+) {
+    const mensaje =
+        document.querySelector(
+            "#mensajeQrAlmacenero"
+        );
+
+    if (mensaje === null) {
+        return;
+    }
+
+    mensaje.textContent =
+        texto;
+
+    mensaje.className =
+        "mensaje";
+
+    if (tipo !== "") {
+        mensaje.classList.add(
+            "mensaje-" + tipo
+        );
+    }
+}
+
+// =======================================================
+// OBTENER TOKEN DESDE EL QR
+// =======================================================
+
+function obtenerTokenDesdeQrAlmacenero(
+    contenidoQr
+) {
+    const texto =
+        String(
+            contenidoQr || ""
+        ).trim();
+
+    if (texto === "") {
+        return null;
+    }
+
+    try {
+        const direccion =
+            new URL(
+                texto,
+                window.location.href
+            );
+
+        const token =
+            direccion.searchParams.get(
+                "token"
+            );
+
+        if (
+            token === null ||
+            token.trim() === ""
+        ) {
+            return null;
+        }
+
+        return token.trim();
+    } catch (error) {
+        return null;
+    }
+}
+
+// =======================================================
+// DETENER LECTOR QR
+// =======================================================
+
+async function detenerLectorQrAlmacenero() {
+    const contenedor =
+        document.querySelector(
+            "#lectorQrAlmacenero"
+        );
+
+    const botonIniciar =
+        document.querySelector(
+            "#botonIniciarLectorQrAlmacenero"
+        );
+
+    const botonDetener =
+        document.querySelector(
+            "#botonDetenerLectorQrAlmacenero"
+        );
+
+    if (lectorQrAlmacenero !== null) {
+        try {
+            if (lectorQrAlmaceneroActivo) {
+                await lectorQrAlmacenero
+                    .stop();
+            }
+        } catch (error) {
+            console.error(
+                "Error al detener el lector QR:",
+                error
+            );
+        }
+
+        try {
+            lectorQrAlmacenero.clear();
+        } catch (error) {
+            console.error(
+                "Error al limpiar el lector QR:",
+                error
+            );
+        }
+    }
+
+    lectorQrAlmacenero = null;
+    lectorQrAlmaceneroActivo = false;
+    lectorQrAlmaceneroIniciando = false;
+    qrAlmaceneroProcesado = false;
+
+    if (contenedor !== null) {
+        contenedor.innerHTML = "";
+        contenedor.classList.add(
+            "oculto"
+        );
+    }
+
+    if (botonIniciar !== null) {
+        botonIniciar.disabled =
+            false;
+    }
+
+    if (botonDetener !== null) {
+        botonDetener.classList.add(
+            "oculto"
+        );
+    }
+}
+
+// =======================================================
+// PROCESAR CÓDIGO QR
+// =======================================================
+
+async function procesarQrAlmacenero(
+    contenidoQr
+) {
+    if (qrAlmaceneroProcesado) {
+        return;
+    }
+
+    const token =
+        obtenerTokenDesdeQrAlmacenero(
+            contenidoQr
+        );
+
+    if (token === null) {
+        mostrarMensajeLectorQrAlmacenero(
+            "El código QR no corresponde a un vale válido.",
+            "error"
+        );
+
+        return;
+    }
+
+    qrAlmaceneroProcesado =
+        true;
+
+    mostrarMensajeLectorQrAlmacenero(
+        "Vale encontrado. Abriendo comprobante...",
+        "exito"
+    );
+
+    await detenerLectorQrAlmacenero();
+
+    const direccionVale =
+        new URL(
+            "vale.html",
+            window.location.href
+        );
+
+    direccionVale.searchParams.set(
+        "token",
+        token
+    );
+
+    window.location.assign(
+        direccionVale.toString()
+    );
+}
+
+// =======================================================
+// INICIAR LECTOR QR
+// =======================================================
+
+async function iniciarLectorQrAlmacenero() {
+    if (
+        lectorQrAlmaceneroActivo ||
+        lectorQrAlmaceneroIniciando
+    ) {
+        return;
+    }
+
+    const contenedor =
+        document.querySelector(
+            "#lectorQrAlmacenero"
+        );
+
+    const botonIniciar =
+        document.querySelector(
+            "#botonIniciarLectorQrAlmacenero"
+        );
+
+    const botonDetener =
+        document.querySelector(
+            "#botonDetenerLectorQrAlmacenero"
+        );
+
+    if (
+        contenedor === null ||
+        botonIniciar === null ||
+        botonDetener === null
+    ) {
+        return;
+    }
+
+    if (
+        typeof window.Html5Qrcode ===
+        "undefined"
+    ) {
+        mostrarMensajeLectorQrAlmacenero(
+            "El lector QR no está disponible.",
+            "error"
+        );
+
+        return;
+    }
+
+    lectorQrAlmaceneroIniciando =
+        true;
+
+    qrAlmaceneroProcesado =
+        false;
+
+    botonIniciar.disabled =
+        true;
+
+    contenedor.classList.remove(
+        "oculto"
+    );
+
+    mostrarMensajeLectorQrAlmacenero(
+        "Permití el acceso a la cámara."
+    );
+
+    try {
+        lectorQrAlmacenero =
+            new window.Html5Qrcode(
+                "lectorQrAlmacenero",
+                {
+                    formatsToSupport: [
+                        window
+                            .Html5QrcodeSupportedFormats
+                            .QR_CODE
+                    ]
+                }
+            );
+
+        await lectorQrAlmacenero.start(
+            {
+                facingMode:
+                    "environment"
+            },
+            {
+                fps:
+                    10,
+
+                qrbox: {
+                    width:
+                        220,
+
+                    height:
+                        220
+                }
+            },
+            procesarQrAlmacenero,
+            function () {
+                // La cámara continúa buscando un QR.
+            }
+        );
+
+        lectorQrAlmaceneroActivo =
+            true;
+
+        botonDetener.classList.remove(
+            "oculto"
+        );
+
+        mostrarMensajeLectorQrAlmacenero(
+            "Apuntá la cámara al código QR del vale."
+        );
+    } catch (error) {
+        console.error(
+            "Error al iniciar el lector QR:",
+            error
+        );
+
+        if (lectorQrAlmacenero !== null) {
+            try {
+                lectorQrAlmacenero.clear();
+            } catch (errorLimpieza) {
+                console.error(
+                    "Error al limpiar el lector:",
+                    errorLimpieza
+                );
+            }
+        }
+
+        lectorQrAlmacenero = null;
+        lectorQrAlmaceneroActivo = false;
+
+        contenedor.innerHTML = "";
+        contenedor.classList.add(
+            "oculto"
+        );
+
+        botonIniciar.disabled =
+            false;
+
+        mostrarMensajeLectorQrAlmacenero(
+            "No se pudo abrir la cámara. Revisá sus permisos.",
+            "error"
+        );
+    } finally {
+        lectorQrAlmaceneroIniciando =
+            false;
+    }
+}
+
+// =======================================================
+// DETENER LECTOR DESDE EL BOTÓN
+// =======================================================
+
+async function detenerLectorQrDesdeBoton() {
+    await detenerLectorQrAlmacenero();
+
+    mostrarMensajeLectorQrAlmacenero(
+        "Lector detenido."
+    );
+}
+
+// =======================================================
+// SALIR DEL PANEL DEL ALMACENERO
+// =======================================================
+
+async function salirDesdePanelAlmacenero() {
+    await detenerLectorQrAlmacenero();
+
+    salirSistema();
+}
+
+
+
+
 // =======================================================
 // PANEL DEL ALMACENERO
 // =======================================================
@@ -3595,9 +3970,36 @@ function asegurarPantallaAlmacenero() {
                     </p>
 
                     <p class="texto-suave">
-                        el comprobante permitirá consultar
-                        los datos del vale y marcarlo como utilizado
+                        podrás consultar los datos del vale
+                        y marcarlo como utilizado
                     </p>
+
+                    <button
+                        type="button"
+                        id="botonIniciarLectorQrAlmacenero"
+                        class="boton"
+                    >
+                        abrir cámara
+                    </button>
+
+                    <button
+                        type="button"
+                        id="botonDetenerLectorQrAlmacenero"
+                        class="boton boton-secundario oculto"
+                    >
+                        detener cámara
+                    </button>
+
+                    <div
+                        id="lectorQrAlmacenero"
+                        class="lector-qr-almacenero oculto"
+                    ></div>
+
+                    <p
+                        id="mensajeQrAlmacenero"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
 
                 </article>
 
@@ -3633,10 +4035,20 @@ function asegurarPantallaAlmacenero() {
             "#botonActualizarProductosAlmacenero"
         );
 
+    const botonIniciarLectorQr =
+        seccion.querySelector(
+            "#botonIniciarLectorQrAlmacenero"
+        );
+
+    const botonDetenerLectorQr =
+        seccion.querySelector(
+            "#botonDetenerLectorQrAlmacenero"
+        );
+
     escuchar(
         botonSalir,
         "click",
-        salirSistema
+        salirDesdePanelAlmacenero
     );
 
     escuchar(
@@ -3657,8 +4069,24 @@ function asegurarPantallaAlmacenero() {
         actualizarListaProductosAlmacenero
     );
 
+    escuchar(
+        botonIniciarLectorQr,
+        "click",
+        iniciarLectorQrAlmacenero
+    );
+
+    escuchar(
+        botonDetenerLectorQr,
+        "click",
+        detenerLectorQrDesdeBoton
+    );
+
     return true;
 }
+
+
+
+
 
 
 function renderizarAlmaceneroActivo() {
@@ -4189,7 +4617,7 @@ async function quitarProductoDesdeAlmacenero(
         producto === null ||
         mensaje === null
     ) {
-        return;
+        return
     }
 
     const confirmado =
