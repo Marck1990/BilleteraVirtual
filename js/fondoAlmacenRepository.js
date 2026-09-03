@@ -16,15 +16,31 @@ function obtenerAdaptadorFondoAlmacen() {
 }
 
 // =======================================================
-// CONSULTAR FONDO
+// LISTAR ALMACENES
 // =======================================================
 
-async function consultarFondoAlmacenRepositorio() {
+async function listarAlmacenesRepositorio() {
     const adaptador =
         obtenerAdaptadorFondoAlmacen();
 
     return await adaptador
-        .consultarFondo();
+        .listarAlmacenes();
+}
+
+// =======================================================
+// CONSULTAR FONDO
+// =======================================================
+
+async function consultarFondoAlmacenRepositorio(
+    almacenId = null
+) {
+    const adaptador =
+        obtenerAdaptadorFondoAlmacen();
+
+    return await adaptador
+        .consultarFondo(
+            almacenId
+        );
 }
 
 // =======================================================
@@ -32,14 +48,16 @@ async function consultarFondoAlmacenRepositorio() {
 // =======================================================
 
 async function cargarFondoAlmacenRepositorio(
-    monto
+    monto,
+    almacenId = null
 ) {
     const adaptador =
         obtenerAdaptadorFondoAlmacen();
 
     return await adaptador
         .cargarFondo(
-            monto
+            monto,
+            almacenId
         );
 }
 
@@ -48,6 +66,9 @@ async function cargarFondoAlmacenRepositorio(
 // =======================================================
 
 window.fondoAlmacenRepository = {
+    listarAlmacenes:
+        listarAlmacenesRepositorio,
+
     consultarFondo:
         consultarFondoAlmacenRepositorio,
 

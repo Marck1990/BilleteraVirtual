@@ -366,6 +366,42 @@ const listaProductosAdmin =
 const listaHistorialAdmin =
     document.querySelector("#listaHistorialAdmin");
 
+
+// =======================================================
+// REFERENCIAS DEL FONDO POR ALMACÉN
+// =======================================================
+
+const selectAlmacenFondoAdmin =
+    document.querySelector(
+        "#selectAlmacenFondoAdmin"
+    );
+
+const saldoAlmacenSeleccionadoAdmin =
+    document.querySelector(
+        "#saldoAlmacenSeleccionadoAdmin"
+    );
+
+const inputMontoFondoAdmin =
+    document.querySelector(
+        "#inputMontoFondoAdmin"
+    );
+
+const botonCargarFondoAdmin =
+    document.querySelector(
+        "#botonCargarFondoAdmin"
+    );
+
+const botonActualizarAlmacenesAdmin =
+    document.querySelector(
+        "#botonActualizarAlmacenesAdmin"
+    );
+
+const mensajeFondoAdmin =
+    document.querySelector(
+        "#mensajeFondoAdmin"
+    );
+
+
 // administrador superior
 
 const textoAdminSuperiorActual =
@@ -5455,6 +5491,409 @@ function renderizarTodoTitular() {
     renderizarHistorialTitular();
 }
 
+
+
+
+// =======================================================
+// MENSAJES DEL FONDO DEL ADMINISTRADOR
+// =======================================================
+
+function mostrarMensajeFondoAdmin(
+    texto,
+    tipo = ""
+) {
+    if (mensajeFondoAdmin === null) {
+        return;
+    }
+
+    mensajeFondoAdmin.textContent =
+        texto;
+
+    mensajeFondoAdmin.className =
+        "mensaje";
+
+    if (tipo !== "") {
+        mensajeFondoAdmin.classList.add(
+            "mensaje-" + tipo
+        );
+    }
+}
+
+function formatearFondoAdmin(valor) {
+    const numero =
+        Number(valor);
+
+    return new Intl.NumberFormat(
+        "es-UY",
+        {
+            style:
+                "currency",
+
+            currency:
+                "UYU",
+
+            maximumFractionDigits:
+                0
+        }
+    ).format(
+        Number.isFinite(numero)
+            ? numero
+            : 0
+    );
+}
+
+// =======================================================
+// CONSULTAR FONDO DEL ALMACÉN SELECCIONADO
+// =======================================================
+
+async function consultarFondoSeleccionadoAdmin() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        saldoAlmacenSeleccionadoAdmin ===
+            null
+    ) {
+        return;
+    }
+
+    const almacenId =
+        selectAlmacenFondoAdmin
+            .value
+            .trim();
+
+    if (almacenId === "") {
+        saldoAlmacenSeleccionadoAdmin
+            .textContent =
+            "seleccioná un almacén para consultar su fondo";
+
+        if (botonCargarFondoAdmin !== null) {
+            botonCargarFondoAdmin.disabled =
+                true;
+        }
+
+        return;
+    }
+
+    if (botonCargarFondoAdmin !== null) {
+        botonCargarFondoAdmin.disabled =
+            true;
+    }
+
+    saldoAlmacenSeleccionadoAdmin
+        .textContent =
+        "consultando fondo...";
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .consultarFondo(
+                almacenId
+            );
+
+    if (!resultado.correcto) {
+        saldoAlmacenSeleccionadoAdmin
+            .textContent =
+            "no se pudo consultar el fondo";
+
+        mostrarMensajeFondoAdmin(
+            resultado.mensaje ||
+                "no se pudo consultar el fondo",
+            "error"
+        );
+
+        return;
+    }
+
+    const opcionSeleccionada =
+        selectAlmacenFondoAdmin
+            .options[
+                selectAlmacenFondoAdmin
+                    .selectedIndex
+            ];
+
+    const nombreAlmacen =
+        resultado.almacenNombre ||
+        opcionSeleccionada?.textContent ||
+        "almacén";
+
+    saldoAlmacenSeleccionadoAdmin
+        .textContent =
+        "fondo disponible en " +
+        nombreAlmacen +
+        ": " +
+        formatearFondoAdmin(
+            resultado.saldo
+        );
+
+    mostrarMensajeFondoAdmin(
+        ""
+    );
+
+    if (botonCargarFondoAdmin !== null) {
+        botonCargarFondoAdmin.disabled =
+            false;
+    }
+}
+
+// =======================================================
+// LISTAR ALMACENES EN EL PANEL
+// =======================================================
+
+async function cargarAlmacenesFondoAdmin() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        typeof window
+            .fondoAlmacenRepository ===
+            "undefined"
+    ) {
+        return;
+    }
+
+    const almacenAnterior =
+        selectAlmacenFondoAdmin.value;
+
+    selectAlmacenFondoAdmin.disabled =
+        true;
+
+    if (
+        botonActualizarAlmacenesAdmin !==
+        null
+    ) {
+        botonActualizarAlmacenesAdmin
+            .disabled =
+            true;
+    }
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .listarAlmacenes();
+
+    selectAlmacenFondoAdmin.innerHTML =
+        "";
+
+    const opcionInicial =
+        document.createElement(
+            "option"
+        );
+
+    opcionInicial.value =
+        "";
+
+    opcionInicial.textContent =
+        "seleccioná un almacén";
+
+    selectAlmacenFondoAdmin.appendChild(
+        opcionInicial
+    );
+
+    if (!resultado.correcto) {
+        selectAlmacenFondoAdmin.disabled =
+            false;
+
+        if (
+            botonActualizarAlmacenesAdmin !==
+            null
+        ) {
+            botonActualizarAlmacenesAdmin
+                .disabled =
+                false;
+        }
+
+        mostrarMensajeFondoAdmin(
+            resultado.mensaje ||
+                "no se pudieron obtener los almacenes",
+            "error"
+        );
+
+        return;
+    }
+
+    for (
+        let i = 0;
+        i < resultado.almacenes.length;
+        i++
+    ) {
+        const almacen =
+            resultado.almacenes[i];
+
+        const opcion =
+            document.createElement(
+                "option"
+            );
+
+        opcion.value =
+            almacen.id;
+
+        opcion.textContent =
+            almacen.nombre;
+
+        selectAlmacenFondoAdmin.appendChild(
+            opcion
+        );
+    }
+
+    const almacenAnteriorExiste =
+        resultado.almacenes.some(
+            function (almacen) {
+                return (
+                    almacen.id ===
+                    almacenAnterior
+                );
+            }
+        );
+
+    if (almacenAnteriorExiste) {
+        selectAlmacenFondoAdmin.value =
+            almacenAnterior;
+    } else if (
+        resultado.almacenes.length === 1
+    ) {
+        selectAlmacenFondoAdmin.value =
+            resultado.almacenes[0].id;
+    }
+
+    selectAlmacenFondoAdmin.disabled =
+        false;
+
+    if (
+        botonActualizarAlmacenesAdmin !==
+        null
+    ) {
+        botonActualizarAlmacenesAdmin
+            .disabled =
+            false;
+    }
+
+    if (
+        resultado.almacenes.length === 0
+    ) {
+        mostrarMensajeFondoAdmin(
+            "no hay almacenes disponibles",
+            "error"
+        );
+    } else {
+        mostrarMensajeFondoAdmin(
+            ""
+        );
+    }
+
+    await consultarFondoSeleccionadoAdmin();
+}
+
+// =======================================================
+// CARGAR DINERO AL ALMACÉN
+// =======================================================
+
+async function cargarFondoDesdeAdministrador() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        inputMontoFondoAdmin === null ||
+        botonCargarFondoAdmin === null
+    ) {
+        return;
+    }
+
+    const almacenId =
+        selectAlmacenFondoAdmin
+            .value
+            .trim();
+
+    const monto =
+        Number(
+            inputMontoFondoAdmin.value
+        );
+
+    if (almacenId === "") {
+        mostrarMensajeFondoAdmin(
+            "seleccioná un almacén",
+            "error"
+        );
+
+        return;
+    }
+
+    if (
+        !Number.isFinite(monto) ||
+        monto <= 0
+    ) {
+        mostrarMensajeFondoAdmin(
+            "ingresá un monto mayor que cero",
+            "error"
+        );
+
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Confirmás la carga de " +
+            formatearFondoAdmin(monto) +
+            " al almacén seleccionado?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    botonCargarFondoAdmin.disabled =
+        true;
+
+    mostrarMensajeFondoAdmin(
+        "cargando fondo..."
+    );
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .cargarFondo(
+                monto,
+                almacenId
+            );
+
+    if (!resultado.correcto) {
+        botonCargarFondoAdmin.disabled =
+            false;
+
+        let mensaje =
+            resultado.mensaje ||
+            "no se pudo cargar el fondo";
+
+        if (
+            resultado.resultado ===
+            "sin_permiso"
+        ) {
+            mensaje =
+                "solo un administrador común puede cargar fondos";
+        }
+
+        if (
+            resultado.resultado ===
+            "almacen_no_encontrado"
+        ) {
+            mensaje =
+                "el almacén seleccionado no está disponible";
+        }
+
+        mostrarMensajeFondoAdmin(
+            mensaje,
+            "error"
+        );
+
+        return;
+    }
+
+    inputMontoFondoAdmin.value =
+        "";
+
+    mostrarMensajeFondoAdmin(
+        "fondo cargado correctamente",
+        "exito"
+    );
+
+    await consultarFondoSeleccionadoAdmin();
+}
+
+
 // =======================================================
 // RENDER DEL ADMINISTRADOR
 // =======================================================
@@ -8248,6 +8687,27 @@ escuchar(
     crearAlmaceneroDesdePanelSuperior
 );
 
+
+escuchar(
+    selectAlmacenFondoAdmin,
+    "change",
+    consultarFondoSeleccionadoAdmin
+);
+
+escuchar(
+    botonCargarFondoAdmin,
+    "click",
+    cargarFondoDesdeAdministrador
+);
+
+escuchar(
+    botonActualizarAlmacenesAdmin,
+    "click",
+    cargarAlmacenesFondoAdmin
+);
+
+
+
 // =======================================================
 // INICIO DE LA APLICACIÓN
 // =======================================================
@@ -8313,3 +8773,7 @@ if (botonCrearNuevoAdmin !== null) {
         crearAdministradorDesdePanelSuperior
     );
 }
+
+
+
+
