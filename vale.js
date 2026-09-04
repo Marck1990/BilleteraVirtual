@@ -1080,7 +1080,7 @@ function obtenerMensajeResultadoUtilizacion(
     if (
         resultado === "sin_permiso"
     ) {
-        return "Tu usuario no tiene permiso para utilizar este vale.";
+        return "Este vale pertenece a otro almacén y no puede ser utilizado por tu usuario.";
     }
 
     if (

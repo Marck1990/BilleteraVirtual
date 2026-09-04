@@ -368,6 +368,17 @@ const botonImprimirQrVale =
     );
 
 
+const pantallaCarga =
+    document.querySelector(
+        "#pantallaCarga"
+    );
+
+const textoPantallaCarga =
+    document.querySelector(
+        "#textoPantallaCarga"
+    );
+
+
 // administrador común
 
 const textoAdminActual =
@@ -595,6 +606,68 @@ function mostrarPantalla(idPantalla) {
         );
     }
 }
+
+
+
+// =======================================================
+// PANTALLA GENERAL DE CARGA
+// =======================================================
+
+let inicioPantallaCarga = 0;
+
+function mostrarPantallaCarga(
+    texto = "Cargando..."
+) {
+    if (pantallaCarga === null) {
+        return;
+    }
+
+    inicioPantallaCarga =
+        Date.now();
+
+    if (textoPantallaCarga !== null) {
+        textoPantallaCarga.textContent =
+            texto;
+    }
+
+    pantallaCarga.classList.remove(
+        "oculto"
+    );
+}
+
+async function ocultarPantallaCarga() {
+    if (pantallaCarga === null) {
+        return;
+    }
+
+    const tiempoTranscurrido =
+        Date.now() -
+        inicioPantallaCarga;
+
+    const tiempoRestante =
+        Math.max(
+            500 - tiempoTranscurrido,
+            0
+        );
+
+    if (tiempoRestante > 0) {
+        await new Promise(
+            function (resolver) {
+                setTimeout(
+                    resolver,
+                    tiempoRestante
+                );
+            }
+        );
+    }
+
+    pantallaCarga.classList.add(
+        "oculto"
+    );
+}
+
+
+
 
 function mostrarMensaje(
     elemento,
@@ -4988,41 +5061,49 @@ async function quitarProductoDesdeAlmacenero(
 
 
 async function abrirPanelAlmacenero() {
-    if (!asegurarPantallaAlmacenero()) {
-        mostrarMensaje(
-            mensajeInicio,
-            "no se pudo abrir el panel del almacenero",
-            "var(--color-error)"
-        );
-
-        return;
-    }
-
-    renderizarAlmaceneroActivo();
-
-    mostrarPantalla(
-        "#pantallaAlmacenero"
+    mostrarPantallaCarga(
+        "Cargando..."
     );
 
-    const productosCargados =
-        await cargarProductosDesdeSupabase();
-
-    renderizarProductosAlmacenero();
-
-    if (!productosCargados) {
-        const mensajeProductos =
-            document.querySelector(
-                "#mensajeProductosAlmacenero"
+    try {
+        if (!asegurarPantallaAlmacenero()) {
+            mostrarMensaje(
+                mensajeInicio,
+                "no se pudo abrir el panel del almacenero",
+                "var(--color-error)"
             );
 
-        mostrarMensaje(
-            mensajeProductos,
-            "no se pudieron cargar los productos",
-            "var(--color-error)"
-        );
-    }
+            return;
+        }
 
-    await cargarFondoAlmacenero();
+        renderizarAlmaceneroActivo();
+
+        mostrarPantalla(
+            "#pantallaAlmacenero"
+        );
+
+        const productosCargados =
+            await cargarProductosDesdeSupabase();
+
+        renderizarProductosAlmacenero();
+
+        if (!productosCargados) {
+            const mensajeProductos =
+                document.querySelector(
+                    "#mensajeProductosAlmacenero"
+                );
+
+            mostrarMensaje(
+                mensajeProductos,
+                "no se pudieron cargar los productos",
+                "var(--color-error)"
+            );
+        }
+
+        await cargarFondoAlmacenero();
+    } finally {
+        await ocultarPantallaCarga();
+    }
 }
 // =======================================================
 // CARGA DESDE SUPABASE
@@ -5363,24 +5444,36 @@ async function recuperarValePendienteTitular() {
 
 
 
-
 async function abrirBilletera() {
-    actualizarValesVencidos();
-
-    almacenTitularSeleccionadoId =
-        null;
-
-    productos = [];
-
-    renderizarTodoTitular();
-
-    mostrarPantalla(
-        "#pantallaBilletera"
+    mostrarPantallaCarga(
+        "Cargando..."
     );
 
-    await cargarAlmacenesTitular();
+    try {
+        actualizarValesVencidos();
 
-    await recuperarValePendienteTitular();
+        almacenTitularSeleccionadoId =
+            null;
+
+        productos = [];
+
+        renderizarTodoTitular();
+
+        mostrarPantalla(
+            "#pantallaBilletera"
+        );
+
+        await cargarAlmacenesTitular();
+
+        await recuperarValePendienteTitular();
+    } catch (error) {
+        console.error(
+            "Error al abrir la billetera:",
+            error
+        );
+    } finally {
+        await ocultarPantallaCarga();
+    }
 }
 
 
