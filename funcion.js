@@ -2284,38 +2284,61 @@ function obtenerImagenQrValeActual() {
         return null;
     }
 
-    const canvas =
+    const qrOriginal =
         contenedorQrVale.querySelector(
+            "canvas, img"
+        );
+
+    if (qrOriginal === null) {
+        return null;
+    }
+
+    const tamanoQr =
+        960;
+
+    const margen =
+        120;
+
+    const canvasDescarga =
+        document.createElement(
             "canvas"
         );
 
-    if (canvas !== null) {
-        try {
-            return canvas.toDataURL(
-                "image/png"
-            );
-        } catch (error) {
-            console.error(
-                "Error al convertir el QR:",
-                error
-            );
-        }
-    }
+    canvasDescarga.width =
+        tamanoQr + margen * 2;
 
-    const imagen =
-        contenedorQrVale.querySelector(
-            "img"
+    canvasDescarga.height =
+        tamanoQr + margen * 2;
+
+    const contexto =
+        canvasDescarga.getContext(
+            "2d"
         );
 
-    if (
-        imagen !== null &&
-        typeof imagen.src === "string" &&
-        imagen.src !== ""
-    ) {
-        return imagen.src;
-    }
+    contexto.fillStyle =
+        "#ffffff";
 
-    return null;
+    contexto.fillRect(
+        0,
+        0,
+        canvasDescarga.width,
+        canvasDescarga.height
+    );
+
+    contexto.imageSmoothingEnabled =
+        false;
+
+    contexto.drawImage(
+        qrOriginal,
+        margen,
+        margen,
+        tamanoQr,
+        tamanoQr
+    );
+
+    return canvasDescarga.toDataURL(
+        "image/png"
+    );
 }
 
 function descargarQrVale() {
