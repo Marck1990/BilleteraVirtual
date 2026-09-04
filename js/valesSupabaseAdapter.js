@@ -149,8 +149,24 @@ async function guardarValeSupabase(vale) {
 // =======================================================
 
 async function realizarCompraConValeSupabase(
-    vale
+    vale,
+    almacenId
 ) {
+    if (
+        typeof almacenId !== "string" ||
+        almacenId.trim() === ""
+    ) {
+        return {
+            correcto: false,
+
+            resultado:
+                "almacen_invalido",
+
+            error:
+                "seleccioná un almacén"
+        };
+    }
+
     try {
         const cliente =
             obtenerClienteSupabase();
@@ -174,7 +190,10 @@ async function realizarCompraConValeSupabase(
                         vale.fechaVencimiento,
 
                     p_productos:
-                        productos
+                        productos,
+
+                    p_almacen_id:
+                        almacenId
                 }
             );
 
@@ -256,7 +275,12 @@ async function realizarCompraConValeSupabase(
 
                 fechaVencimiento:
                     valeRemoto
-                        .vence_en
+                        .vence_en,
+
+                almacenId:
+                    valeRemoto
+                        .almacen_id ||
+                    almacenId
             }
         };
     } catch (error) {

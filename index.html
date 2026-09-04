@@ -521,6 +521,18 @@
                                 catálogo de productos
                             </h3>
 
+                            <label for="selectAlmacenTitular" class="etiqueta-control">
+                                seleccionar almacén
+                            </label>
+
+                            <select id="selectAlmacenTitular" class="input-control">
+                                <option value="">
+                                    cargando almacenes...
+                                </option>
+                            </select>
+
+                            <p id="mensajeAlmacenTitular" class="mensaje" aria-live="polite"></p>
+
                             <div id="listaProductos" class="lista-productos"></div>
 
                         </article>
@@ -627,214 +639,147 @@
              PANEL DEL ADMINISTRADOR
         ======================================================== -->
 
-     <!-- =======================================================
+        <!-- =======================================================
      PANEL DEL ADMINISTRADOR
 ======================================================== -->
 
-<section id="pantallaAdmin" class="pantalla oculto">
-    <div class="contenedor-principal">
+        <section id="pantallaAdmin" class="pantalla oculto">
+            <div class="contenedor-principal">
 
-        <header class="encabezado-billetera">
+                <header class="encabezado-billetera">
 
-            <div>
+                    <div>
 
-                <h2 class="titulo-seccion">
-                    panel administrador
-                </h2>
+                        <h2 class="titulo-seccion">
+                            panel administrador
+                        </h2>
 
-                <p
-                    id="textoAdminActual"
-                    class="texto-suave"
-                >
-                    sin administrador activo
-                </p>
+                        <p id="textoAdminActual" class="texto-suave">
+                            sin administrador activo
+                        </p>
 
-            </div>
+                    </div>
 
-            <div class="acciones-encabezado">
+                    <div class="acciones-encabezado">
 
-                <button
-                    type="button"
-                    id="botonSalirAdmin"
-                    class="boton boton-secundario"
-                >
-                    cerrar sesión
-                </button>
+                        <button type="button" id="botonSalirAdmin" class="boton boton-secundario">
+                            cerrar sesión
+                        </button>
 
-            </div>
+                    </div>
 
-        </header>
+                </header>
 
-        <div class="grid-admin">
+                <div class="grid-admin">
 
-            <article class="tarjeta">
+                    <article class="tarjeta">
 
-                <h3 class="subtitulo-seccion">
-                    usuarios registrados
-                </h3>
+                        <h3 class="subtitulo-seccion">
+                            usuarios registrados
+                        </h3>
 
-                <div
-                    id="listaUsuariosAdmin"
-                    class="lista-usuarios-admin"
-                ></div>
+                        <div id="listaUsuariosAdmin" class="lista-usuarios-admin"></div>
 
-            </article>
+                    </article>
 
-            <!-- ===================================================
+                    <!-- ===================================================
                  CARGAR FONDO DE UN ALMACÉN
             ==================================================== -->
 
-            <article class="tarjeta">
+                    <article class="tarjeta">
 
-                <h3 class="subtitulo-seccion">
-                    cargar fondo del almacén
-                </h3>
+                        <h3 class="subtitulo-seccion">
+                            cargar fondo del almacén
+                        </h3>
 
-                <p class="texto-suave">
-                    seleccioná el almacén que recibirá
-                    el dinero
-                </p>
+                        <p class="texto-suave">
+                            seleccioná el almacén que recibirá
+                            el dinero
+                        </p>
 
-                <label
-                    for="selectAlmacenFondoAdmin"
-                    class="etiqueta-control"
-                >
-                    almacén
-                </label>
+                        <label for="selectAlmacenFondoAdmin" class="etiqueta-control">
+                            almacén
+                        </label>
 
-                <select
-                    id="selectAlmacenFondoAdmin"
-                    class="input-control"
-                >
-                    <option value="">
-                        seleccioná un almacén
-                    </option>
-                </select>
+                        <select id="selectAlmacenFondoAdmin" class="input-control">
+                            <option value="">
+                                seleccioná un almacén
+                            </option>
+                        </select>
 
-                <p
-                    id="saldoAlmacenSeleccionadoAdmin"
-                    class="texto-suave"
-                >
-                    seleccioná un almacén para consultar
-                    su fondo
-                </p>
+                        <p id="saldoAlmacenSeleccionadoAdmin" class="texto-suave">
+                            seleccioná un almacén para consultar
+                            su fondo
+                        </p>
 
-                <label
-                    for="inputMontoFondoAdmin"
-                    class="etiqueta-control"
-                >
-                    monto a cargar
-                </label>
+                        <label for="inputMontoFondoAdmin" class="etiqueta-control">
+                            monto a cargar
+                        </label>
 
-                <input
-                    type="number"
-                    id="inputMontoFondoAdmin"
-                    class="input-control"
-                    placeholder="ejemplo: 1000"
-                    min="1"
-                    step="1"
-                >
+                        <input type="number" id="inputMontoFondoAdmin" class="input-control" placeholder="ejemplo: 1000"
+                            min="1" step="1">
 
-                <button
-                    type="button"
-                    id="botonCargarFondoAdmin"
-                    class="boton"
-                >
-                    cargar fondo
-                </button>
+                        <button type="button" id="botonCargarFondoAdmin" class="boton">
+                            cargar fondo
+                        </button>
 
-                <button
-                    type="button"
-                    id="botonActualizarAlmacenesAdmin"
-                    class="boton boton-secundario"
-                >
-                    actualizar almacenes
-                </button>
+                        <button type="button" id="botonActualizarAlmacenesAdmin" class="boton boton-secundario">
+                            actualizar almacenes
+                        </button>
 
-                <p
-                    id="mensajeFondoAdmin"
-                    class="mensaje"
-                    aria-live="polite"
-                ></p>
+                        <p id="mensajeFondoAdmin" class="mensaje" aria-live="polite"></p>
 
-            </article>
+                    </article>
 
-            <article class="tarjeta">
+                    <article class="tarjeta">
 
-                <h3 class="subtitulo-seccion">
-                    agregar producto
-                </h3>
+                        <h3 class="subtitulo-seccion">
+                            agregar producto
+                        </h3>
 
-                <label
-                    for="inputNombreProducto"
-                    class="etiqueta-control"
-                >
-                    nombre del producto
-                </label>
+                        <label for="inputNombreProducto" class="etiqueta-control">
+                            nombre del producto
+                        </label>
 
-                <input
-                    type="text"
-                    id="inputNombreProducto"
-                    class="input-control"
-                    placeholder="ejemplo: pera"
-                >
+                        <input type="text" id="inputNombreProducto" class="input-control" placeholder="ejemplo: pera">
 
-                <label
-                    for="inputPrecioProducto"
-                    class="etiqueta-control"
-                >
-                    precio
-                </label>
+                        <label for="inputPrecioProducto" class="etiqueta-control">
+                            precio
+                        </label>
 
-                <input
-                    type="number"
-                    id="inputPrecioProducto"
-                    class="input-control"
-                    placeholder="ejemplo: 45"
-                    min="1"
-                    step="1"
-                >
+                        <input type="number" id="inputPrecioProducto" class="input-control" placeholder="ejemplo: 45"
+                            min="1" step="1">
 
-                <button
-                    type="button"
-                    id="botonAgregarProducto"
-                    class="boton"
-                >
-                    agregar producto
-                </button>
+                        <button type="button" id="botonAgregarProducto" class="boton">
+                            agregar producto
+                        </button>
 
-            </article>
+                    </article>
 
-            <article class="tarjeta">
+                    <article class="tarjeta">
 
-                <h3 class="subtitulo-seccion">
-                    quitar productos
-                </h3>
+                        <h3 class="subtitulo-seccion">
+                            quitar productos
+                        </h3>
 
-                <div
-                    id="listaProductosAdmin"
-                    class="lista-productos-admin"
-                ></div>
+                        <div id="listaProductosAdmin" class="lista-productos-admin"></div>
 
-            </article>
+                    </article>
 
-        </div>
+                </div>
 
-        <article class="tarjeta">
+                <article class="tarjeta">
 
-            <h3 class="subtitulo-seccion">
-                historial completo
-            </h3>
+                    <h3 class="subtitulo-seccion">
+                        historial completo
+                    </h3>
 
-            <div
-                id="listaHistorialAdmin"
-                class="lista-historial"
-            ></div>
+                    <div id="listaHistorialAdmin" class="lista-historial"></div>
 
-        </article>
+                </article>
 
-    </div>
-</section>
+            </div>
+        </section>
 
         <!-- =======================================================
              PANEL DEL ADMIN SUPERIOR

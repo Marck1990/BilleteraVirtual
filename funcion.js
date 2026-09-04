@@ -129,6 +129,9 @@ let sesion = {
 
 let carrito = [];
 
+let almacenTitularSeleccionadoId =
+    null;
+
 let palabraAdminSuperiorActual = "";
 let usuarioAdminSuperiorValidado = "";
 let codigoAdminSuperiorEnviado = false;
@@ -286,6 +289,18 @@ const estadoTitular =
 
 const listaProductos =
     document.querySelector("#listaProductos");
+
+
+const selectAlmacenTitular =
+    document.querySelector(
+        "#selectAlmacenTitular"
+    );
+
+const mensajeAlmacenTitular =
+    document.querySelector(
+        "#mensajeAlmacenTitular"
+    );
+
 
 const listaCarrito =
     document.querySelector("#listaCarrito");
@@ -1698,6 +1713,21 @@ async function procesarCompraConVale() {
     const usuarioActivo =
         obtenerUsuarioActivo();
 
+    if (
+        typeof almacenTitularSeleccionadoId !==
+            "string" ||
+        almacenTitularSeleccionadoId.trim() ===
+            ""
+    ) {
+        mostrarMensaje(
+            mensajeCompra,
+            "seleccioná un almacén antes de comprar",
+            "var(--color-error)"
+        );
+
+        return null;
+    }
+
     await sincronizarValesLocalesConSupabase();
 
     actualizarValesVencidos();
@@ -1731,11 +1761,11 @@ async function procesarCompraConVale() {
         if (esUsuarioSupabase) {
             if (
                 typeof window.valesRepository ===
-                "undefined" ||
+                    "undefined" ||
                 typeof window
                     .valesRepository
                     .realizarCompraConVale !==
-                "function"
+                    "function"
             ) {
                 mostrarMensaje(
                     mensajeCompra,
@@ -1785,11 +1815,15 @@ async function procesarCompraConVale() {
                         validacion.total
                 });
 
+                vale.almacenId =
+                    almacenTitularSeleccionadoId;
+
                 resultadoSupabase =
                     await window
                         .valesRepository
                         .realizarCompraConVale(
-                            vale
+                            vale,
+                            almacenTitularSeleccionadoId
                         );
 
                 if (
@@ -1841,6 +1875,14 @@ async function procesarCompraConVale() {
                 ) {
                     mensajeError =
                         "la sesión venció. Iniciá sesión nuevamente";
+                } else if (
+                    resultadoError ===
+                        "almacen_invalido" ||
+                    resultadoError ===
+                        "almacen_no_encontrado"
+                ) {
+                    mensajeError =
+                        "el almacén seleccionado ya no está disponible";
                 } else if (
                     resultadoError ===
                     "codigo_duplicado"
@@ -1917,6 +1959,9 @@ async function procesarCompraConVale() {
                 total:
                     validacion.total
             });
+
+            vale.almacenId =
+                almacenTitularSeleccionadoId;
 
             const saldoAnterior =
                 usuarioActivo.saldo;
@@ -4508,7 +4553,7 @@ async function agregarProductoDesdeAlmacenero() {
             mostrarMensaje(
                 mensaje,
                 resultado.mensaje ||
-                    "no se pudo crear el producto",
+                "no se pudo crear el producto",
                 "var(--color-error)"
             );
 
@@ -4562,7 +4607,7 @@ async function actualizarPrecioProductoAlmacenero(
     const input =
         document.querySelector(
             "#precioProductoAlmacenero-" +
-                idProducto
+            idProducto
         );
 
     const mensaje =
@@ -4614,7 +4659,7 @@ async function actualizarPrecioProductoAlmacenero(
         mostrarMensaje(
             mensaje,
             resultado.mensaje ||
-                "no se pudo actualizar el precio",
+            "no se pudo actualizar el precio",
             "var(--color-error)"
         );
 
@@ -4682,7 +4727,7 @@ async function quitarProductoDesdeAlmacenero(
         mostrarMensaje(
             mensaje,
             resultado.mensaje ||
-                "no se pudo quitar el producto",
+            "no se pudo quitar el producto",
             "var(--color-error)"
         );
 
@@ -4775,26 +4820,250 @@ async function cargarProductosDesdeSupabase() {
     return true;
 }
 
-async function abrirBilletera() {
-    actualizarValesVencidos();
 
-    const productosCargados =
-        await cargarProductosDesdeSupabase();
 
-    if (!productosCargados) {
+// =======================================================
+// ALMACÉN SELECCIONADO POR EL TITULAR
+// =======================================================
+
+async function cargarProductosAlmacenTitular() {
+    productos = [];
+
+    renderizarProductos();
+
+    if (
+        almacenTitularSeleccionadoId ===
+        null
+    ) {
         mostrarMensaje(
-            mensajeCompra,
+            mensajeAlmacenTitular,
+            "seleccioná un almacén",
+            "var(--color-advertencia)"
+        );
+
+        return false;
+    }
+
+    if (
+        typeof window.productosRepository ===
+        "undefined" ||
+        typeof window
+            .productosRepository
+            .listarProductosPorAlmacen !==
+        "function"
+    ) {
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            "el servicio de productos no está disponible",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+
+    limpiarMensaje(
+        mensajeAlmacenTitular
+    );
+
+    const resultado =
+        await window
+            .productosRepository
+            .listarProductosPorAlmacen(
+                almacenTitularSeleccionadoId
+            );
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            resultado.mensaje ||
             "no se pudieron cargar los productos",
             "var(--color-error)"
         );
+
+        return false;
     }
+
+    productos =
+        resultado.productos;
+
+    siguienteIdProducto =
+        obtenerSiguienteId(
+            productos
+        );
+
+    renderizarProductos();
+
+    return true;
+}
+
+async function cargarAlmacenesTitular() {
+    if (selectAlmacenTitular === null) {
+        return false;
+    }
+
+    selectAlmacenTitular.disabled =
+        true;
+
+    selectAlmacenTitular.innerHTML =
+        "";
+
+    const opcionCargando =
+        document.createElement(
+            "option"
+        );
+
+    opcionCargando.value =
+        "";
+
+    opcionCargando.textContent =
+        "cargando almacenes...";
+
+    selectAlmacenTitular.appendChild(
+        opcionCargando
+    );
+
+    if (
+        typeof window.fondoAlmacenRepository ===
+        "undefined" ||
+        typeof window
+            .fondoAlmacenRepository
+            .listarAlmacenes !==
+        "function"
+    ) {
+        opcionCargando.textContent =
+            "servicio no disponible";
+
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            "no se pudieron consultar los almacenes",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .listarAlmacenes();
+
+    if (
+        !resultado.correcto ||
+        resultado.almacenes.length === 0
+    ) {
+        opcionCargando.textContent =
+            "no hay almacenes disponibles";
+
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            resultado.mensaje ||
+            "no hay almacenes disponibles",
+            "var(--color-advertencia)"
+        );
+
+        return false;
+    }
+
+    selectAlmacenTitular.innerHTML =
+        "";
+
+    for (
+        let i = 0;
+        i < resultado.almacenes.length;
+        i++
+    ) {
+        const almacen =
+            resultado.almacenes[i];
+
+        const opcion =
+            document.createElement(
+                "option"
+            );
+
+        opcion.value =
+            almacen.id;
+
+        opcion.textContent =
+            almacen.nombre;
+
+        selectAlmacenTitular.appendChild(
+            opcion
+        );
+    }
+
+    almacenTitularSeleccionadoId =
+        resultado.almacenes[0].id;
+
+    selectAlmacenTitular.value =
+        almacenTitularSeleccionadoId;
+
+    selectAlmacenTitular.disabled =
+        false;
+
+    return await cargarProductosAlmacenTitular();
+}
+
+async function cambiarAlmacenTitular() {
+    if (selectAlmacenTitular === null) {
+        return;
+    }
+
+    const nuevoAlmacenId =
+        selectAlmacenTitular
+            .value
+            .trim();
+
+    if (
+        nuevoAlmacenId === "" ||
+        nuevoAlmacenId ===
+        almacenTitularSeleccionadoId
+    ) {
+        return;
+    }
+
+    almacenTitularSeleccionadoId =
+        nuevoAlmacenId;
+
+    carrito = [];
+
+    renderizarCarrito();
+
+    const productosCargados =
+        await cargarProductosAlmacenTitular();
+
+    if (productosCargados) {
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            "almacén actualizado y carrito vaciado",
+            "var(--color-exito)"
+        );
+    }
+}
+
+
+
+
+
+
+async function abrirBilletera() {
+    actualizarValesVencidos();
+
+    almacenTitularSeleccionadoId =
+        null;
+
+    productos = [];
 
     renderizarTodoTitular();
 
     mostrarPantalla(
         "#pantallaBilletera"
     );
+
+    await cargarAlmacenesTitular();
 }
+
+
+
 
 async function cargarUsuariosParaAdministracion() {
     if (
@@ -5550,7 +5819,7 @@ async function consultarFondoSeleccionadoAdmin() {
     if (
         selectAlmacenFondoAdmin === null ||
         saldoAlmacenSeleccionadoAdmin ===
-            null
+        null
     ) {
         return;
     }
@@ -5596,7 +5865,7 @@ async function consultarFondoSeleccionadoAdmin() {
 
         mostrarMensajeFondoAdmin(
             resultado.mensaje ||
-                "no se pudo consultar el fondo",
+            "no se pudo consultar el fondo",
             "error"
         );
 
@@ -5606,9 +5875,9 @@ async function consultarFondoSeleccionadoAdmin() {
     const opcionSeleccionada =
         selectAlmacenFondoAdmin
             .options[
-                selectAlmacenFondoAdmin
-                    .selectedIndex
-            ];
+        selectAlmacenFondoAdmin
+            .selectedIndex
+        ];
 
     const nombreAlmacen =
         resultado.almacenNombre ||
@@ -5643,7 +5912,7 @@ async function cargarAlmacenesFondoAdmin() {
         selectAlmacenFondoAdmin === null ||
         typeof window
             .fondoAlmacenRepository ===
-            "undefined"
+        "undefined"
     ) {
         return;
     }
@@ -5701,7 +5970,7 @@ async function cargarAlmacenesFondoAdmin() {
 
         mostrarMensajeFondoAdmin(
             resultado.mensaje ||
-                "no se pudieron obtener los almacenes",
+            "no se pudieron obtener los almacenes",
             "error"
         );
 
@@ -8556,6 +8825,13 @@ function mostrarSoporte() {
 // =======================================================
 
 escuchar(
+    selectAlmacenTitular,
+    "change",
+    cambiarAlmacenTitular
+);
+
+
+escuchar(
     botonGuardarContrasenaObligatoria,
     "click",
     guardarContrasenaObligatoria
@@ -8789,9 +9065,9 @@ async function aplicarSesionAlmaceneroRestaurada(
     if (
         usuarioSupabase === null ||
         typeof usuarioSupabase !==
-            "object" ||
+        "object" ||
         usuarioSupabase.tipo !==
-            "operador_vales"
+        "operador_vales"
     ) {
         return false;
     }
@@ -8881,11 +9157,11 @@ async function restaurarAlmaceneroAlVolver() {
 
     if (
         typeof window.usuariosRepository ===
-            "undefined" ||
+        "undefined" ||
         typeof window
             .usuariosRepository
             .restaurarSesion !==
-            "function"
+        "function"
     ) {
         return;
     }

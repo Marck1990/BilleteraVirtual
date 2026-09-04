@@ -53,7 +53,8 @@ async function guardarValeRepositorio(
 // =======================================================
 
 async function realizarCompraConValeRepositorio(
-    vale
+    vale,
+    almacenId
 ) {
     const adaptador =
         obtenerAdaptadorVales();
@@ -64,6 +65,7 @@ async function realizarCompraConValeRepositorio(
     ) {
         return {
             correcto: false,
+
             resultado:
                 "operacion_no_disponible"
         };
@@ -71,7 +73,8 @@ async function realizarCompraConValeRepositorio(
 
     return await adaptador
         .realizarCompraConVale(
-            vale
+            vale,
+            almacenId
         );
 }
 
