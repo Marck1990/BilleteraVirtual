@@ -536,3 +536,48 @@ button {
         align-self: flex-start;
     }
 }
+
+
+/* =======================================================
+   IMPRESIÓN Y GUARDADO COMO PDF
+======================================================= */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    body {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .pagina-vale {
+        min-height: auto;
+        padding: 0;
+    }
+
+    .comprobante-vale {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        border: none;
+        box-shadow: none;
+    }
+
+    .acciones-comprobante,
+    .mensaje-accion {
+        display: none !important;
+    }
+
+    .tabla-contenedor {
+        overflow: visible;
+    }
+
+    .tabla-productos {
+        width: 100%;
+    }
+
+}
