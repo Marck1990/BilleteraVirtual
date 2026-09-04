@@ -1715,9 +1715,9 @@ async function procesarCompraConVale() {
 
     if (
         typeof almacenTitularSeleccionadoId !==
-            "string" ||
+        "string" ||
         almacenTitularSeleccionadoId.trim() ===
-            ""
+        ""
     ) {
         mostrarMensaje(
             mensajeCompra,
@@ -1761,11 +1761,11 @@ async function procesarCompraConVale() {
         if (esUsuarioSupabase) {
             if (
                 typeof window.valesRepository ===
-                    "undefined" ||
+                "undefined" ||
                 typeof window
                     .valesRepository
                     .realizarCompraConVale !==
-                    "function"
+                "function"
             ) {
                 mostrarMensaje(
                     mensajeCompra,
@@ -1877,9 +1877,9 @@ async function procesarCompraConVale() {
                         "la sesión venció. Iniciá sesión nuevamente";
                 } else if (
                     resultadoError ===
-                        "almacen_invalido" ||
+                    "almacen_invalido" ||
                     resultadoError ===
-                        "almacen_no_encontrado"
+                    "almacen_no_encontrado"
                 ) {
                     mensajeError =
                         "el almacén seleccionado ya no está disponible";
@@ -5714,13 +5714,19 @@ function renderizarHistorialTitular() {
         return;
     }
 
+    const movimientosVisibles =
+        usuario.historial.slice(
+            0,
+            5
+        );
+
     for (
         let i = 0;
-        i < usuario.historial.length;
+        i < movimientosVisibles.length;
         i++
     ) {
         const movimiento =
-            usuario.historial[i];
+            movimientosVisibles[i];
 
         listaHistorial.innerHTML += `
             <div class="item-historial">
