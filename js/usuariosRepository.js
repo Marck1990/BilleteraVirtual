@@ -127,3 +127,19 @@ window.usuariosRepository = {
     cambiarContrasenaObligatoria:
         cambiarContrasenaObligatoriaRepositorio
 };
+
+// =======================================================
+// RESTAURAR SESIÓN EXISTENTE
+// =======================================================
+
+async function restaurarSesionRepositorio() {
+    const adaptador =
+        obtenerAdaptadorUsuarios();
+
+    return await adaptador
+        .restaurarSesion();
+}
+
+window.usuariosRepository
+    .restaurarSesion =
+    restaurarSesionRepositorio;
