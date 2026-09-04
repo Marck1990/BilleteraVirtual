@@ -5717,7 +5717,7 @@ function renderizarHistorialTitular() {
     const movimientosVisibles =
         usuario.historial.slice(
             0,
-            5
+            3
         );
 
     for (
