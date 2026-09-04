@@ -689,12 +689,12 @@
                     <article class="tarjeta">
 
                         <h3 class="subtitulo-seccion">
-                            cargar fondo del almacén
+                            administrar fondo del almacén
                         </h3>
 
                         <p class="texto-suave">
-                            seleccioná el almacén que recibirá
-                            el dinero
+                            seleccioná el almacén y luego cargá
+                            o retirale dinero
                         </p>
 
                         <label for="selectAlmacenFondoAdmin" class="etiqueta-control">
@@ -713,15 +713,23 @@
                         </p>
 
                         <label for="inputMontoFondoAdmin" class="etiqueta-control">
-                            monto a cargar
+                            monto a cargar o retirar
                         </label>
 
                         <input type="number" id="inputMontoFondoAdmin" class="input-control" placeholder="ejemplo: 1000"
                             min="1" step="1">
 
-                        <button type="button" id="botonCargarFondoAdmin" class="boton">
-                            cargar fondo
-                        </button>
+                        <div class="acciones-formulario">
+
+                            <button type="button" id="botonCargarFondoAdmin" class="boton">
+                                cargar fondo
+                            </button>
+
+                            <button type="button" id="botonRetirarFondoAdmin" class="boton boton-peligro">
+                                retirar fondo
+                            </button>
+
+                        </div>
 
                         <button type="button" id="botonActualizarAlmacenesAdmin" class="boton boton-secundario">
                             actualizar almacenes

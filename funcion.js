@@ -406,6 +406,14 @@ const botonCargarFondoAdmin =
         "#botonCargarFondoAdmin"
     );
 
+
+const botonRetirarFondoAdmin =
+    document.querySelector(
+        "#botonRetirarFondoAdmin"
+    );
+
+
+
 const botonActualizarAlmacenesAdmin =
     document.querySelector(
         "#botonActualizarAlmacenesAdmin"
@@ -6063,7 +6071,8 @@ async function cargarFondoDesdeAdministrador() {
     if (
         selectAlmacenFondoAdmin === null ||
         inputMontoFondoAdmin === null ||
-        botonCargarFondoAdmin === null
+        botonCargarFondoAdmin === null ||
+        botonRetirarFondoAdmin === null
     ) {
         return;
     }
@@ -6113,60 +6122,225 @@ async function cargarFondoDesdeAdministrador() {
     botonCargarFondoAdmin.disabled =
         true;
 
+    botonRetirarFondoAdmin.disabled =
+        true;
+
     mostrarMensajeFondoAdmin(
         "cargando fondo..."
     );
 
-    const resultado =
-        await window
-            .fondoAlmacenRepository
-            .cargarFondo(
-                monto,
-                almacenId
+    try {
+        const resultado =
+            await window
+                .fondoAlmacenRepository
+                .cargarFondo(
+                    monto,
+                    almacenId
+                );
+
+        if (!resultado.correcto) {
+            let mensaje =
+                resultado.mensaje ||
+                "no se pudo cargar el fondo";
+
+            if (
+                resultado.resultado ===
+                "sin_permiso"
+            ) {
+                mensaje =
+                    "solo un administrador común puede cargar fondos";
+            }
+
+            if (
+                resultado.resultado ===
+                "almacen_no_encontrado"
+            ) {
+                mensaje =
+                    "el almacén seleccionado no está disponible";
+            }
+
+            mostrarMensajeFondoAdmin(
+                mensaje,
+                "error"
             );
 
-    if (!resultado.correcto) {
+            return;
+        }
+
+        inputMontoFondoAdmin.value =
+            "";
+
+        await consultarFondoSeleccionadoAdmin();
+
+        mostrarMensajeFondoAdmin(
+            "fondo cargado correctamente",
+            "exito"
+        );
+    } catch (error) {
+        console.error(
+            "Error al cargar fondo:",
+            error
+        );
+
+        mostrarMensajeFondoAdmin(
+            "no se pudo cargar el fondo",
+            "error"
+        );
+    } finally {
         botonCargarFondoAdmin.disabled =
             false;
 
-        let mensaje =
-            resultado.mensaje ||
-            "no se pudo cargar el fondo";
+        botonRetirarFondoAdmin.disabled =
+            false;
+    }
+}
 
-        if (
-            resultado.resultado ===
-            "sin_permiso"
-        ) {
-            mensaje =
-                "solo un administrador común puede cargar fondos";
-        }
 
-        if (
-            resultado.resultado ===
-            "almacen_no_encontrado"
-        ) {
-            mensaje =
-                "el almacén seleccionado no está disponible";
-        }
 
+
+async function retirarFondoDesdeAdministrador() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        inputMontoFondoAdmin === null ||
+        botonCargarFondoAdmin === null ||
+        botonRetirarFondoAdmin === null
+    ) {
+        return;
+    }
+
+    const almacenId =
+        selectAlmacenFondoAdmin
+            .value
+            .trim();
+
+    const monto =
+        Number(
+            inputMontoFondoAdmin.value
+        );
+
+    if (almacenId === "") {
         mostrarMensajeFondoAdmin(
-            mensaje,
+            "seleccioná un almacén",
             "error"
         );
 
         return;
     }
 
-    inputMontoFondoAdmin.value =
-        "";
+    if (
+        !Number.isFinite(monto) ||
+        monto <= 0
+    ) {
+        mostrarMensajeFondoAdmin(
+            "ingresá un monto mayor que cero",
+            "error"
+        );
+
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Confirmás el retiro de " +
+            formatearFondoAdmin(monto) +
+            " del almacén seleccionado?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    botonCargarFondoAdmin.disabled =
+        true;
+
+    botonRetirarFondoAdmin.disabled =
+        true;
 
     mostrarMensajeFondoAdmin(
-        "fondo cargado correctamente",
-        "exito"
+        "retirando fondo..."
     );
 
-    await consultarFondoSeleccionadoAdmin();
+    try {
+        const resultado =
+            await window
+                .fondoAlmacenRepository
+                .retirarFondo(
+                    monto,
+                    almacenId
+                );
+
+        if (!resultado.correcto) {
+            let mensaje =
+                resultado.mensaje ||
+                "no se pudo retirar el fondo";
+
+            if (
+                resultado.resultado ===
+                "sin_permiso"
+            ) {
+                mensaje =
+                    "solo un administrador común puede retirar fondos";
+            } else if (
+                resultado.resultado ===
+                "almacen_no_encontrado"
+            ) {
+                mensaje =
+                    "el almacén seleccionado no está disponible";
+            } else if (
+                resultado.resultado ===
+                "fondo_comprometido"
+            ) {
+                mensaje =
+                    "no se puede retirar ese monto. Disponible: " +
+                    formatearFondoAdmin(
+                        resultado.saldoDisponible
+                    ) +
+                    ". Reservado para vales pendientes: " +
+                    formatearFondoAdmin(
+                        resultado.saldoReservado
+                    );
+            }
+
+            mostrarMensajeFondoAdmin(
+                mensaje,
+                "error"
+            );
+
+            return;
+        }
+
+        inputMontoFondoAdmin.value =
+            "";
+
+        await consultarFondoSeleccionadoAdmin();
+
+        mostrarMensajeFondoAdmin(
+            "fondo retirado correctamente",
+            "exito"
+        );
+    } catch (error) {
+        console.error(
+            "Error al retirar fondo:",
+            error
+        );
+
+        mostrarMensajeFondoAdmin(
+            "no se pudo retirar el fondo",
+            "error"
+        );
+    } finally {
+        botonCargarFondoAdmin.disabled =
+            false;
+
+        botonRetirarFondoAdmin.disabled =
+            false;
+    }
 }
+
+
+
+
+
 
 
 // =======================================================
@@ -8981,6 +9155,15 @@ escuchar(
     "click",
     cargarFondoDesdeAdministrador
 );
+
+
+escuchar(
+    botonRetirarFondoAdmin,
+    "click",
+    retirarFondoDesdeAdministrador
+);
+
+
 
 escuchar(
     botonActualizarAlmacenesAdmin,

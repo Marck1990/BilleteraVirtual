@@ -393,6 +393,171 @@ async function cargarFondoAlmacenSupabase(
     }
 }
 
+
+
+
+
+// =======================================================
+// RETIRAR FONDO
+// =======================================================
+
+async function retirarFondoAlmacenSupabase(
+    monto,
+    almacenId
+) {
+    const montoNumerico =
+        Number(monto);
+
+    const idNormalizado =
+        typeof almacenId === "string"
+            ? almacenId.trim()
+            : "";
+
+    if (
+        !Number.isFinite(
+            montoNumerico
+        ) ||
+        montoNumerico <= 0
+    ) {
+        return {
+            correcto: false,
+
+            resultado:
+                "monto_invalido",
+
+            mensaje:
+                "el monto debe ser mayor que cero"
+        };
+    }
+
+    if (idNormalizado === "") {
+        return {
+            correcto: false,
+
+            resultado:
+                "almacen_invalido",
+
+            mensaje:
+                "seleccioná un almacén"
+        };
+    }
+
+    try {
+        const cliente =
+            obtenerClienteFondoAlmacenSupabase();
+
+        const respuesta =
+            await cliente.rpc(
+                "retirar_fondo_almacen",
+                {
+                    p_almacen_id:
+                        idNormalizado,
+
+                    p_monto:
+                        montoNumerico
+                }
+            );
+
+        if (respuesta.error) {
+            console.error(
+                "Error al retirar el fondo:",
+                respuesta.error
+            );
+
+            return {
+                correcto: false,
+
+                resultado:
+                    "error_supabase",
+
+                mensaje:
+                    respuesta.error.message
+            };
+        }
+
+        const datos =
+            respuesta.data;
+
+        if (
+            datos === null ||
+            datos.resultado !==
+                "retiro_correcto"
+        ) {
+            return {
+                correcto: false,
+
+                resultado:
+                    datos?.resultado ||
+                    "respuesta_invalida",
+
+                saldoActual:
+                    convertirNumeroFondo(
+                        datos?.saldo_actual
+                    ),
+
+                saldoReservado:
+                    convertirNumeroFondo(
+                        datos?.saldo_reservado
+                    ),
+
+                saldoDisponible:
+                    convertirNumeroFondo(
+                        datos?.saldo_disponible
+                    ),
+
+                mensaje:
+                    "no se pudo retirar el fondo"
+            };
+        }
+
+        return {
+            correcto: true,
+
+            resultado:
+                datos.resultado,
+
+            almacenId:
+                idNormalizado,
+
+            monto:
+                convertirNumeroFondo(
+                    datos.monto
+                ),
+
+            saldo:
+                convertirNumeroFondo(
+                    datos.saldo
+                ),
+
+            saldoReservado:
+                convertirNumeroFondo(
+                    datos.saldo_reservado
+                )
+        };
+    } catch (error) {
+        console.error(
+            "Error inesperado al retirar el fondo:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            resultado:
+                "error_inesperado",
+
+            mensaje:
+                "no se pudo conectar con Supabase"
+        };
+    }
+}
+
+
+
+
+
+
+
 // =======================================================
 // API PÚBLICA DEL ADAPTADOR
 // =======================================================
@@ -405,5 +570,8 @@ window.fondoAlmacenSupabaseAdapter = {
         consultarFondoAlmacenSupabase,
 
     cargarFondo:
-        cargarFondoAlmacenSupabase
+        cargarFondoAlmacenSupabase,
+
+    retirarFondo:
+        retirarFondoAlmacenSupabase
 };

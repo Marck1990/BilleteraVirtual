@@ -61,6 +61,31 @@ async function cargarFondoAlmacenRepositorio(
         );
 }
 
+
+
+
+// =======================================================
+// RETIRAR FONDO
+// =======================================================
+
+async function retirarFondoAlmacenRepositorio(
+    monto,
+    almacenId
+) {
+    const adaptador =
+        obtenerAdaptadorFondoAlmacen();
+
+    return await adaptador
+        .retirarFondo(
+            monto,
+            almacenId
+        );
+}
+
+
+
+
+
 // =======================================================
 // API PÚBLICA DEL REPOSITORIO
 // =======================================================
@@ -73,5 +98,8 @@ window.fondoAlmacenRepository = {
         consultarFondoAlmacenRepositorio,
 
     cargarFondo:
-        cargarFondoAlmacenRepositorio
+        cargarFondoAlmacenRepositorio,
+
+    retirarFondo:
+        retirarFondoAlmacenRepositorio
 };
