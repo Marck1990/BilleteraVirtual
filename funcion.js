@@ -613,7 +613,8 @@ function mostrarPantalla(idPantalla) {
 // PANTALLA GENERAL DE CARGA
 // =======================================================
 
-let inicioPantallaCarga = 0;
+let inicioPantallaCarga =
+    Date.now();
 
 function mostrarPantallaCarga(
     texto = "Cargando..."
@@ -9922,6 +9923,8 @@ async function restaurarAlmaceneroAlVolver() {
             .restaurarSesion !==
             "function"
     ) {
+        await ocultarPantallaCarga();
+
         return;
     }
 
@@ -9988,6 +9991,8 @@ async function restaurarAlmaceneroAlVolver() {
     } finally {
         restauracionAlmaceneroEnCurso =
             false;
+
+        await ocultarPantallaCarga();
     }
 }
 // =======================================================
