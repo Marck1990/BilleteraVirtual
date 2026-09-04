@@ -993,4 +993,101 @@ window.usuariosSupabaseAdapter = {
 
     cambiarContrasenaObligatoria:
         cambiarContrasenaObligatoriaSupabase
+
+
+
 };
+
+
+// =======================================================
+// RESTAURAR SESIÓN EXISTENTE DE SUPABASE
+// =======================================================
+
+async function restaurarSesionSupabase() {
+    try {
+        const cliente =
+            obtenerClienteUsuariosSupabase();
+
+        const respuestaSesion =
+            await cliente
+                .auth
+                .getSession();
+
+        if (respuestaSesion.error) {
+            return {
+                correcto: false,
+
+                sesionEncontrada:
+                    false,
+
+                mensaje:
+                    respuestaSesion
+                        .error
+                        .message
+            };
+        }
+
+        const sesionSupabase =
+            respuestaSesion
+                .data
+                .session;
+
+        if (sesionSupabase === null) {
+            return {
+                correcto: true,
+
+                sesionEncontrada:
+                    false
+            };
+        }
+
+        const resultadoBilletera =
+            await obtenerMiBilleteraSupabase();
+
+        if (!resultadoBilletera.correcto) {
+            return {
+                correcto: false,
+
+                sesionEncontrada:
+                    true,
+
+                mensaje:
+                    resultadoBilletera
+                        .mensaje
+            };
+        }
+
+        return {
+            correcto: true,
+
+            sesionEncontrada:
+                true,
+
+            sesion:
+                sesionSupabase,
+
+            usuario:
+                resultadoBilletera
+                    .usuario
+        };
+    } catch (error) {
+        console.error(
+            "Error al restaurar sesión:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            sesionEncontrada:
+                false,
+
+            mensaje:
+                "no se pudo restaurar la sesión"
+        };
+    }
+}
+
+window.usuariosSupabaseAdapter
+    .restaurarSesion =
+    restaurarSesionSupabase;

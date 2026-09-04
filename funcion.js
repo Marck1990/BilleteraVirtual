@@ -8776,4 +8776,151 @@ if (botonCrearNuevoAdmin !== null) {
 
 
 
+// =======================================================
+// RESTAURAR PANEL DEL ALMACENERO
+// =======================================================
 
+let restauracionAlmaceneroEnCurso =
+    false;
+
+async function aplicarSesionAlmaceneroRestaurada(
+    usuarioSupabase
+) {
+    if (
+        usuarioSupabase === null ||
+        typeof usuarioSupabase !==
+            "object" ||
+        usuarioSupabase.tipo !==
+            "operador_vales"
+    ) {
+        return false;
+    }
+
+    let almacenero =
+        buscarAdministradorPorNombreUsuario(
+            usuarioSupabase.usuario
+        );
+
+    if (almacenero === null) {
+        almacenero = {
+            id:
+                siguienteIdAdmin,
+
+            tipo:
+                "operadorVales",
+
+            usuario:
+                usuarioSupabase.usuario,
+
+            nombre:
+                usuarioSupabase.nombre,
+
+            contrasena:
+                "",
+
+            debeCambiarContrasena:
+                usuarioSupabase
+                    .debeCambiarContrasena ===
+                true,
+
+            autenticacion:
+                "supabase"
+        };
+
+        administradores.push(
+            almacenero
+        );
+
+        siguienteIdAdmin++;
+    } else {
+        almacenero.tipo =
+            "operadorVales";
+
+        almacenero.nombre =
+            usuarioSupabase.nombre;
+
+        almacenero.debeCambiarContrasena =
+            usuarioSupabase
+                .debeCambiarContrasena ===
+            true;
+
+        almacenero.autenticacion =
+            "supabase";
+    }
+
+    sesion.tipo =
+        "operadorVales";
+
+    sesion.adminId =
+        almacenero.id;
+
+    sesion.usuarioId =
+        null;
+
+    sesion.origen =
+        "supabase";
+
+    if (
+        almacenero
+            .debeCambiarContrasena
+    ) {
+        abrirCambioContrasenaObligatorio();
+
+        return true;
+    }
+
+    await abrirPanelAlmacenero();
+
+    return true;
+}
+
+async function restaurarAlmaceneroAlVolver() {
+    if (restauracionAlmaceneroEnCurso) {
+        return;
+    }
+
+    if (
+        typeof window.usuariosRepository ===
+            "undefined" ||
+        typeof window
+            .usuariosRepository
+            .restaurarSesion !==
+            "function"
+    ) {
+        return;
+    }
+
+    restauracionAlmaceneroEnCurso =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .usuariosRepository
+                .restaurarSesion();
+
+        if (
+            !resultado.correcto ||
+            !resultado.sesionEncontrada
+        ) {
+            return;
+        }
+
+        await aplicarSesionAlmaceneroRestaurada(
+            resultado.usuario
+        );
+    } catch (error) {
+        console.error(
+            "Error al recuperar al almacenero:",
+            error
+        );
+    } finally {
+        restauracionAlmaceneroEnCurso =
+            false;
+    }
+}
+
+window.addEventListener(
+    "pageshow",
+    restaurarAlmaceneroAlVolver
+);
