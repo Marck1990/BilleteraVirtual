@@ -8920,7 +8920,62 @@ async function restaurarAlmaceneroAlVolver() {
     }
 }
 
+// =======================================================
+// RECUPERAR SESIÓN AL VOLVER DESDE EL VALE EN CELULAR
+// =======================================================
+
+let temporizadorRestauracionAlmacenero =
+    null;
+
+function programarRestauracionAlmacenero() {
+    if (
+        document.visibilityState ===
+        "hidden"
+    ) {
+        return;
+    }
+
+    if (
+        temporizadorRestauracionAlmacenero !==
+        null
+    ) {
+        clearTimeout(
+            temporizadorRestauracionAlmacenero
+        );
+    }
+
+    temporizadorRestauracionAlmacenero =
+        setTimeout(
+            function () {
+                temporizadorRestauracionAlmacenero =
+                    null;
+
+                restaurarAlmaceneroAlVolver();
+            },
+            150
+        );
+}
+
 window.addEventListener(
     "pageshow",
-    restaurarAlmaceneroAlVolver
+    programarRestauracionAlmacenero
 );
+
+window.addEventListener(
+    "focus",
+    programarRestauracionAlmacenero
+);
+
+document.addEventListener(
+    "visibilitychange",
+    function () {
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+            programarRestauracionAlmacenero();
+        }
+    }
+);
+
+programarRestauracionAlmacenero();
