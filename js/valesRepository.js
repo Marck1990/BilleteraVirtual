@@ -122,3 +122,41 @@ window.valesRepository = {
     marcarValeComoUsado:
         marcarValeComoUsadoRepositorio
 };
+
+
+
+// =======================================================
+// RECUPERAR ÚLTIMO VALE PENDIENTE DEL TITULAR
+// =======================================================
+
+async function obtenerMiUltimoValePendienteRepositorio() {
+    const adaptador =
+        obtenerAdaptadorVales();
+
+    if (
+        typeof adaptador
+            .obtenerMiUltimoValePendiente !==
+        "function"
+    ) {
+        return {
+            correcto: false,
+
+            existe:
+                false,
+
+            resultado:
+                "operacion_no_disponible"
+        };
+    }
+
+    return await adaptador
+        .obtenerMiUltimoValePendiente();
+}
+
+window.valesRepository
+    .obtenerMiUltimoValePendiente =
+    obtenerMiUltimoValePendienteRepositorio;
+
+
+
+

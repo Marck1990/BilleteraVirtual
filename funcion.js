@@ -5053,6 +5053,86 @@ async function cambiarAlmacenTitular() {
 
 
 
+// =======================================================
+// RECUPERAR VALE PENDIENTE DEL TITULAR
+// =======================================================
+
+async function recuperarValePendienteTitular() {
+    if (
+        sesion.origen !== "supabase" ||
+        typeof window.valesRepository ===
+            "undefined" ||
+        typeof window
+            .valesRepository
+            .obtenerMiUltimoValePendiente !==
+            "function"
+    ) {
+        return false;
+    }
+
+    try {
+        const resultado =
+            await window
+                .valesRepository
+                .obtenerMiUltimoValePendiente();
+
+        if (!resultado.correcto) {
+            console.error(
+                "No se pudo recuperar el vale pendiente:",
+                resultado
+            );
+
+            return false;
+        }
+
+        if (
+            resultado.existe !== true ||
+            resultado.vale === null
+        ) {
+            return false;
+        }
+
+        const vale =
+            resultado.vale;
+
+        guardarVale(
+            vale
+        );
+
+        mostrarValeGenerado(
+            vale
+        );
+
+        mostrarMensaje(
+            mensajeCompra,
+            "se recuperó tu vale pendiente: " +
+                vale.id,
+            "var(--color-principal)"
+        );
+
+        return true;
+    } catch (error) {
+        console.error(
+            "Error al recuperar el vale pendiente:",
+            error
+        );
+
+        return false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 async function abrirBilletera() {
     actualizarValesVencidos();
 
@@ -5068,8 +5148,9 @@ async function abrirBilletera() {
     );
 
     await cargarAlmacenesTitular();
-}
 
+    await recuperarValePendienteTitular();
+}
 
 
 

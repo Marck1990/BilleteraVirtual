@@ -437,3 +437,182 @@ window.valesSupabaseAdapter = {
     marcarValeComoUsado:
         marcarValeComoUsadoSupabase
 };
+
+
+
+
+
+// =======================================================
+// RECUPERAR ÚLTIMO VALE PENDIENTE DEL TITULAR
+// =======================================================
+
+async function obtenerMiUltimoValePendienteSupabase() {
+    try {
+        const cliente =
+            obtenerClienteSupabase();
+
+        const respuesta =
+            await cliente.rpc(
+                "obtener_mi_ultimo_vale_pendiente"
+            );
+
+        if (respuesta.error) {
+            console.error(
+                "Error al recuperar el vale pendiente:",
+                respuesta.error
+            );
+
+            return {
+                correcto: false,
+
+                existe:
+                    false,
+
+                mensaje:
+                    respuesta.error.message
+            };
+        }
+
+        const datos =
+            respuesta.data;
+
+        if (
+            datos === null ||
+            datos.resultado !==
+                "correcto"
+        ) {
+            return {
+                correcto: false,
+
+                existe:
+                    false,
+
+                resultado:
+                    datos?.resultado ||
+                    "respuesta_invalida",
+
+                mensaje:
+                    "no se pudo recuperar el vale pendiente"
+            };
+        }
+
+        if (
+            datos.existe !== true ||
+            datos.vale === null
+        ) {
+            return {
+                correcto: true,
+
+                existe:
+                    false
+            };
+        }
+
+        const valeOriginal =
+            datos.vale;
+
+        const productosOriginales =
+            Array.isArray(
+                valeOriginal.productos
+            )
+                ? valeOriginal.productos
+                : [];
+
+        const productos = [];
+
+        for (
+            let i = 0;
+            i < productosOriginales.length;
+            i++
+        ) {
+            const producto =
+                productosOriginales[i];
+
+            productos.push({
+                nombre:
+                    producto.nombre,
+
+                cantidad:
+                    Number(
+                        producto.cantidad
+                    ),
+
+                precioUnitario:
+                    Number(
+                        producto
+                            .precio_unitario
+                    ),
+
+                subtotal:
+                    Number(
+                        producto.subtotal
+                    )
+            });
+        }
+
+        return {
+            correcto: true,
+
+            existe:
+                true,
+
+            vale: {
+                id:
+                    valeOriginal.codigo,
+
+                idInterno:
+                    valeOriginal.id,
+
+                tokenPublico:
+                    valeOriginal
+                        .token_publico,
+
+                titularNombre:
+                    valeOriginal
+                        .titular_nombre,
+
+                estado:
+                    valeOriginal.estado,
+
+                total:
+                    Number(
+                        valeOriginal.total
+                    ),
+
+                fechaCreacion:
+                    valeOriginal
+                        .creado_en,
+
+                fechaVencimiento:
+                    valeOriginal
+                        .vence_en,
+
+                almacenId:
+                    valeOriginal
+                        .almacen_id,
+
+                productos:
+                    productos
+            }
+        };
+    } catch (error) {
+        console.error(
+            "Error inesperado al recuperar el vale pendiente:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            existe:
+                false,
+
+            mensaje:
+                "no se pudo conectar con Supabase"
+        };
+    }
+}
+
+window.valesSupabaseAdapter
+    .obtenerMiUltimoValePendiente =
+    obtenerMiUltimoValePendienteSupabase;
