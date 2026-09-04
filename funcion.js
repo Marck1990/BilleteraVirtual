@@ -355,6 +355,19 @@ const enlaceAbrirComprobanteVale =
 const botonCerrarValeGenerado =
     document.querySelector("#botonCerrarValeGenerado");
 
+
+
+const botonDescargarQrVale =
+    document.querySelector(
+        "#botonDescargarQrVale"
+    );
+
+const botonImprimirQrVale =
+    document.querySelector(
+        "#botonImprimirQrVale"
+    );
+
+
 // administrador común
 
 const textoAdminActual =
@@ -2258,6 +2271,201 @@ function generarCodigoQR(
         return false;
     }
 }
+
+
+
+
+// =======================================================
+// DESCARGAR E IMPRIMIR EL QR
+// =======================================================
+
+function obtenerImagenQrValeActual() {
+    if (contenedorQrVale === null) {
+        return null;
+    }
+
+    const canvas =
+        contenedorQrVale.querySelector(
+            "canvas"
+        );
+
+    if (canvas !== null) {
+        try {
+            return canvas.toDataURL(
+                "image/png"
+            );
+        } catch (error) {
+            console.error(
+                "Error al convertir el QR:",
+                error
+            );
+        }
+    }
+
+    const imagen =
+        contenedorQrVale.querySelector(
+            "img"
+        );
+
+    if (
+        imagen !== null &&
+        typeof imagen.src === "string" &&
+        imagen.src !== ""
+    ) {
+        return imagen.src;
+    }
+
+    return null;
+}
+
+function descargarQrVale() {
+    const imagenQr =
+        obtenerImagenQrValeActual();
+
+    if (imagenQr === null) {
+        mostrarMensaje(
+            mensajeCompra,
+            "no se pudo preparar el QR para descargar",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const codigoVale =
+        idValeMostradoActualmente ||
+        "vale";
+
+    const enlace =
+        document.createElement(
+            "a"
+        );
+
+    enlace.href =
+        imagenQr;
+
+    enlace.download =
+        "QR-" +
+        codigoVale +
+        ".png";
+
+    document.body.appendChild(
+        enlace
+    );
+
+    enlace.click();
+
+    enlace.remove();
+
+    mostrarMensaje(
+        mensajeCompra,
+        "QR descargado correctamente",
+        "var(--color-exito)"
+    );
+}
+
+function imprimirQrVale() {
+    const imagenQr =
+        obtenerImagenQrValeActual();
+
+    if (imagenQr === null) {
+        mostrarMensaje(
+            mensajeCompra,
+            "no se pudo preparar el QR para imprimir",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const ventanaImpresion =
+        window.open(
+            "",
+            "_blank"
+        );
+
+    if (ventanaImpresion === null) {
+        mostrarMensaje(
+            mensajeCompra,
+            "el navegador bloqueó la ventana de impresión",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    ventanaImpresion.document.write(`
+        <!DOCTYPE html>
+
+        <html lang="es">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0"
+            >
+
+            <title>Imprimir QR</title>
+
+            <style>
+
+                @page {
+                    margin: 12mm;
+                }
+
+                html,
+                body {
+                    width: 100%;
+                    min-height: 100%;
+                    margin: 0;
+                }
+
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                img {
+                    width: 90mm;
+                    height: 90mm;
+                    object-fit: contain;
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <img
+                src="${imagenQr}"
+                alt="Código QR del vale"
+                onload="window.focus(); window.print();"
+            >
+
+            <script>
+                window.onafterprint =
+                    function () {
+                        window.close();
+                    };
+            <\/script>
+
+        </body>
+
+        </html>
+    `);
+
+    ventanaImpresion.document.close();
+}
+
+
+
+
+
 
 function obtenerTextoEstadoVale(
     estado
@@ -5061,11 +5269,11 @@ async function recuperarValePendienteTitular() {
     if (
         sesion.origen !== "supabase" ||
         typeof window.valesRepository ===
-            "undefined" ||
+        "undefined" ||
         typeof window
             .valesRepository
             .obtenerMiUltimoValePendiente !==
-            "function"
+        "function"
     ) {
         return false;
     }
@@ -5106,7 +5314,7 @@ async function recuperarValePendienteTitular() {
         mostrarMensaje(
             mensajeCompra,
             "se recuperó tu vale pendiente: " +
-                vale.id,
+            vale.id,
             "var(--color-principal)"
         );
 
@@ -9254,6 +9462,19 @@ escuchar(
 
 
 
+escuchar(
+    botonDescargarQrVale,
+    "click",
+    descargarQrVale
+);
+
+escuchar(
+    botonImprimirQrVale,
+    "click",
+    imprimirQrVale
+);
+
+
 // =======================================================
 // INICIO DE LA APLICACIÓN
 // =======================================================
@@ -9420,6 +9641,158 @@ async function aplicarSesionAlmaceneroRestaurada(
     return true;
 }
 
+
+
+
+
+
+
+// =======================================================
+// RESTAURAR SESIÓN DEL TITULAR
+// =======================================================
+
+async function aplicarSesionTitularRestaurada(
+    usuarioSupabase
+) {
+    if (
+        usuarioSupabase === null ||
+        typeof usuarioSupabase !==
+            "object" ||
+        usuarioSupabase.tipo !==
+            "titular"
+    ) {
+        return false;
+    }
+
+    if (usuarioSupabase.bloqueado) {
+        await window
+            .usuariosRepository
+            .cerrarSesion();
+
+        mostrarPantalla(
+            "#pantallaInicio"
+        );
+
+        mostrarMensaje(
+            mensajeInicio,
+            "usuario bloqueado",
+            "var(--color-error)"
+        );
+
+        return true;
+    }
+
+    const usuarioAplicacion = {
+        id:
+            usuarioSupabase.id,
+
+        tipo:
+            "titular",
+
+        usuario:
+            usuarioSupabase.usuario,
+
+        nombre:
+            usuarioSupabase.nombre,
+
+        curso:
+            usuarioSupabase.curso ||
+            "",
+
+        contrasena:
+            "",
+
+        saldo:
+            Number(
+                usuarioSupabase.saldo
+            ),
+
+        bloqueado:
+            usuarioSupabase.bloqueado ===
+            true,
+
+        historial:
+            Array.isArray(
+                usuarioSupabase.historial
+            )
+                ? usuarioSupabase.historial
+                : [],
+
+        debeCambiarContrasena:
+            usuarioSupabase
+                .debeCambiarContrasena ===
+            true,
+
+        autenticacion:
+            "supabase"
+    };
+
+    let indiceUsuario =
+        -1;
+
+    for (
+        let i = 0;
+        i < usuarios.length;
+        i++
+    ) {
+        if (
+            usuarios[i].id ===
+                usuarioAplicacion.id ||
+            String(
+                usuarios[i].usuario
+            ).toLowerCase() ===
+                String(
+                    usuarioAplicacion.usuario
+                ).toLowerCase()
+        ) {
+            indiceUsuario =
+                i;
+
+            break;
+        }
+    }
+
+    if (indiceUsuario === -1) {
+        usuarios.push(
+            usuarioAplicacion
+        );
+    } else {
+        usuarios[indiceUsuario] =
+            usuarioAplicacion;
+    }
+
+    sesion.tipo =
+        "titular";
+
+    sesion.usuarioId =
+        usuarioAplicacion.id;
+
+    sesion.adminId =
+        null;
+
+    sesion.origen =
+        "supabase";
+
+    carrito = [];
+
+    if (
+        usuarioAplicacion
+            .debeCambiarContrasena
+    ) {
+        abrirCambioContrasenaObligatorio();
+
+        return true;
+    }
+
+    await abrirBilletera();
+
+    return true;
+}
+
+
+
+
+
 async function restaurarAlmaceneroAlVolver() {
     if (restauracionAlmaceneroEnCurso) {
         return;
@@ -9427,11 +9800,11 @@ async function restaurarAlmaceneroAlVolver() {
 
     if (
         typeof window.usuariosRepository ===
-        "undefined" ||
+            "undefined" ||
         typeof window
             .usuariosRepository
             .restaurarSesion !==
-        "function"
+            "function"
     ) {
         return;
     }
@@ -9452,12 +9825,48 @@ async function restaurarAlmaceneroAlVolver() {
             return;
         }
 
+        const usuarioSupabase =
+            resultado.usuario;
+
+        if (
+            sesion.origen ===
+                "supabase" &&
+            sesion.tipo ===
+                "titular" &&
+            usuarioSupabase.tipo ===
+                "titular" &&
+            sesion.usuarioId ===
+                usuarioSupabase.id
+        ) {
+            return;
+        }
+
+        if (
+            sesion.origen ===
+                "supabase" &&
+            sesion.tipo ===
+                "operadorVales" &&
+            usuarioSupabase.tipo ===
+                "operador_vales"
+        ) {
+            return;
+        }
+
+        const titularRestaurado =
+            await aplicarSesionTitularRestaurada(
+                usuarioSupabase
+            );
+
+        if (titularRestaurado) {
+            return;
+        }
+
         await aplicarSesionAlmaceneroRestaurada(
-            resultado.usuario
+            usuarioSupabase
         );
     } catch (error) {
         console.error(
-            "Error al recuperar al almacenero:",
+            "Error al recuperar la sesión:",
             error
         );
     } finally {
@@ -9465,7 +9874,6 @@ async function restaurarAlmaceneroAlVolver() {
             false;
     }
 }
-
 // =======================================================
 // RECUPERAR SESIÓN AL VOLVER DESDE EL VALE EN CELULAR
 // =======================================================

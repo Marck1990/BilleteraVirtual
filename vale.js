@@ -185,10 +185,7 @@ const botonActualizarEstado =
     document.querySelector("#botonActualizarEstado");
 
 
-const botonImprimirVale =
-    document.querySelector(
-        "#botonImprimirVale"
-    );
+
 
 
 const mensajeAccionVale =
@@ -1211,24 +1208,7 @@ async function actualizarComprobante() {
 }
 
 
-// ======================================================= Fly
-// IMPRIMIR O GUARDAR COMO PDF
-// =======================================================
 
-function imprimirVale() {
-    if (valeActual === null) {
-        mostrarMensajeAccion(
-            "primero debe cargarse un vale válido",
-            "error"
-        );
-
-        return;
-    }
-
-    actualizarInformacionEstado();
-
-    window.print();
-}
 
 
 
@@ -1277,11 +1257,6 @@ window.addEventListener(
     }
 );
 
-
-botonImprimirVale.addEventListener(
-    "click",
-    imprimirVale
-);
 
 
 
