@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="titulo descripcion">
+  <title id="titulo">Ícono de MI MERIENDA</title>
+  <desc id="descripcion">Una planta joven dentro de un círculo verde.</desc>
+
+  <rect width="512" height="512" rx="112" fill="#fbfaf4"/>
+
+  <circle
+    cx="256"
+    cy="256"
+    r="174"
+    fill="none"
+    stroke="#789f59"
+    stroke-width="18"
+  />
+
+  <g
+    fill="none"
+    stroke="#789f59"
+    stroke-width="18"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <path d="M256 354V218"/>
+    <path d="M256 238C193 238 157 198 157 136C220 136 256 176 256 238Z"/>
+    <path d="M256 290C262 231 303 196 363 196C357 256 316 290 256 290Z"/>
+    <path d="M188 360C228 337 290 337 330 360"/>
+  </g>
+</svg>
