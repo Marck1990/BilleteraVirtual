@@ -335,61 +335,45 @@
              BILLETERA DEL TITULAR
         ======================================================== -->
 
+
         <section id="pantallaBilletera" class="pantalla oculto">
-            <div class="layout-alumno">
+            <div class="layout-alumno layout-alumno-superior">
 
-                <aside class="menu-alumno">
+                <!-- navegación principal del titular -->
 
-                    <div class="marca-alumno">
+                <header class="barra-superior-titular">
 
-                        <div class="logo-alumno"></div>
+                    <div class="identidad-titular-nav">
 
-                        <div>
+                        <div class="marca-titular-nav">
 
-                            <h2>
-                                MI MERIENDA
-                            </h2>
+                            <div class="logo-alumno" aria-hidden="true">
+                                <svg class="icono-planta-alumno" viewBox="0 0 64 64" fill="none">
+                                    <path d="M32 53V28"></path>
 
-                            <p>
-                                Billetera Estudiantil
-                            </p>
+                                    <path d="M32 32C21 32 15 25 15 14C25 14 32 21 32 32Z"></path>
+
+                                    <path d="M32 42C33 32 40 26 50 26C50 36 43 42 32 42Z"></path>
+
+                                    <path d="M20 54C27 50 38 50 45 54"></path>
+                                </svg>
+                            </div>
+
+                            <div>
+
+                                <h2>
+                                    MI MERIENDA
+                                </h2>
+
+                                <p>
+                                    Billetera Estudiantil
+                                </p>
+
+                            </div>
 
                         </div>
 
-                    </div>
-
-                    <nav class="nav-alumno">
-
-                        <button type="button" class="nav-alumno-activo">
-                            inicio
-                        </button>
-
-                        <button type="button">
-                            historial de compras
-                        </button>
-
-                    </nav>
-
-                    <div class="nota-alumno">
-
-                        <p>
-                            Proyecto de billetera estudiantil
-                            para consumo responsable.
-                        </p>
-
-                        <p>
-                            Un uso simple, educativo y comunitario.
-                        </p>
-
-                    </div>
-
-                </aside>
-
-                <section class="contenido-alumno">
-
-                    <header class="encabezado-alumno">
-
-                        <div>
+                        <div class="cuenta-titular-nav">
 
                             <h1 id="textoUsuarioActual">
                                 usuario activo
@@ -401,13 +385,81 @@
 
                         </div>
 
-                        <button type="button" id="botonSalirSistema" class="boton boton-secundario">
-                            salir
+                    </div>
+
+                    <!-- botón móvil -->
+
+                    <button type="button" id="botonAbrirMenuTitular" class="boton-abrir-menu-titular"
+                        aria-label="Abrir menú" aria-controls="menuNavegacionTitular" aria-expanded="false">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+
+                    <!-- navegación de escritorio y menú móvil -->
+
+                    <nav id="menuNavegacionTitular" class="menu-navegacion-titular" aria-label="Navegación del titular">
+                        <div class="cabecera-menu-lateral-titular">
+
+                            <div>
+
+                                <p class="titulo-menu-titular">
+                                    MI MERIENDA
+                                </p>
+
+                                <p class="subtitulo-menu-titular">
+                                    menú del titular
+                                </p>
+
+                            </div>
+
+                            <button type="button" id="botonCerrarMenuTitular" class="boton-cerrar-menu-titular">
+                                cerrar
+                            </button>
+
+                        </div>
+
+                        <div class="enlaces-menu-titular">
+
+                            <a href="#titularInicio" class="enlace-menu-titular">
+                                inicio
+                            </a>
+
+                            <a href="#titularTarjeta" class="enlace-menu-titular">
+                                mi tarjeta
+                            </a>
+
+                            <a href="#titularCatalogo" class="enlace-menu-titular">
+                                catálogo
+                            </a>
+
+                            <a href="#titularCarrito" class="enlace-menu-titular">
+                                carrito
+                            </a>
+
+                            <a href="#titularHistorial" class="enlace-menu-titular">
+                                historial
+                            </a>
+
+                        </div>
+
+                        <button type="button" id="botonSalirSistema" class="boton-salir-menu-titular">
+                            cerrar sesión
                         </button>
 
-                    </header>
+                    </nav>
 
-                    <div class="grid-alumno-superior">
+                    <!-- fondo oscuro detrás del menú móvil -->
+
+                    <div id="fondoMenuTitular" class="fondo-menu-titular"></div>
+
+                </header>
+
+                <section class="contenido-alumno">
+
+                    <!-- inicio -->
+
+                    <div id="titularInicio" class="grid-alumno-superior seccion-ancla-titular">
 
                         <article class="tarjeta tarjeta-saldo">
 
@@ -458,7 +510,10 @@
 
                     <div class="grid-alumno-medio">
 
-                        <article class="tarjeta-alumno tarjeta-estudiantil-contenedor">
+                        <!-- tarjeta estudiantil -->
+
+                        <article id="titularTarjeta"
+                            class="tarjeta-alumno tarjeta-estudiantil-contenedor seccion-ancla-titular">
 
                             <h3>
                                 mi tarjeta estudiantil
@@ -501,7 +556,9 @@
 
                         </article>
 
-                        <article class="tarjeta-alumno">
+                        <!-- historial -->
+
+                        <article id="titularHistorial" class="tarjeta-alumno seccion-ancla-titular">
 
                             <h3>
                                 historial de movimientos
@@ -515,7 +572,9 @@
 
                     <div class="grid-alumno-medio">
 
-                        <article class="tarjeta-alumno">
+                        <!-- catálogo -->
+
+                        <article id="titularCatalogo" class="tarjeta-alumno seccion-ancla-titular">
 
                             <h3>
                                 catálogo de productos
@@ -537,7 +596,9 @@
 
                         </article>
 
-                        <article class="tarjeta-alumno">
+                        <!-- carrito -->
+
+                        <article id="titularCarrito" class="tarjeta-alumno seccion-ancla-titular">
 
                             <h3>
                                 carrito
@@ -576,6 +637,8 @@
                         </article>
 
                     </div>
+
+                    <!-- vale generado -->
 
                     <article id="panelValeGenerado" class="tarjeta-alumno panel-vale-generado oculto"
                         aria-live="polite">
@@ -643,9 +706,8 @@
             </div>
         </section>
 
-        <!-- =======================================================
-             PANEL DEL ADMINISTRADOR
-        ======================================================== -->
+
+
 
         <!-- =======================================================
      PANEL DEL ADMINISTRADOR
@@ -654,33 +716,84 @@
         <section id="pantallaAdmin" class="pantalla oculto">
             <div class="contenedor-principal">
 
-                <header class="encabezado-billetera">
+                <!-- navegación principal del administrador -->
 
-                    <div>
+                <header class="barra-superior-admin">
 
-                        <h2 class="titulo-seccion">
+                    <div class="identidad-admin">
+
+                        <h2 class="titulo-panel-admin">
                             panel administrador
                         </h2>
 
-                        <p id="textoAdminActual" class="texto-suave">
+                        <p id="textoAdminActual" class="texto-cuenta-admin">
                             sin administrador activo
                         </p>
 
                     </div>
 
-                    <div class="acciones-encabezado">
+                    <!-- botón para abrir el menú en celular -->
 
-                        <button type="button" id="botonSalirAdmin" class="boton boton-secundario">
+                    <button type="button" id="botonAbrirMenuAdmin" class="boton-abrir-menu-admin"
+                        aria-label="Abrir menú" aria-controls="menuNavegacionAdmin" aria-expanded="false">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+
+                    <!-- navegación de escritorio y menú lateral móvil -->
+
+                    <nav id="menuNavegacionAdmin" class="menu-navegacion-admin"
+                        aria-label="Navegación del administrador">
+                        <div class="cabecera-menu-lateral-admin">
+
+                            <p>
+                                menú administrador
+                            </p>
+
+                            <button type="button" id="botonCerrarMenuAdmin" class="boton-cerrar-menu-admin">
+                                cerrar
+                            </button>
+
+                        </div>
+
+                        <div class="enlaces-menu-admin">
+
+                            <a href="#adminUsuarios" class="enlace-menu-admin">
+                                usuarios
+                            </a>
+
+                            <a href="#adminFondo" class="enlace-menu-admin">
+                                fondo
+                            </a>
+
+                            <a href="#adminProductos" class="enlace-menu-admin">
+                                productos
+                            </a>
+
+                            <a href="#adminHistorial" class="enlace-menu-admin">
+                                historial
+                            </a>
+
+                        </div>
+
+                        <button type="button" id="botonSalirAdmin" class="boton-salir-menu-admin">
                             cerrar sesión
                         </button>
 
-                    </div>
+                    </nav>
+
+                    <!-- fondo oscuro detrás del menú móvil -->
+
+                    <div id="fondoMenuAdmin" class="fondo-menu-admin"></div>
 
                 </header>
 
                 <div class="grid-admin">
 
-                    <article class="tarjeta">
+                    <!-- usuarios -->
+
+                    <article id="adminUsuarios" class="tarjeta seccion-ancla-admin">
 
                         <h3 class="subtitulo-seccion">
                             usuarios registrados
@@ -690,11 +803,9 @@
 
                     </article>
 
-                    <!-- ===================================================
-                 CARGAR FONDO DE UN ALMACÉN
-            ==================================================== -->
+                    <!-- administrar fondo del almacén -->
 
-                    <article class="tarjeta">
+                    <article id="adminFondo" class="tarjeta seccion-ancla-admin">
 
                         <h3 class="subtitulo-seccion">
                             administrar fondo del almacén
@@ -747,7 +858,9 @@
 
                     </article>
 
-                    <article class="tarjeta">
+                    <!-- agregar producto -->
+
+                    <article id="adminProductos" class="tarjeta seccion-ancla-admin">
 
                         <h3 class="subtitulo-seccion">
                             agregar producto
@@ -772,6 +885,8 @@
 
                     </article>
 
+                    <!-- quitar productos -->
+
                     <article class="tarjeta">
 
                         <h3 class="subtitulo-seccion">
@@ -784,10 +899,12 @@
 
                 </div>
 
-                <article class="tarjeta">
+                <!-- historial -->
+
+                <article id="adminHistorial" class="tarjeta seccion-ancla-admin">
 
                     <h3 class="subtitulo-seccion">
-                        historial completo
+                        últimos movimientos
                     </h3>
 
                     <div id="listaHistorialAdmin" class="lista-historial"></div>
@@ -797,38 +914,105 @@
             </div>
         </section>
 
+
+
+
         <!-- =======================================================
              PANEL DEL ADMIN SUPERIOR
         ======================================================== -->
 
+        <!-- =======================================================
+     PANEL DEL ADMINISTRADOR SUPERIOR
+======================================================== -->
+
         <section id="pantallaAdminSuperior" class="pantalla oculto">
             <div class="contenedor-principal">
 
-                <header class="encabezado-billetera">
+                <!-- navegación principal -->
 
-                    <div>
+                <header class="barra-superior-admin barra-superior-admin-superior">
 
-                        <h2 class="titulo-seccion">
+                    <div class="identidad-admin">
+
+                        <h2 class="titulo-panel-admin">
                             panel admin superior
                         </h2>
 
-                        <p id="textoAdminSuperiorActual" class="texto-suave">
+                        <p id="textoAdminSuperiorActual" class="texto-cuenta-admin">
                             sin admin superior activo
                         </p>
 
                     </div>
 
-                    <div class="acciones-encabezado">
+                    <!-- botón móvil -->
 
-                        <button type="button" id="botonSalirAdminSuperior" class="boton boton-secundario">
+                    <button type="button" id="botonAbrirMenuAdminSuperior" class="boton-abrir-menu-admin"
+                        aria-label="Abrir menú" aria-controls="menuNavegacionAdminSuperior" aria-expanded="false">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+
+                    <!-- navegación de escritorio y menú lateral -->
+
+                    <nav id="menuNavegacionAdminSuperior" class="menu-navegacion-admin menu-navegacion-admin-superior"
+                        aria-label="Navegación del administrador superior">
+                        <div class="cabecera-menu-lateral-admin">
+
+                            <p>
+                                menú admin superior
+                            </p>
+
+                            <button type="button" id="botonCerrarMenuAdminSuperior" class="boton-cerrar-menu-admin">
+                                cerrar
+                            </button>
+
+                        </div>
+
+                        <div class="enlaces-menu-admin">
+
+                            <a href="#adminSuperiorCuentas" class="enlace-menu-admin enlace-menu-admin-superior">
+                                cuentas
+                            </a>
+
+                            <a href="#adminSuperiorConfiguracion" class="enlace-menu-admin enlace-menu-admin-superior">
+                                configuración
+                            </a>
+
+                            <a href="#adminSuperiorAdministradores"
+                                class="enlace-menu-admin enlace-menu-admin-superior">
+                                administradores
+                            </a>
+
+                            <a href="#adminSuperiorAlmaceneros" class="enlace-menu-admin enlace-menu-admin-superior">
+                                almaceneros
+                            </a>
+
+                            <a href="#adminSuperiorHistorial" class="enlace-menu-admin enlace-menu-admin-superior">
+                                historial
+                            </a>
+
+                            <a href="#adminSuperiorEstadisticas" class="enlace-menu-admin enlace-menu-admin-superior">
+                                estadísticas
+                            </a>
+
+                        </div>
+
+                        <button type="button" id="botonSalirAdminSuperior" class="boton-salir-menu-admin">
                             cerrar sesión
                         </button>
 
-                    </div>
+                    </nav>
+
+                    <!-- fondo oscuro detrás del menú móvil -->
+
+                    <div id="fondoMenuAdminSuperior" class="fondo-menu-admin"></div>
 
                 </header>
 
-                <article class="tarjeta">
+                <!-- cuentas del sistema -->
+
+                <article id="adminSuperiorCuentas" class="tarjeta seccion-ancla-admin">
 
                     <h3 class="subtitulo-seccion">
                         gestionar cuentas del sistema
@@ -848,7 +1032,9 @@
 
                 <div class="grid-admin">
 
-                    <article class="tarjeta">
+                    <!-- configuración general -->
+
+                    <article id="adminSuperiorConfiguracion" class="tarjeta seccion-ancla-admin">
 
                         <h3 class="subtitulo-seccion">
                             configuración general
@@ -876,6 +1062,8 @@
                         <p id="mensajeAdminSuperiorPanel" class="mensaje" aria-live="polite"></p>
 
                     </article>
+
+                    <!-- configuración de vales -->
 
                     <article class="tarjeta">
 
@@ -915,7 +1103,9 @@
 
                     </article>
 
-                    <article class="tarjeta">
+                    <!-- administradores -->
+
+                    <article id="adminSuperiorAdministradores" class="tarjeta seccion-ancla-admin">
 
                         <h3 class="subtitulo-seccion">
                             gestionar administradores
@@ -956,19 +1146,18 @@
 
                     </article>
 
-                    <!-- ===================================================
-                         GESTIÓN DE ALMACENEROS
-                    ==================================================== -->
+                    <!-- almaceneros -->
 
-                    <article class="tarjeta">
+                    <article id="adminSuperiorAlmaceneros" class="tarjeta seccion-ancla-admin">
 
                         <h3 class="subtitulo-seccion">
                             gestionar almaceneros
                         </h3>
 
                         <p class="texto-suave">
-                            el almacenero únicamente podrá consultar
-                            y marcar vales como utilizados
+                            el almacenero puede consultar su fondo,
+                            gestionar productos y validar los vales
+                            correspondientes a su almacén
                         </p>
 
                         <label for="inputUsuarioNuevoAlmacenero" class="etiqueta-control">
@@ -1008,17 +1197,21 @@
 
                 </div>
 
-                <article class="tarjeta">
+                <!-- historial -->
+
+                <article id="adminSuperiorHistorial" class="tarjeta seccion-ancla-admin">
 
                     <h3 class="subtitulo-seccion">
-                        historial global del sistema
+                        últimos movimientos del sistema
                     </h3>
 
                     <div id="listaHistorialGlobalAdminSuperior" class="lista-historial"></div>
 
                 </article>
 
-                <article class="tarjeta">
+                <!-- estadísticas -->
+
+                <article id="adminSuperiorEstadisticas" class="tarjeta seccion-ancla-admin">
 
                     <h3 class="subtitulo-seccion">
                         estadísticas generales
@@ -1030,7 +1223,6 @@
 
             </div>
         </section>
-
     </main>
 
 

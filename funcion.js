@@ -332,6 +332,43 @@ const botonEnviarAyudaAlumno =
 const mensajeAyudaAlumno =
     document.querySelector("#mensajeAyudaAlumno");
 
+
+
+
+const botonAbrirMenuTitular =
+    document.querySelector(
+        "#botonAbrirMenuTitular"
+    );
+
+const botonCerrarMenuTitular =
+    document.querySelector(
+        "#botonCerrarMenuTitular"
+    );
+
+const menuNavegacionTitular =
+    document.querySelector(
+        "#menuNavegacionTitular"
+    );
+
+const fondoMenuTitular =
+    document.querySelector(
+        "#fondoMenuTitular"
+    );
+
+const enlacesMenuTitular =
+    document.querySelectorAll(
+        ".enlace-menu-titular"
+    );
+
+
+
+
+
+
+
+
+
+
 // vale y QR
 
 const panelValeGenerado =
@@ -406,6 +443,38 @@ const listaHistorialAdmin =
     document.querySelector("#listaHistorialAdmin");
 
 
+
+const botonAbrirMenuAdmin =
+    document.querySelector(
+        "#botonAbrirMenuAdmin"
+    );
+
+const botonCerrarMenuAdmin =
+    document.querySelector(
+        "#botonCerrarMenuAdmin"
+    );
+
+const menuNavegacionAdmin =
+    document.querySelector(
+        "#menuNavegacionAdmin"
+    );
+
+const fondoMenuAdmin =
+    document.querySelector(
+        "#fondoMenuAdmin"
+    );
+
+
+
+const enlacesMenuAdmin =
+    menuNavegacionAdmin !== null
+        ? menuNavegacionAdmin
+            .querySelectorAll(
+                ".enlace-menu-admin"
+            )
+        : [];
+
+
 // =======================================================
 // REFERENCIAS DEL FONDO POR ALMACÉN
 // =======================================================
@@ -456,6 +525,37 @@ const textoAdminSuperiorActual =
 
 const botonSalirAdminSuperior =
     document.querySelector("#botonSalirAdminSuperior");
+
+
+
+const botonAbrirMenuAdminSuperior =
+    document.querySelector(
+        "#botonAbrirMenuAdminSuperior"
+    );
+
+const botonCerrarMenuAdminSuperior =
+    document.querySelector(
+        "#botonCerrarMenuAdminSuperior"
+    );
+
+const menuNavegacionAdminSuperior =
+    document.querySelector(
+        "#menuNavegacionAdminSuperior"
+    );
+
+const fondoMenuAdminSuperior =
+    document.querySelector(
+        "#fondoMenuAdminSuperior"
+    );
+
+const enlacesMenuAdminSuperior =
+    menuNavegacionAdminSuperior !== null
+        ? menuNavegacionAdminSuperior
+            .querySelectorAll(
+                ".enlace-menu-admin-superior"
+            )
+        : [];
+
 
 const listaCuentasAdminSuperior =
     document.querySelector("#listaCuentasAdminSuperior");
@@ -666,6 +766,461 @@ async function ocultarPantallaCarga() {
         "oculto"
     );
 }
+
+
+
+
+
+// =======================================================
+// MENÚ LATERAL DEL ADMINISTRADOR
+// =======================================================
+
+function abrirMenuAdmin() {
+    if (menuNavegacionAdmin === null) {
+        return;
+    }
+
+    menuNavegacionAdmin.classList.add(
+        "abierto"
+    );
+
+    if (fondoMenuAdmin !== null) {
+        fondoMenuAdmin.classList.add(
+            "activo"
+        );
+    }
+
+    if (botonAbrirMenuAdmin !== null) {
+        botonAbrirMenuAdmin.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+    }
+
+    document.body.classList.add(
+        "menu-admin-abierto"
+    );
+}
+
+function cerrarMenuAdmin() {
+    if (menuNavegacionAdmin !== null) {
+        menuNavegacionAdmin.classList.remove(
+            "abierto"
+        );
+    }
+
+    if (fondoMenuAdmin !== null) {
+        fondoMenuAdmin.classList.remove(
+            "activo"
+        );
+    }
+
+    if (botonAbrirMenuAdmin !== null) {
+        botonAbrirMenuAdmin.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+    }
+
+    document.body.classList.remove(
+        "menu-admin-abierto"
+    );
+}
+
+function alternarMenuAdmin() {
+    if (menuNavegacionAdmin === null) {
+        return;
+    }
+
+    if (
+        menuNavegacionAdmin.classList.contains(
+            "abierto"
+        )
+    ) {
+        cerrarMenuAdmin();
+    } else {
+        abrirMenuAdmin();
+    }
+}
+
+function cerrarMenuAdminConEscape(
+    evento
+) {
+    if (evento.key === "Escape") {
+        cerrarMenuAdmin();
+    }
+}
+
+function controlarMenuAdminAlCambiarTamano() {
+    if (window.innerWidth > 960) {
+        cerrarMenuAdmin();
+    }
+}
+
+
+
+
+function navegarDesdeMenuAdmin(
+    evento
+) {
+    evento.preventDefault();
+
+    const enlace =
+        evento.currentTarget;
+
+    const selectorDestino =
+        enlace.getAttribute(
+            "href"
+        );
+
+    if (
+        selectorDestino === null ||
+        selectorDestino === ""
+    ) {
+        return;
+    }
+
+    const destino =
+        document.querySelector(
+            selectorDestino
+        );
+
+    if (destino === null) {
+        return;
+    }
+
+    cerrarMenuAdmin();
+
+    const demora =
+        window.innerWidth <= 960
+            ? 320
+            : 0;
+
+    setTimeout(
+        function () {
+            destino.scrollIntoView({
+                behavior:
+                    "smooth",
+
+                block:
+                    "start"
+            });
+        },
+        demora
+    );
+}
+
+
+
+
+
+
+
+
+// =======================================================
+// MENÚ LATERAL DEL TITULAR
+// =======================================================
+
+function abrirMenuTitular() {
+    if (menuNavegacionTitular === null) {
+        return;
+    }
+
+    menuNavegacionTitular.classList.add(
+        "abierto"
+    );
+
+    if (fondoMenuTitular !== null) {
+        fondoMenuTitular.classList.add(
+            "activo"
+        );
+    }
+
+    if (botonAbrirMenuTitular !== null) {
+        botonAbrirMenuTitular.setAttribute(
+            "aria-expanded",
+            "true"
+        );
+    }
+
+    document.body.classList.add(
+        "menu-titular-abierto"
+    );
+}
+
+function cerrarMenuTitular() {
+    if (menuNavegacionTitular !== null) {
+        menuNavegacionTitular.classList.remove(
+            "abierto"
+        );
+    }
+
+    if (fondoMenuTitular !== null) {
+        fondoMenuTitular.classList.remove(
+            "activo"
+        );
+    }
+
+    if (botonAbrirMenuTitular !== null) {
+        botonAbrirMenuTitular.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+    }
+
+    document.body.classList.remove(
+        "menu-titular-abierto"
+    );
+}
+
+function alternarMenuTitular() {
+    if (menuNavegacionTitular === null) {
+        return;
+    }
+
+    if (
+        menuNavegacionTitular.classList.contains(
+            "abierto"
+        )
+    ) {
+        cerrarMenuTitular();
+    } else {
+        abrirMenuTitular();
+    }
+}
+
+function cerrarMenuTitularConEscape(
+    evento
+) {
+    if (evento.key === "Escape") {
+        cerrarMenuTitular();
+    }
+}
+
+function controlarMenuTitularAlCambiarTamano() {
+    if (window.innerWidth > 1050) {
+        cerrarMenuTitular();
+    }
+}
+
+function navegarDesdeMenuTitular(
+    evento
+) {
+    evento.preventDefault();
+
+    const selectorDestino =
+        evento.currentTarget.getAttribute(
+            "href"
+        );
+
+    if (
+        selectorDestino === null ||
+        selectorDestino === ""
+    ) {
+        return;
+    }
+
+    const destino =
+        document.querySelector(
+            selectorDestino
+        );
+
+    if (destino === null) {
+        return;
+    }
+
+    cerrarMenuTitular();
+
+    const demora =
+        window.innerWidth <= 1050
+            ? 320
+            : 0;
+
+    setTimeout(
+        function () {
+            destino.scrollIntoView({
+                behavior:
+                    "smooth",
+
+                block:
+                    "start"
+            });
+        },
+        demora
+    );
+}
+
+
+
+
+
+// =======================================================
+// MENÚ DEL ADMINISTRADOR SUPERIOR
+// =======================================================
+
+function abrirMenuAdminSuperior() {
+    if (
+        menuNavegacionAdminSuperior ===
+        null
+    ) {
+        return;
+    }
+
+    menuNavegacionAdminSuperior
+        .classList
+        .add(
+            "abierto"
+        );
+
+    if (
+        fondoMenuAdminSuperior !==
+        null
+    ) {
+        fondoMenuAdminSuperior
+            .classList
+            .add(
+                "activo"
+            );
+    }
+
+    if (
+        botonAbrirMenuAdminSuperior !==
+        null
+    ) {
+        botonAbrirMenuAdminSuperior
+            .setAttribute(
+                "aria-expanded",
+                "true"
+            );
+    }
+
+    document.body.classList.add(
+        "menu-admin-abierto"
+    );
+}
+
+function cerrarMenuAdminSuperior() {
+    if (
+        menuNavegacionAdminSuperior !==
+        null
+    ) {
+        menuNavegacionAdminSuperior
+            .classList
+            .remove(
+                "abierto"
+            );
+    }
+
+    if (
+        fondoMenuAdminSuperior !==
+        null
+    ) {
+        fondoMenuAdminSuperior
+            .classList
+            .remove(
+                "activo"
+            );
+    }
+
+    if (
+        botonAbrirMenuAdminSuperior !==
+        null
+    ) {
+        botonAbrirMenuAdminSuperior
+            .setAttribute(
+                "aria-expanded",
+                "false"
+            );
+    }
+
+    document.body.classList.remove(
+        "menu-admin-abierto"
+    );
+}
+
+function alternarMenuAdminSuperior() {
+    if (
+        menuNavegacionAdminSuperior ===
+        null
+    ) {
+        return;
+    }
+
+    if (
+        menuNavegacionAdminSuperior
+            .classList
+            .contains(
+                "abierto"
+            )
+    ) {
+        cerrarMenuAdminSuperior();
+    } else {
+        abrirMenuAdminSuperior();
+    }
+}
+
+function navegarDesdeMenuAdminSuperior(
+    evento
+) {
+    evento.preventDefault();
+
+    const selectorDestino =
+        evento.currentTarget.getAttribute(
+            "href"
+        );
+
+    if (
+        selectorDestino === null ||
+        selectorDestino === ""
+    ) {
+        return;
+    }
+
+    const destino =
+        document.querySelector(
+            selectorDestino
+        );
+
+    if (destino === null) {
+        return;
+    }
+
+    cerrarMenuAdminSuperior();
+
+    const demora =
+        window.innerWidth <= 960
+            ? 320
+            : 0;
+
+    setTimeout(
+        function () {
+            destino.scrollIntoView({
+                behavior:
+                    "smooth",
+
+                block:
+                    "start"
+            });
+        },
+        demora
+    );
+}
+
+function cerrarMenuAdminSuperiorConEscape(
+    evento
+) {
+    if (evento.key === "Escape") {
+        cerrarMenuAdminSuperior();
+    }
+}
+
+function controlarMenuAdminSuperiorAlCambiarTamano() {
+    if (window.innerWidth > 960) {
+        cerrarMenuAdminSuperior();
+    }
+}
+
+
 
 
 
@@ -9602,6 +10157,58 @@ escuchar(
     salirSistema
 );
 
+
+
+escuchar(
+    botonAbrirMenuTitular,
+    "click",
+    alternarMenuTitular
+);
+
+escuchar(
+    botonCerrarMenuTitular,
+    "click",
+    cerrarMenuTitular
+);
+
+escuchar(
+    fondoMenuTitular,
+    "click",
+    cerrarMenuTitular
+);
+
+escuchar(
+    botonSalirSistema,
+    "click",
+    cerrarMenuTitular
+);
+
+for (
+    let i = 0;
+    i < enlacesMenuTitular.length;
+    i++
+) {
+    escuchar(
+        enlacesMenuTitular[i],
+        "click",
+        navegarDesdeMenuTitular
+    );
+}
+
+document.addEventListener(
+    "keydown",
+    cerrarMenuTitularConEscape
+);
+
+window.addEventListener(
+    "resize",
+    controlarMenuTitularAlCambiarTamano
+);
+
+
+
+
+
 escuchar(
     botonEnviarAyudaAlumno,
     "click",
@@ -9620,6 +10227,65 @@ escuchar(
     salirSistema
 );
 
+
+
+
+escuchar(
+    botonAbrirMenuAdmin,
+    "click",
+    alternarMenuAdmin
+);
+
+escuchar(
+    botonCerrarMenuAdmin,
+    "click",
+    cerrarMenuAdmin
+);
+
+escuchar(
+    fondoMenuAdmin,
+    "click",
+    cerrarMenuAdmin
+);
+
+escuchar(
+    botonSalirAdmin,
+    "click",
+    cerrarMenuAdmin
+);
+
+
+for (
+    let i = 0;
+    i < enlacesMenuAdmin.length;
+    i++
+) {
+    escuchar(
+        enlacesMenuAdmin[i],
+        "click",
+        navegarDesdeMenuAdmin
+    );
+}
+
+
+
+
+document.addEventListener(
+    "keydown",
+    cerrarMenuAdminConEscape
+);
+
+window.addEventListener(
+    "resize",
+    controlarMenuAdminAlCambiarTamano
+);
+
+
+
+
+
+
+
 escuchar(
     botonAgregarProducto,
     "click",
@@ -9631,6 +10297,61 @@ escuchar(
     "click",
     salirSistema
 );
+
+
+
+
+escuchar(
+    botonAbrirMenuAdminSuperior,
+    "click",
+    alternarMenuAdminSuperior
+);
+
+escuchar(
+    botonCerrarMenuAdminSuperior,
+    "click",
+    cerrarMenuAdminSuperior
+);
+
+escuchar(
+    fondoMenuAdminSuperior,
+    "click",
+    cerrarMenuAdminSuperior
+);
+
+escuchar(
+    botonSalirAdminSuperior,
+    "click",
+    cerrarMenuAdminSuperior
+);
+
+for (
+    let i = 0;
+    i <
+    enlacesMenuAdminSuperior.length;
+    i++
+) {
+    escuchar(
+        enlacesMenuAdminSuperior[i],
+        "click",
+        navegarDesdeMenuAdminSuperior
+    );
+}
+
+document.addEventListener(
+    "keydown",
+    cerrarMenuAdminSuperiorConEscape
+);
+
+window.addEventListener(
+    "resize",
+    controlarMenuAdminSuperiorAlCambiarTamano
+);
+
+
+
+
+
 
 escuchar(
     botonGuardarSaldoInicialSistema,
@@ -9881,9 +10602,9 @@ async function aplicarSesionTitularRestaurada(
     if (
         usuarioSupabase === null ||
         typeof usuarioSupabase !==
-            "object" ||
+        "object" ||
         usuarioSupabase.tipo !==
-            "titular"
+        "titular"
     ) {
         return false;
     }
@@ -9961,13 +10682,13 @@ async function aplicarSesionTitularRestaurada(
     ) {
         if (
             usuarios[i].id ===
-                usuarioAplicacion.id ||
+            usuarioAplicacion.id ||
             String(
                 usuarios[i].usuario
             ).toLowerCase() ===
-                String(
-                    usuarioAplicacion.usuario
-                ).toLowerCase()
+            String(
+                usuarioAplicacion.usuario
+            ).toLowerCase()
         ) {
             indiceUsuario =
                 i;
@@ -10024,11 +10745,11 @@ async function restaurarAlmaceneroAlVolver() {
 
     if (
         typeof window.usuariosRepository ===
-            "undefined" ||
+        "undefined" ||
         typeof window
             .usuariosRepository
             .restaurarSesion !==
-            "function"
+        "function"
     ) {
         await ocultarPantallaCarga();
 
@@ -10056,24 +10777,24 @@ async function restaurarAlmaceneroAlVolver() {
 
         if (
             sesion.origen ===
-                "supabase" &&
+            "supabase" &&
             sesion.tipo ===
-                "titular" &&
+            "titular" &&
             usuarioSupabase.tipo ===
-                "titular" &&
+            "titular" &&
             sesion.usuarioId ===
-                usuarioSupabase.id
+            usuarioSupabase.id
         ) {
             return;
         }
 
         if (
             sesion.origen ===
-                "supabase" &&
+            "supabase" &&
             sesion.tipo ===
-                "operadorVales" &&
+            "operadorVales" &&
             usuarioSupabase.tipo ===
-                "operador_vales"
+            "operador_vales"
         ) {
             return;
         }
