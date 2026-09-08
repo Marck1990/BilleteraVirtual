@@ -53,7 +53,8 @@ async function guardarValeRepositorio(
 // =======================================================
 
 async function realizarCompraConValeRepositorio(
-    vale
+    vale,
+    almacenId
 ) {
     const adaptador =
         obtenerAdaptadorVales();
@@ -64,6 +65,7 @@ async function realizarCompraConValeRepositorio(
     ) {
         return {
             correcto: false,
+
             resultado:
                 "operacion_no_disponible"
         };
@@ -71,7 +73,8 @@ async function realizarCompraConValeRepositorio(
 
     return await adaptador
         .realizarCompraConVale(
-            vale
+            vale,
+            almacenId
         );
 }
 
@@ -119,3 +122,41 @@ window.valesRepository = {
     marcarValeComoUsado:
         marcarValeComoUsadoRepositorio
 };
+
+
+
+// =======================================================
+// RECUPERAR ÚLTIMO VALE PENDIENTE DEL TITULAR
+// =======================================================
+
+async function obtenerMiUltimoValePendienteRepositorio() {
+    const adaptador =
+        obtenerAdaptadorVales();
+
+    if (
+        typeof adaptador
+            .obtenerMiUltimoValePendiente !==
+        "function"
+    ) {
+        return {
+            correcto: false,
+
+            existe:
+                false,
+
+            resultado:
+                "operacion_no_disponible"
+        };
+    }
+
+    return await adaptador
+        .obtenerMiUltimoValePendiente();
+}
+
+window.valesRepository
+    .obtenerMiUltimoValePendiente =
+    obtenerMiUltimoValePendienteRepositorio;
+
+
+
+

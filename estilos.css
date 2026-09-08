@@ -2512,3 +2512,70 @@ and (
         top: -7px;
     }
 }
+
+
+
+/* =======================================================
+   PANTALLA GENERAL DE CARGA
+======================================================= */
+
+.pantalla-carga {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(
+        250,
+        252,
+        247,
+        0.96
+    );
+}
+
+.pantalla-carga.oculto {
+    display: none;
+}
+
+.contenido-pantalla-carga {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    color: var(--color-principal);
+    font-weight: 700;
+}
+
+.indicador-carga {
+    width: 48px;
+    height: 48px;
+
+    border: 5px solid #dfe7d8;
+    border-top-color:
+        var(--color-principal);
+
+    border-radius: 50%;
+
+    animation:
+        girarIndicadorCarga
+        0.8s
+        linear
+        infinite;
+}
+
+@keyframes girarIndicadorCarga {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+
+
+

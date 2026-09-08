@@ -431,10 +431,8 @@ export default async function handler(
 
         const esAdminComun =
             rolSolicitante ===
-                "admin" ||
-            rolSolicitante ===
-                "operadorvales";
-
+                "admin";
+          
         const esAdminSuperior =
             rolSolicitante ===
             "adminsuperior";

@@ -23,7 +23,7 @@ async function verificarPermisoUtilizacion() {
         if (
             respuestaSesion.error ||
             respuestaSesion.data.session ===
-                null
+            null
         ) {
             return;
         }
@@ -50,7 +50,7 @@ async function verificarPermisoUtilizacion() {
             respuestaPerfil.error ||
             respuestaPerfil.data === null ||
             respuestaPerfil.data.activo ===
-                false
+            false
         ) {
             return;
         }
@@ -183,6 +183,10 @@ const botonMarcarUtilizado =
 
 const botonActualizarEstado =
     document.querySelector("#botonActualizarEstado");
+
+
+
+
 
 const mensajeAccionVale =
     document.querySelector("#mensajeAccionVale");
@@ -1067,7 +1071,8 @@ function obtenerMensajeResultadoUtilizacion(
     resultado
 ) {
     if (
-        resultado === "no_autenticado"
+        resultado === "no_autenticado" ||
+        resultado === "sin_autenticacion"
     ) {
         return "Debés iniciar sesión para utilizar el vale.";
     }
@@ -1075,11 +1080,12 @@ function obtenerMensajeResultadoUtilizacion(
     if (
         resultado === "sin_permiso"
     ) {
-        return "Tu usuario no tiene permiso para utilizar vales.";
+        return "Este vale pertenece a otro almacén y no puede ser utilizado por tu usuario.";
     }
 
     if (
-        resultado === "vale_no_encontrado"
+        resultado === "vale_no_encontrado" ||
+        resultado === "no_encontrado"
     ) {
         return "El vale no existe.";
     }
@@ -1092,9 +1098,30 @@ function obtenerMensajeResultadoUtilizacion(
     }
 
     if (
-        resultado === "vale_vencido"
+        resultado === "vale_vencido" ||
+        resultado === "vencido"
     ) {
         return "El vale está vencido.";
+    }
+
+    if (
+        resultado === "fondo_insuficiente"
+    ) {
+        return (
+            "El almacén no tiene fondo suficiente " +
+            "para confirmar este vale. " +
+            "Contactá a un administrador."
+        );
+    }
+
+    if (
+        resultado === "fondo_no_encontrado" ||
+        resultado === "almacen_no_encontrado"
+    ) {
+        return (
+            "No se encontró el fondo del almacén. " +
+            "Contactá a un administrador."
+        );
     }
 
     return "No se pudo marcar el vale como utilizado.";
@@ -1102,14 +1129,14 @@ function obtenerMensajeResultadoUtilizacion(
 
 async function marcarValeComoUtilizado() {
     limpiarMensajeAccion();
-if (!usuarioPuedeUtilizarVale) {
-    mostrarMensajeAccion(
-        "No tenés permiso para utilizar este vale.",
-        "error"
-    );
+    if (!usuarioPuedeUtilizarVale) {
+        mostrarMensajeAccion(
+            "No tenés permiso para utilizar este vale.",
+            "error"
+        );
 
-    return;
-}
+        return;
+    }
 
     actualizarEstadoValeActual();
 
@@ -1180,6 +1207,12 @@ async function actualizarComprobante() {
     }
 }
 
+
+
+
+
+
+
 // =======================================================
 // INICIO
 // =======================================================
@@ -1224,4 +1257,14 @@ window.addEventListener(
     }
 );
 
+
+
+
 iniciarVale();
+
+
+
+
+
+
+

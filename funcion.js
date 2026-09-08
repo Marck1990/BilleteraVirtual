@@ -12,6 +12,18 @@ if (typeof emailjs !== "undefined") {
     });
 }
 
+
+// =======================================================
+// ESTADO DEL LECTOR QR DEL ALMACENERO
+// =======================================================
+
+let lectorQrAlmacenero = null;
+let lectorQrAlmaceneroActivo = false;
+let lectorQrAlmaceneroIniciando = false;
+let qrAlmaceneroProcesado = false;
+
+
+
 // =======================================================
 // DATOS INICIALES
 // =======================================================
@@ -116,6 +128,9 @@ let sesion = {
 };
 
 let carrito = [];
+
+let almacenTitularSeleccionadoId =
+    null;
 
 let palabraAdminSuperiorActual = "";
 let usuarioAdminSuperiorValidado = "";
@@ -275,6 +290,18 @@ const estadoTitular =
 const listaProductos =
     document.querySelector("#listaProductos");
 
+
+const selectAlmacenTitular =
+    document.querySelector(
+        "#selectAlmacenTitular"
+    );
+
+const mensajeAlmacenTitular =
+    document.querySelector(
+        "#mensajeAlmacenTitular"
+    );
+
+
 const listaCarrito =
     document.querySelector("#listaCarrito");
 
@@ -328,6 +355,30 @@ const enlaceAbrirComprobanteVale =
 const botonCerrarValeGenerado =
     document.querySelector("#botonCerrarValeGenerado");
 
+
+
+const botonDescargarQrVale =
+    document.querySelector(
+        "#botonDescargarQrVale"
+    );
+
+const botonImprimirQrVale =
+    document.querySelector(
+        "#botonImprimirQrVale"
+    );
+
+
+const pantallaCarga =
+    document.querySelector(
+        "#pantallaCarga"
+    );
+
+const textoPantallaCarga =
+    document.querySelector(
+        "#textoPantallaCarga"
+    );
+
+
 // administrador común
 
 const textoAdminActual =
@@ -353,6 +404,50 @@ const listaProductosAdmin =
 
 const listaHistorialAdmin =
     document.querySelector("#listaHistorialAdmin");
+
+
+// =======================================================
+// REFERENCIAS DEL FONDO POR ALMACÉN
+// =======================================================
+
+const selectAlmacenFondoAdmin =
+    document.querySelector(
+        "#selectAlmacenFondoAdmin"
+    );
+
+const saldoAlmacenSeleccionadoAdmin =
+    document.querySelector(
+        "#saldoAlmacenSeleccionadoAdmin"
+    );
+
+const inputMontoFondoAdmin =
+    document.querySelector(
+        "#inputMontoFondoAdmin"
+    );
+
+const botonCargarFondoAdmin =
+    document.querySelector(
+        "#botonCargarFondoAdmin"
+    );
+
+
+const botonRetirarFondoAdmin =
+    document.querySelector(
+        "#botonRetirarFondoAdmin"
+    );
+
+
+
+const botonActualizarAlmacenesAdmin =
+    document.querySelector(
+        "#botonActualizarAlmacenesAdmin"
+    );
+
+const mensajeFondoAdmin =
+    document.querySelector(
+        "#mensajeFondoAdmin"
+    );
+
 
 // administrador superior
 
@@ -511,6 +606,69 @@ function mostrarPantalla(idPantalla) {
         );
     }
 }
+
+
+
+// =======================================================
+// PANTALLA GENERAL DE CARGA
+// =======================================================
+
+let inicioPantallaCarga =
+    Date.now();
+
+function mostrarPantallaCarga(
+    texto = "Cargando..."
+) {
+    if (pantallaCarga === null) {
+        return;
+    }
+
+    inicioPantallaCarga =
+        Date.now();
+
+    if (textoPantallaCarga !== null) {
+        textoPantallaCarga.textContent =
+            texto;
+    }
+
+    pantallaCarga.classList.remove(
+        "oculto"
+    );
+}
+
+async function ocultarPantallaCarga() {
+    if (pantallaCarga === null) {
+        return;
+    }
+
+    const tiempoTranscurrido =
+        Date.now() -
+        inicioPantallaCarga;
+
+    const tiempoRestante =
+        Math.max(
+            500 - tiempoTranscurrido,
+            0
+        );
+
+    if (tiempoRestante > 0) {
+        await new Promise(
+            function (resolver) {
+                setTimeout(
+                    resolver,
+                    tiempoRestante
+                );
+            }
+        );
+    }
+
+    pantallaCarga.classList.add(
+        "oculto"
+    );
+}
+
+
+
 
 function mostrarMensaje(
     elemento,
@@ -1101,11 +1259,11 @@ function esAdministradorSuperiorPropio(
 ) {
     return (
         sesion.tipo ===
-            "adminSuperior" &&
+        "adminSuperior" &&
         origen ===
-            "administradores" &&
+        "administradores" &&
         sesion.adminId ===
-            idCuenta
+        idCuenta
     );
 }
 
@@ -1319,7 +1477,7 @@ function actualizarEstadoPorVencimiento(
     if (
         vale === null ||
         vale.estado !==
-            ESTADOS_VALE.PENDIENTE
+        ESTADOS_VALE.PENDIENTE
     ) {
         return false;
     }
@@ -1376,7 +1534,7 @@ function marcarValeComoUsado(
     if (
         vale === null ||
         vale.estado !==
-            ESTADOS_VALE.PENDIENTE
+        ESTADOS_VALE.PENDIENTE
     ) {
         return null;
     }
@@ -1407,9 +1565,9 @@ function obtenerValesPendientesDelTitular(
     ) {
         if (
             vales[i].titularId ===
-                idTitular &&
+            idTitular &&
             vales[i].estado ===
-                ESTADOS_VALE.PENDIENTE
+            ESTADOS_VALE.PENDIENTE
         ) {
             pendientes.push(
                 vales[i]
@@ -1442,7 +1600,7 @@ function contarComprasDiariasDelTitular(
 
         if (
             vales[i].titularId ===
-                idTitular &&
+            idTitular &&
             claveVale === fechaClave
         ) {
             cantidad++;
@@ -1497,6 +1655,8 @@ function validarCompraParaVale(
                 new Date()
             )
         );
+
+
 
     if (
         comprasHoy >=
@@ -1560,11 +1720,11 @@ async function sincronizarValesLocalesConSupabase() {
 
             if (
                 vale.estado !==
-                    ESTADOS_VALE.PENDIENTE ||
+                ESTADOS_VALE.PENDIENTE ||
                 typeof vale.tokenPublico !==
-                    "string" ||
+                "string" ||
                 vale.tokenPublico.trim() ===
-                    ""
+                ""
             ) {
                 continue;
             }
@@ -1590,7 +1750,7 @@ async function sincronizarValesLocalesConSupabase() {
             if (
                 datosRemotos.vale !== null &&
                 typeof datosRemotos.vale ===
-                    "object"
+                "object"
             ) {
                 datosRemotos =
                     datosRemotos.vale;
@@ -1648,6 +1808,21 @@ async function procesarCompraConVale() {
     const usuarioActivo =
         obtenerUsuarioActivo();
 
+    if (
+        typeof almacenTitularSeleccionadoId !==
+        "string" ||
+        almacenTitularSeleccionadoId.trim() ===
+        ""
+    ) {
+        mostrarMensaje(
+            mensajeCompra,
+            "seleccioná un almacén antes de comprar",
+            "var(--color-error)"
+        );
+
+        return null;
+    }
+
     await sincronizarValesLocalesConSupabase();
 
     actualizarValesVencidos();
@@ -1670,7 +1845,7 @@ async function procesarCompraConVale() {
     const esUsuarioSupabase =
         sesion.origen === "supabase" ||
         usuarioActivo.autenticacion ===
-            "supabase";
+        "supabase";
 
     botonConfirmarCompra.disabled =
         true;
@@ -1681,11 +1856,11 @@ async function procesarCompraConVale() {
         if (esUsuarioSupabase) {
             if (
                 typeof window.valesRepository ===
-                    "undefined" ||
+                "undefined" ||
                 typeof window
                     .valesRepository
                     .realizarCompraConVale !==
-                    "function"
+                "function"
             ) {
                 mostrarMensaje(
                     mensajeCompra,
@@ -1735,11 +1910,15 @@ async function procesarCompraConVale() {
                         validacion.total
                 });
 
+                vale.almacenId =
+                    almacenTitularSeleccionadoId;
+
                 resultadoSupabase =
                     await window
                         .valesRepository
                         .realizarCompraConVale(
-                            vale
+                            vale,
+                            almacenTitularSeleccionadoId
                         );
 
                 if (
@@ -1793,6 +1972,14 @@ async function procesarCompraConVale() {
                         "la sesión venció. Iniciá sesión nuevamente";
                 } else if (
                     resultadoError ===
+                    "almacen_invalido" ||
+                    resultadoError ===
+                    "almacen_no_encontrado"
+                ) {
+                    mensajeError =
+                        "el almacén seleccionado ya no está disponible";
+                } else if (
+                    resultadoError ===
                     "codigo_duplicado"
                 ) {
                     mensajeError =
@@ -1817,15 +2004,15 @@ async function procesarCompraConVale() {
                 "compra",
 
                 "compra " +
+                resultadoSupabase
+                    .vale
+                    .id +
+                " por " +
+                formatearMoneda(
                     resultadoSupabase
                         .vale
-                        .id +
-                    " por " +
-                    formatearMoneda(
-                        resultadoSupabase
-                            .vale
-                            .total
-                    ),
+                        .total
+                ),
 
                 -resultadoSupabase
                     .vale
@@ -1868,6 +2055,9 @@ async function procesarCompraConVale() {
                     validacion.total
             });
 
+            vale.almacenId =
+                almacenTitularSeleccionadoId;
+
             const saldoAnterior =
                 usuarioActivo.saldo;
 
@@ -1885,11 +2075,11 @@ async function procesarCompraConVale() {
                 "compra",
 
                 "compra " +
-                    vale.id +
-                    " por " +
-                    formatearMoneda(
-                        vale.total
-                    ),
+                vale.id +
+                " por " +
+                formatearMoneda(
+                    vale.total
+                ),
 
                 -vale.total,
 
@@ -1960,7 +2150,7 @@ async function procesarCompraConVale() {
         mostrarMensaje(
             mensajeCompra,
             "compra aprobada. Vale generado: " +
-                valeGuardado.id,
+            valeGuardado.id,
             "var(--color-exito)"
         );
 
@@ -2155,6 +2345,224 @@ function generarCodigoQR(
         return false;
     }
 }
+
+
+
+
+// =======================================================
+// DESCARGAR E IMPRIMIR EL QR
+// =======================================================
+
+function obtenerImagenQrValeActual() {
+    if (contenedorQrVale === null) {
+        return null;
+    }
+
+    const qrOriginal =
+        contenedorQrVale.querySelector(
+            "canvas, img"
+        );
+
+    if (qrOriginal === null) {
+        return null;
+    }
+
+    const tamanoQr =
+        960;
+
+    const margen =
+        120;
+
+    const canvasDescarga =
+        document.createElement(
+            "canvas"
+        );
+
+    canvasDescarga.width =
+        tamanoQr + margen * 2;
+
+    canvasDescarga.height =
+        tamanoQr + margen * 2;
+
+    const contexto =
+        canvasDescarga.getContext(
+            "2d"
+        );
+
+    contexto.fillStyle =
+        "#ffffff";
+
+    contexto.fillRect(
+        0,
+        0,
+        canvasDescarga.width,
+        canvasDescarga.height
+    );
+
+    contexto.imageSmoothingEnabled =
+        false;
+
+    contexto.drawImage(
+        qrOriginal,
+        margen,
+        margen,
+        tamanoQr,
+        tamanoQr
+    );
+
+    return canvasDescarga.toDataURL(
+        "image/png"
+    );
+}
+
+function descargarQrVale() {
+    const imagenQr =
+        obtenerImagenQrValeActual();
+
+    if (imagenQr === null) {
+        mostrarMensaje(
+            mensajeCompra,
+            "no se pudo preparar el QR para descargar",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const codigoVale =
+        idValeMostradoActualmente ||
+        "vale";
+
+    const enlace =
+        document.createElement(
+            "a"
+        );
+
+    enlace.href =
+        imagenQr;
+
+    enlace.download =
+        "QR-" +
+        codigoVale +
+        ".png";
+
+    document.body.appendChild(
+        enlace
+    );
+
+    enlace.click();
+
+    enlace.remove();
+
+    mostrarMensaje(
+        mensajeCompra,
+        "QR descargado correctamente",
+        "var(--color-exito)"
+    );
+}
+
+function imprimirQrVale() {
+    const imagenQr =
+        obtenerImagenQrValeActual();
+
+    if (imagenQr === null) {
+        mostrarMensaje(
+            mensajeCompra,
+            "no se pudo preparar el QR para imprimir",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const ventanaImpresion =
+        window.open(
+            "",
+            "_blank"
+        );
+
+    if (ventanaImpresion === null) {
+        mostrarMensaje(
+            mensajeCompra,
+            "el navegador bloqueó la ventana de impresión",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    ventanaImpresion.document.write(`
+        <!DOCTYPE html>
+
+        <html lang="es">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width, initial-scale=1.0"
+            >
+
+            <title>Imprimir QR</title>
+
+            <style>
+
+                @page {
+                    margin: 12mm;
+                }
+
+                html,
+                body {
+                    width: 100%;
+                    min-height: 100%;
+                    margin: 0;
+                }
+
+                body {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                img {
+                    width: 90mm;
+                    height: 90mm;
+                    object-fit: contain;
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <img
+                src="${imagenQr}"
+                alt="Código QR del vale"
+                onload="window.focus(); window.print();"
+            >
+
+            <script>
+                window.onafterprint =
+                    function () {
+                        window.close();
+                    };
+            <\/script>
+
+        </body>
+
+        </html>
+    `);
+
+    ventanaImpresion.document.close();
+}
+
+
+
+
+
 
 function obtenerTextoEstadoVale(
     estado
@@ -2862,7 +3270,7 @@ async function ingresarAlSistema() {
         if (
             adminLocal !== null &&
             adminLocal.autenticacion !==
-                "supabase"
+            "supabase"
         ) {
             if (
                 adminLocal.contrasena !==
@@ -2914,7 +3322,7 @@ async function ingresarAlSistema() {
         if (
             usuarioLocal !== null &&
             usuarioLocal.autenticacion !==
-                "supabase"
+            "supabase"
         ) {
             if (
                 usuarioLocal.contrasena !==
@@ -2997,10 +3405,9 @@ async function ingresarAlSistema() {
         const usuarioSupabase =
             resultado.usuario;
 
-        if (
-            usuarioSupabase === null ||
+        if (usuarioSupabase === null ||
             typeof usuarioSupabase !==
-                "object"
+            "object"
         ) {
             mostrarMensaje(
                 mensajeInicio,
@@ -3077,11 +3484,11 @@ async function ingresarAlSistema() {
             ) {
                 if (
                     usuarios[i].id ===
-                        usuarioAplicacion.id ||
+                    usuarioAplicacion.id ||
                     usuarios[i].usuario
                         .toLowerCase() ===
-                        usuarioAplicacion.usuario
-                            .toLowerCase()
+                    usuarioAplicacion.usuario
+                        .toLowerCase()
                 ) {
                     indiceUsuario = i;
                     break;
@@ -3134,13 +3541,13 @@ async function ingresarAlSistema() {
                 "adminSuperior";
         } else if (
             usuarioSupabase.tipo ===
-                "admin"
+            "admin"
         ) {
             tipoAdministrador =
                 "admin";
         } else if (
             usuarioSupabase.tipo ===
-                "operador_vales"
+            "operador_vales"
         ) {
             tipoAdministrador =
                 "operadorVales";
@@ -3422,6 +3829,369 @@ function volverAInicio() {
     );
 }
 
+
+// =======================================================
+// MENSAJES DEL LECTOR QR
+// =======================================================
+
+function mostrarMensajeLectorQrAlmacenero(
+    texto,
+    tipo = ""
+) {
+    const mensaje =
+        document.querySelector(
+            "#mensajeQrAlmacenero"
+        );
+
+    if (mensaje === null) {
+        return;
+    }
+
+    mensaje.textContent =
+        texto;
+
+    mensaje.className =
+        "mensaje";
+
+    if (tipo !== "") {
+        mensaje.classList.add(
+            "mensaje-" + tipo
+        );
+    }
+}
+
+// =======================================================
+// OBTENER TOKEN DESDE EL QR
+// =======================================================
+
+function obtenerTokenDesdeQrAlmacenero(
+    contenidoQr
+) {
+    const texto =
+        String(
+            contenidoQr || ""
+        ).trim();
+
+    if (texto === "") {
+        return null;
+    }
+
+    try {
+        const direccion =
+            new URL(
+                texto,
+                window.location.href
+            );
+
+        const token =
+            direccion.searchParams.get(
+                "token"
+            );
+
+        if (
+            token === null ||
+            token.trim() === ""
+        ) {
+            return null;
+        }
+
+        return token.trim();
+    } catch (error) {
+        return null;
+    }
+}
+
+// =======================================================
+// DETENER LECTOR QR
+// =======================================================
+
+async function detenerLectorQrAlmacenero() {
+    const contenedor =
+        document.querySelector(
+            "#lectorQrAlmacenero"
+        );
+
+    const botonIniciar =
+        document.querySelector(
+            "#botonIniciarLectorQrAlmacenero"
+        );
+
+    const botonDetener =
+        document.querySelector(
+            "#botonDetenerLectorQrAlmacenero"
+        );
+
+    if (lectorQrAlmacenero !== null) {
+        try {
+            if (lectorQrAlmaceneroActivo) {
+                await lectorQrAlmacenero
+                    .stop();
+            }
+        } catch (error) {
+            console.error(
+                "Error al detener el lector QR:",
+                error
+            );
+        }
+
+        try {
+            lectorQrAlmacenero.clear();
+        } catch (error) {
+            console.error(
+                "Error al limpiar el lector QR:",
+                error
+            );
+        }
+    }
+
+    lectorQrAlmacenero = null;
+    lectorQrAlmaceneroActivo = false;
+    lectorQrAlmaceneroIniciando = false;
+    qrAlmaceneroProcesado = false;
+
+    if (contenedor !== null) {
+        contenedor.innerHTML = "";
+        contenedor.classList.add(
+            "oculto"
+        );
+    }
+
+    if (botonIniciar !== null) {
+        botonIniciar.disabled =
+            false;
+    }
+
+    if (botonDetener !== null) {
+        botonDetener.classList.add(
+            "oculto"
+        );
+    }
+}
+
+// =======================================================
+// PROCESAR CÓDIGO QR
+// =======================================================
+
+async function procesarQrAlmacenero(
+    contenidoQr
+) {
+    if (qrAlmaceneroProcesado) {
+        return;
+    }
+
+    const token =
+        obtenerTokenDesdeQrAlmacenero(
+            contenidoQr
+        );
+
+    if (token === null) {
+        mostrarMensajeLectorQrAlmacenero(
+            "El código QR no corresponde a un vale válido.",
+            "error"
+        );
+
+        return;
+    }
+
+    qrAlmaceneroProcesado =
+        true;
+
+    mostrarMensajeLectorQrAlmacenero(
+        "Vale encontrado. Abriendo comprobante...",
+        "exito"
+    );
+
+    await detenerLectorQrAlmacenero();
+
+    const direccionVale =
+        new URL(
+            "vale.html",
+            window.location.href
+        );
+
+    direccionVale.searchParams.set(
+        "token",
+        token
+    );
+
+    window.location.assign(
+        direccionVale.toString()
+    );
+}
+
+// =======================================================
+// INICIAR LECTOR QR
+// =======================================================
+
+async function iniciarLectorQrAlmacenero() {
+    if (
+        lectorQrAlmaceneroActivo ||
+        lectorQrAlmaceneroIniciando
+    ) {
+        return;
+    }
+
+    const contenedor =
+        document.querySelector(
+            "#lectorQrAlmacenero"
+        );
+
+    const botonIniciar =
+        document.querySelector(
+            "#botonIniciarLectorQrAlmacenero"
+        );
+
+    const botonDetener =
+        document.querySelector(
+            "#botonDetenerLectorQrAlmacenero"
+        );
+
+    if (
+        contenedor === null ||
+        botonIniciar === null ||
+        botonDetener === null
+    ) {
+        return;
+    }
+
+    if (
+        typeof window.Html5Qrcode ===
+        "undefined"
+    ) {
+        mostrarMensajeLectorQrAlmacenero(
+            "El lector QR no está disponible.",
+            "error"
+        );
+
+        return;
+    }
+
+    lectorQrAlmaceneroIniciando =
+        true;
+
+    qrAlmaceneroProcesado =
+        false;
+
+    botonIniciar.disabled =
+        true;
+
+    contenedor.classList.remove(
+        "oculto"
+    );
+
+    mostrarMensajeLectorQrAlmacenero(
+        "Permití el acceso a la cámara."
+    );
+
+    try {
+        lectorQrAlmacenero =
+            new window.Html5Qrcode(
+                "lectorQrAlmacenero",
+                {
+                    formatsToSupport: [
+                        window
+                            .Html5QrcodeSupportedFormats
+                            .QR_CODE
+                    ]
+                }
+            );
+
+        await lectorQrAlmacenero.start(
+            {
+                facingMode:
+                    "environment"
+            },
+            {
+                fps:
+                    10,
+
+                qrbox: {
+                    width:
+                        220,
+
+                    height:
+                        220
+                }
+            },
+            procesarQrAlmacenero,
+            function () {
+                // La cámara continúa buscando un QR.
+            }
+        );
+
+        lectorQrAlmaceneroActivo =
+            true;
+
+        botonDetener.classList.remove(
+            "oculto"
+        );
+
+        mostrarMensajeLectorQrAlmacenero(
+            "Apuntá la cámara al código QR del vale."
+        );
+    } catch (error) {
+        console.error(
+            "Error al iniciar el lector QR:",
+            error
+        );
+
+        if (lectorQrAlmacenero !== null) {
+            try {
+                lectorQrAlmacenero.clear();
+            } catch (errorLimpieza) {
+                console.error(
+                    "Error al limpiar el lector:",
+                    errorLimpieza
+                );
+            }
+        }
+
+        lectorQrAlmacenero = null;
+        lectorQrAlmaceneroActivo = false;
+
+        contenedor.innerHTML = "";
+        contenedor.classList.add(
+            "oculto"
+        );
+
+        botonIniciar.disabled =
+            false;
+
+        mostrarMensajeLectorQrAlmacenero(
+            "No se pudo abrir la cámara. Revisá sus permisos.",
+            "error"
+        );
+    } finally {
+        lectorQrAlmaceneroIniciando =
+            false;
+    }
+}
+
+// =======================================================
+// DETENER LECTOR DESDE EL BOTÓN
+// =======================================================
+
+async function detenerLectorQrDesdeBoton() {
+    await detenerLectorQrAlmacenero();
+
+    mostrarMensajeLectorQrAlmacenero(
+        "Lector detenido."
+    );
+}
+
+// =======================================================
+// SALIR DEL PANEL DEL ALMACENERO
+// =======================================================
+
+async function salirDesdePanelAlmacenero() {
+    await detenerLectorQrAlmacenero();
+
+    salirSistema();
+}
+
+
+
+
 // =======================================================
 // PANEL DEL ALMACENERO
 // =======================================================
@@ -3452,42 +4222,21 @@ function asegurarPantallaAlmacenero() {
         "pantalla oculto";
 
     seccion.innerHTML = `
-        <div class="contenedor-secundario">
+        <div class="contenedor-principal">
 
-            <article class="tarjeta-formulario">
+            <header class="encabezado-billetera">
 
-                <h2 class="titulo-seccion">
-                    panel almacenero
-                </h2>
+                <div>
 
-                <p
-                    id="textoAlmaceneroActual"
-                    class="texto-suave"
-                >
-                    sin almacenero activo
-                </p>
+                    <h2 class="titulo-seccion">
+                        panel almacenero
+                    </h2>
 
-                <div class="tarjeta">
-
-                    <h3 class="subtitulo-seccion">
-                        validar vales
-                    </h3>
-
-                    <p class="texto-suave">
-                        escaneá el código QR que te muestre
-                        el estudiante. El comprobante se abrirá
-                        en este mismo dispositivo.
-                    </p>
-
-                    <p class="texto-suave">
-                        desde el comprobante podrás consultar
-                        los datos del vale y marcarlo como utilizado.
-                    </p>
-
-                    <p class="texto-ayuda-panel">
-                        esta cuenta no tiene acceso a usuarios,
-                        saldos, productos, estadísticas ni
-                        funciones administrativas.
+                    <p
+                        id="textoAlmaceneroActual"
+                        class="texto-suave"
+                    >
+                        sin almacenero activo
                     </p>
 
                 </div>
@@ -3500,7 +4249,155 @@ function asegurarPantallaAlmacenero() {
                     cerrar sesión
                 </button>
 
-            </article>
+            </header>
+
+            <div class="grid-admin">
+
+                <article class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
+                        fondo disponible
+                    </h3>
+
+                    <p class="texto-suave">
+                        dinero disponible para respaldar
+                        las ventas del almacén
+                    </p>
+
+                    <p
+                        id="saldoFondoAlmacen"
+                        class="saldo-disponible"
+                    >
+                        $ 0
+                    </p>
+
+                    <p
+                        id="fechaFondoAlmacen"
+                        class="texto-ayuda-panel"
+                    >
+                        sin actualización registrada
+                    </p>
+
+                    <button
+                        type="button"
+                        id="botonActualizarFondoAlmacen"
+                        class="boton boton-secundario"
+                    >
+                        actualizar fondo
+                    </button>
+
+                    <p
+                        id="mensajeFondoAlmacen"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
+
+                </article>
+
+                <article class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
+                        gestionar productos
+                    </h3>
+
+                    <label for="inputNombreProductoAlmacenero">
+                        nombre del producto
+                    </label>
+
+                    <input
+                        type="text"
+                        id="inputNombreProductoAlmacenero"
+                        maxlength="120"
+                        placeholder="ejemplo: jugo natural"
+                    >
+
+                    <label for="inputPrecioProductoAlmacenero">
+                        precio
+                    </label>
+
+                    <input
+                        type="number"
+                        id="inputPrecioProductoAlmacenero"
+                        min="1"
+                        step="1"
+                        placeholder="ingresá el precio"
+                    >
+
+                    <button
+                        type="button"
+                        id="botonAgregarProductoAlmacenero"
+                        class="boton"
+                    >
+                        agregar producto
+                    </button>
+
+                    <button
+                        type="button"
+                        id="botonActualizarProductosAlmacenero"
+                        class="boton boton-secundario"
+                    >
+                        actualizar lista
+                    </button>
+
+                    <p
+                        id="mensajeProductosAlmacenero"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
+
+                    <div
+                        id="listaProductosAlmacenero"
+                        class="lista-productos-admin"
+                    ></div>
+
+                </article>
+
+                <article class="tarjeta">
+
+                    <h3 class="subtitulo-seccion">
+                        validar vales
+                    </h3>
+
+                    <p class="texto-suave">
+                        escaneá el código QR que te muestre
+                        el estudiante
+                    </p>
+
+                    <p class="texto-suave">
+                        podrás consultar los datos del vale
+                        y marcarlo como utilizado
+                    </p>
+
+                    <button
+                        type="button"
+                        id="botonIniciarLectorQrAlmacenero"
+                        class="boton"
+                    >
+                        abrir cámara
+                    </button>
+
+                    <button
+                        type="button"
+                        id="botonDetenerLectorQrAlmacenero"
+                        class="boton boton-secundario oculto"
+                    >
+                        detener cámara
+                    </button>
+
+                    <div
+                        id="lectorQrAlmacenero"
+                        class="lector-qr-almacenero oculto"
+                    ></div>
+
+                    <p
+                        id="mensajeQrAlmacenero"
+                        class="mensaje"
+                        aria-live="polite"
+                    ></p>
+
+                </article>
+
+            </div>
 
         </div>
     `;
@@ -3517,14 +4414,74 @@ function asegurarPantallaAlmacenero() {
             "#botonSalirAlmacenero"
         );
 
+    const botonActualizarFondo =
+        seccion.querySelector(
+            "#botonActualizarFondoAlmacen"
+        );
+
+    const botonAgregarProducto =
+        seccion.querySelector(
+            "#botonAgregarProductoAlmacenero"
+        );
+
+    const botonActualizarProductos =
+        seccion.querySelector(
+            "#botonActualizarProductosAlmacenero"
+        );
+
+    const botonIniciarLectorQr =
+        seccion.querySelector(
+            "#botonIniciarLectorQrAlmacenero"
+        );
+
+    const botonDetenerLectorQr =
+        seccion.querySelector(
+            "#botonDetenerLectorQrAlmacenero"
+        );
+
     escuchar(
         botonSalir,
         "click",
-        salirSistema
+        salirDesdePanelAlmacenero
+    );
+
+    escuchar(
+        botonActualizarFondo,
+        "click",
+        cargarFondoAlmacenero
+    );
+
+    escuchar(
+        botonAgregarProducto,
+        "click",
+        agregarProductoDesdeAlmacenero
+    );
+
+    escuchar(
+        botonActualizarProductos,
+        "click",
+        actualizarListaProductosAlmacenero
+    );
+
+    escuchar(
+        botonIniciarLectorQr,
+        "click",
+        iniciarLectorQrAlmacenero
+    );
+
+    escuchar(
+        botonDetenerLectorQr,
+        "click",
+        detenerLectorQrDesdeBoton
     );
 
     return true;
 }
+
+
+
+
+
 
 function renderizarAlmaceneroActivo() {
     if (!asegurarPantallaAlmacenero()) {
@@ -3547,30 +4504,608 @@ function renderizarAlmaceneroActivo() {
         almacenero === null
             ? "sin almacenero activo"
             : "almacenero activo: " +
-              almacenero.nombre +
-              " (" +
-              almacenero.usuario +
-              ")";
+            almacenero.nombre +
+            " (" +
+            almacenero.usuario +
+            ")";
 }
 
-function abrirPanelAlmacenero() {
-    if (!asegurarPantallaAlmacenero()) {
+function formatearFechaFondoAlmacen(
+    fechaTexto
+) {
+    if (
+        typeof fechaTexto !== "string" ||
+        fechaTexto.trim() === ""
+    ) {
+        return "sin actualización registrada";
+    }
+
+    const fecha =
+        new Date(
+            fechaTexto
+        );
+
+    if (
+        Number.isNaN(
+            fecha.getTime()
+        )
+    ) {
+        return "sin actualización registrada";
+    }
+
+    return (
+        "última actualización: " +
+        fecha.toLocaleString(
+            "es-UY",
+            {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        )
+    );
+}
+
+async function cargarFondoAlmacenero() {
+    const saldo =
+        document.querySelector(
+            "#saldoFondoAlmacen"
+        );
+
+    const fecha =
+        document.querySelector(
+            "#fechaFondoAlmacen"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonActualizarFondoAlmacen"
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeFondoAlmacen"
+        );
+
+    if (
+        saldo === null ||
+        fecha === null ||
+        boton === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        typeof window.fondoAlmacenRepository ===
+        "undefined"
+    ) {
         mostrarMensaje(
-            mensajeInicio,
-            "no se pudo abrir el panel del almacenero",
+            mensaje,
+            "el servicio del fondo no está disponible",
             "var(--color-error)"
         );
 
         return;
     }
 
-    renderizarAlmaceneroActivo();
+    boton.disabled =
+        true;
 
-    mostrarPantalla(
-        "#pantallaAlmacenero"
+    try {
+        const resultado =
+            await window
+                .fondoAlmacenRepository
+                .consultarFondo();
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensaje,
+                resultado.mensaje ||
+                "no se pudo consultar el fondo",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        saldo.textContent =
+            formatearMoneda(
+                resultado.saldo
+            );
+
+        fecha.textContent =
+            formatearFechaFondoAlmacen(
+                resultado.actualizadoEn
+            );
+    } catch (error) {
+        console.error(
+            "Error al cargar el fondo:",
+            error
+        );
+
+        mostrarMensaje(
+            mensaje,
+            "no se pudo consultar el fondo",
+            "var(--color-error)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+
+
+// =======================================================
+// PRODUCTOS DEL ALMACENERO
+// =======================================================
+
+function renderizarProductosAlmacenero() {
+    const contenedor =
+        document.querySelector(
+            "#listaProductosAlmacenero"
+        );
+
+    if (contenedor === null) {
+        return;
+    }
+
+    contenedor.innerHTML =
+        "";
+
+    if (productos.length === 0) {
+        contenedor.innerHTML =
+            '<p class="lista-vacia">no hay productos registrados</p>';
+
+        return;
+    }
+
+    for (
+        let i = 0;
+        i < productos.length;
+        i++
+    ) {
+        const producto =
+            productos[i];
+
+        contenedor.innerHTML += `
+            <div class="item-producto-admin">
+
+                <p class="producto-nombre">
+                    ${producto.nombre}
+                </p>
+
+                <label
+                    for="precioProductoAlmacenero-${producto.id}"
+                >
+                    precio
+                </label>
+
+                <input
+                    type="number"
+                    id="precioProductoAlmacenero-${producto.id}"
+                    min="1"
+                    step="1"
+                    value="${Number(producto.precio)}"
+                >
+
+                <div class="acciones-usuario-admin">
+
+                    <button
+                        type="button"
+                        class="boton boton-chico"
+                        onclick="actualizarPrecioProductoAlmacenero(${producto.id})"
+                    >
+                        guardar precio
+                    </button>
+
+                    <button
+                        type="button"
+                        class="boton boton-peligro boton-chico"
+                        onclick="quitarProductoDesdeAlmacenero(${producto.id})"
+                    >
+                        quitar producto
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+    }
+}
+
+// =======================================================
+// ACTUALIZAR LISTA DE PRODUCTOS
+// =======================================================
+
+async function actualizarListaProductosAlmacenero() {
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonActualizarProductosAlmacenero"
+        );
+
+    if (
+        mensaje === null ||
+        boton === null
+    ) {
+        return;
+    }
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    boton.disabled =
+        true;
+
+    try {
+        const cargados =
+            await cargarProductosDesdeSupabase();
+
+        if (!cargados) {
+            mostrarMensaje(
+                mensaje,
+                "no se pudieron cargar los productos",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        renderizarProductosAlmacenero();
+
+        mostrarMensaje(
+            mensaje,
+            "lista actualizada correctamente",
+            "var(--color-exito)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+// =======================================================
+// AGREGAR PRODUCTO DESDE ALMACENERO
+// =======================================================
+
+async function agregarProductoDesdeAlmacenero() {
+    const inputNombre =
+        document.querySelector(
+            "#inputNombreProductoAlmacenero"
+        );
+
+    const inputPrecio =
+        document.querySelector(
+            "#inputPrecioProductoAlmacenero"
+        );
+
+    const boton =
+        document.querySelector(
+            "#botonAgregarProductoAlmacenero"
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    if (
+        inputNombre === null ||
+        inputPrecio === null ||
+        boton === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    const nombre =
+        inputNombre.value.trim();
+
+    const precio =
+        Number(
+            inputPrecio.value
+        );
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        nombre === "" ||
+        Number.isNaN(precio) ||
+        precio <= 0
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "ingresá un nombre y un precio válido",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    if (
+        typeof window.productosRepository ===
+        "undefined"
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "el servicio de productos no está disponible",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    boton.disabled =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .productosRepository
+                .crearProducto(
+                    nombre,
+                    precio
+                );
+
+        if (!resultado.correcto) {
+            mostrarMensaje(
+                mensaje,
+                resultado.mensaje ||
+                "no se pudo crear el producto",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        inputNombre.value =
+            "";
+
+        inputPrecio.value =
+            "";
+
+        await cargarProductosDesdeSupabase();
+
+        renderizarProductosAlmacenero();
+
+        mostrarMensaje(
+            mensaje,
+            "producto agregado correctamente",
+            "var(--color-exito)"
+        );
+    } catch (error) {
+        console.error(
+            "Error al crear producto desde almacenero:",
+            error
+        );
+
+        mostrarMensaje(
+            mensaje,
+            "no se pudo crear el producto",
+            "var(--color-error)"
+        );
+    } finally {
+        boton.disabled =
+            false;
+    }
+}
+
+// =======================================================
+// ACTUALIZAR PRECIO DESDE ALMACENERO
+// =======================================================
+
+async function actualizarPrecioProductoAlmacenero(
+    idProducto
+) {
+    const producto =
+        buscarProductoPorId(
+            idProducto
+        );
+
+    const input =
+        document.querySelector(
+            "#precioProductoAlmacenero-" +
+            idProducto
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    if (
+        producto === null ||
+        input === null ||
+        mensaje === null
+    ) {
+        return;
+    }
+
+    const precio =
+        Number(
+            input.value
+        );
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    if (
+        Number.isNaN(precio) ||
+        precio <= 0
+    ) {
+        mostrarMensaje(
+            mensaje,
+            "ingresá un precio válido",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    const resultado =
+        await window
+            .productosRepository
+            .actualizarProducto(
+                producto.id,
+                producto.nombre,
+                precio,
+                true
+            );
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensaje,
+            resultado.mensaje ||
+            "no se pudo actualizar el precio",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    await cargarProductosDesdeSupabase();
+
+    renderizarProductosAlmacenero();
+
+    mostrarMensaje(
+        mensaje,
+        "precio actualizado correctamente",
+        "var(--color-exito)"
     );
 }
 
+// =======================================================
+// QUITAR PRODUCTO DESDE ALMACENERO
+// =======================================================
+
+async function quitarProductoDesdeAlmacenero(
+    idProducto
+) {
+    const producto =
+        buscarProductoPorId(
+            idProducto
+        );
+
+    const mensaje =
+        document.querySelector(
+            "#mensajeProductosAlmacenero"
+        );
+
+    if (
+        producto === null ||
+        mensaje === null
+    ) {
+        return
+    }
+
+    const confirmado =
+        confirm(
+            "¿Quitar el producto " +
+            producto.nombre +
+            "?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    limpiarMensaje(
+        mensaje
+    );
+
+    const resultado =
+        await window
+            .productosRepository
+            .eliminarProducto(
+                producto.id
+            );
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensaje,
+            resultado.mensaje ||
+            "no se pudo quitar el producto",
+            "var(--color-error)"
+        );
+
+        return;
+    }
+
+    await cargarProductosDesdeSupabase();
+
+    renderizarProductosAlmacenero();
+
+    mostrarMensaje(
+        mensaje,
+        "producto quitado correctamente",
+        "var(--color-exito)"
+    );
+}
+
+
+
+
+async function abrirPanelAlmacenero() {
+    mostrarPantallaCarga(
+        "Cargando..."
+    );
+
+    try {
+        if (!asegurarPantallaAlmacenero()) {
+            mostrarMensaje(
+                mensajeInicio,
+                "no se pudo abrir el panel del almacenero",
+                "var(--color-error)"
+            );
+
+            return;
+        }
+
+        renderizarAlmaceneroActivo();
+
+        mostrarPantalla(
+            "#pantallaAlmacenero"
+        );
+
+        const productosCargados =
+            await cargarProductosDesdeSupabase();
+
+        renderizarProductosAlmacenero();
+
+        if (!productosCargados) {
+            const mensajeProductos =
+                document.querySelector(
+                    "#mensajeProductosAlmacenero"
+                );
+
+            mostrarMensaje(
+                mensajeProductos,
+                "no se pudieron cargar los productos",
+                "var(--color-error)"
+            );
+        }
+
+        await cargarFondoAlmacenero();
+    } finally {
+        await ocultarPantallaCarga();
+    }
+}
 // =======================================================
 // CARGA DESDE SUPABASE
 // =======================================================
@@ -3606,32 +5141,349 @@ async function cargarProductosDesdeSupabase() {
     return true;
 }
 
-async function abrirBilletera() {
-    actualizarValesVencidos();
 
-    const productosCargados =
-        await cargarProductosDesdeSupabase();
 
-    if (!productosCargados) {
+// =======================================================
+// ALMACÉN SELECCIONADO POR EL TITULAR
+// =======================================================
+
+async function cargarProductosAlmacenTitular() {
+    productos = [];
+
+    renderizarProductos();
+
+    if (
+        almacenTitularSeleccionadoId ===
+        null
+    ) {
         mostrarMensaje(
-            mensajeCompra,
+            mensajeAlmacenTitular,
+            "seleccioná un almacén",
+            "var(--color-advertencia)"
+        );
+
+        return false;
+    }
+
+    if (
+        typeof window.productosRepository ===
+        "undefined" ||
+        typeof window
+            .productosRepository
+            .listarProductosPorAlmacen !==
+        "function"
+    ) {
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            "el servicio de productos no está disponible",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+
+    limpiarMensaje(
+        mensajeAlmacenTitular
+    );
+
+    const resultado =
+        await window
+            .productosRepository
+            .listarProductosPorAlmacen(
+                almacenTitularSeleccionadoId
+            );
+
+    if (!resultado.correcto) {
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            resultado.mensaje ||
             "no se pudieron cargar los productos",
             "var(--color-error)"
         );
+
+        return false;
     }
 
-    renderizarTodoTitular();
+    productos =
+        resultado.productos;
 
-    mostrarPantalla(
-        "#pantallaBilletera"
-    );
+    siguienteIdProducto =
+        obtenerSiguienteId(
+            productos
+        );
+
+    renderizarProductos();
+
+    return true;
 }
+
+async function cargarAlmacenesTitular() {
+    if (selectAlmacenTitular === null) {
+        return false;
+    }
+
+    selectAlmacenTitular.disabled =
+        true;
+
+    selectAlmacenTitular.innerHTML =
+        "";
+
+    const opcionCargando =
+        document.createElement(
+            "option"
+        );
+
+    opcionCargando.value =
+        "";
+
+    opcionCargando.textContent =
+        "cargando almacenes...";
+
+    selectAlmacenTitular.appendChild(
+        opcionCargando
+    );
+
+    if (
+        typeof window.fondoAlmacenRepository ===
+        "undefined" ||
+        typeof window
+            .fondoAlmacenRepository
+            .listarAlmacenes !==
+        "function"
+    ) {
+        opcionCargando.textContent =
+            "servicio no disponible";
+
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            "no se pudieron consultar los almacenes",
+            "var(--color-error)"
+        );
+
+        return false;
+    }
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .listarAlmacenes();
+
+    if (
+        !resultado.correcto ||
+        resultado.almacenes.length === 0
+    ) {
+        opcionCargando.textContent =
+            "no hay almacenes disponibles";
+
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            resultado.mensaje ||
+            "no hay almacenes disponibles",
+            "var(--color-advertencia)"
+        );
+
+        return false;
+    }
+
+    selectAlmacenTitular.innerHTML =
+        "";
+
+    for (
+        let i = 0;
+        i < resultado.almacenes.length;
+        i++
+    ) {
+        const almacen =
+            resultado.almacenes[i];
+
+        const opcion =
+            document.createElement(
+                "option"
+            );
+
+        opcion.value =
+            almacen.id;
+
+        opcion.textContent =
+            almacen.nombre;
+
+        selectAlmacenTitular.appendChild(
+            opcion
+        );
+    }
+
+    almacenTitularSeleccionadoId =
+        resultado.almacenes[0].id;
+
+    selectAlmacenTitular.value =
+        almacenTitularSeleccionadoId;
+
+    selectAlmacenTitular.disabled =
+        false;
+
+    return await cargarProductosAlmacenTitular();
+}
+
+async function cambiarAlmacenTitular() {
+    if (selectAlmacenTitular === null) {
+        return;
+    }
+
+    const nuevoAlmacenId =
+        selectAlmacenTitular
+            .value
+            .trim();
+
+    if (
+        nuevoAlmacenId === "" ||
+        nuevoAlmacenId ===
+        almacenTitularSeleccionadoId
+    ) {
+        return;
+    }
+
+    almacenTitularSeleccionadoId =
+        nuevoAlmacenId;
+
+    carrito = [];
+
+    renderizarCarrito();
+
+    const productosCargados =
+        await cargarProductosAlmacenTitular();
+
+    if (productosCargados) {
+        mostrarMensaje(
+            mensajeAlmacenTitular,
+            "almacén actualizado y carrito vaciado",
+            "var(--color-exito)"
+        );
+    }
+}
+
+
+
+
+
+
+// =======================================================
+// RECUPERAR VALE PENDIENTE DEL TITULAR
+// =======================================================
+
+async function recuperarValePendienteTitular() {
+    if (
+        sesion.origen !== "supabase" ||
+        typeof window.valesRepository ===
+        "undefined" ||
+        typeof window
+            .valesRepository
+            .obtenerMiUltimoValePendiente !==
+        "function"
+    ) {
+        return false;
+    }
+
+    try {
+        const resultado =
+            await window
+                .valesRepository
+                .obtenerMiUltimoValePendiente();
+
+        if (!resultado.correcto) {
+            console.error(
+                "No se pudo recuperar el vale pendiente:",
+                resultado
+            );
+
+            return false;
+        }
+
+        if (
+            resultado.existe !== true ||
+            resultado.vale === null
+        ) {
+            return false;
+        }
+
+        const vale =
+            resultado.vale;
+
+        guardarVale(
+            vale
+        );
+
+        mostrarValeGenerado(
+            vale
+        );
+
+        mostrarMensaje(
+            mensajeCompra,
+            "se recuperó tu vale pendiente: " +
+            vale.id,
+            "var(--color-principal)"
+        );
+
+        return true;
+    } catch (error) {
+        console.error(
+            "Error al recuperar el vale pendiente:",
+            error
+        );
+
+        return false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+async function abrirBilletera() {
+    mostrarPantallaCarga(
+        "Cargando..."
+    );
+
+    try {
+        actualizarValesVencidos();
+
+        almacenTitularSeleccionadoId =
+            null;
+
+        productos = [];
+
+        renderizarTodoTitular();
+
+        mostrarPantalla(
+            "#pantallaBilletera"
+        );
+
+        await cargarAlmacenesTitular();
+
+        await recuperarValePendienteTitular();
+    } catch (error) {
+        console.error(
+            "Error al abrir la billetera:",
+            error
+        );
+    } finally {
+        await ocultarPantallaCarga();
+    }
+}
+
+
 
 async function cargarUsuariosParaAdministracion() {
     if (
         sesion.origen !== "supabase" ||
         typeof window.usuariosRepository ===
-            "undefined"
+        "undefined"
     ) {
         return true;
     }
@@ -3681,7 +5533,7 @@ async function cargarUsuariosParaAdministracion() {
 
         if (
             usuarios[i].autenticacion !==
-                "supabase" &&
+            "supabase" &&
             !existeEnSupabase
         ) {
             usuariosCombinados.push(
@@ -3710,9 +5562,9 @@ async function cargarUsuariosParaAdministracion() {
 async function cargarAdministradoresDesdeSupabase() {
     if (
         sesion.tipo !==
-            "adminSuperior" ||
+        "adminSuperior" ||
         sesion.origen !==
-            "supabase"
+        "supabase"
     ) {
         return true;
     }
@@ -3795,9 +5647,9 @@ async function cargarAdministradoresDesdeSupabase() {
 
             if (
                 adminActual.tipo ===
-                    "admin" &&
+                "admin" &&
                 adminActual.autenticacion !==
-                    "supabase"
+                "supabase"
             ) {
                 let existeRemoto =
                     false;
@@ -3891,9 +5743,9 @@ async function cargarAdministradoresDesdeSupabase() {
 async function cargarAlmacenerosDesdeSupabase() {
     if (
         sesion.tipo !==
-            "adminSuperior" ||
+        "adminSuperior" ||
         sesion.origen !==
-            "supabase"
+        "supabase"
     ) {
         return true;
     }
@@ -4276,13 +6128,19 @@ function renderizarHistorialTitular() {
         return;
     }
 
+    const movimientosVisibles =
+        usuario.historial.slice(
+            0,
+            3
+        );
+
     for (
         let i = 0;
-        i < usuario.historial.length;
+        i < movimientosVisibles.length;
         i++
     ) {
         const movimiento =
-            usuario.historial[i];
+            movimientosVisibles[i];
 
         listaHistorial.innerHTML += `
             <div class="item-historial">
@@ -4322,6 +6180,575 @@ function renderizarTodoTitular() {
     renderizarHistorialTitular();
 }
 
+
+
+
+// =======================================================
+// MENSAJES DEL FONDO DEL ADMINISTRADOR
+// =======================================================
+
+function mostrarMensajeFondoAdmin(
+    texto,
+    tipo = ""
+) {
+    if (mensajeFondoAdmin === null) {
+        return;
+    }
+
+    mensajeFondoAdmin.textContent =
+        texto;
+
+    mensajeFondoAdmin.className =
+        "mensaje";
+
+    if (tipo !== "") {
+        mensajeFondoAdmin.classList.add(
+            "mensaje-" + tipo
+        );
+    }
+}
+
+function formatearFondoAdmin(valor) {
+    const numero =
+        Number(valor);
+
+    return new Intl.NumberFormat(
+        "es-UY",
+        {
+            style:
+                "currency",
+
+            currency:
+                "UYU",
+
+            maximumFractionDigits:
+                0
+        }
+    ).format(
+        Number.isFinite(numero)
+            ? numero
+            : 0
+    );
+}
+
+// =======================================================
+// CONSULTAR FONDO DEL ALMACÉN SELECCIONADO
+// =======================================================
+
+async function consultarFondoSeleccionadoAdmin() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        saldoAlmacenSeleccionadoAdmin ===
+        null
+    ) {
+        return;
+    }
+
+    const almacenId =
+        selectAlmacenFondoAdmin
+            .value
+            .trim();
+
+    if (almacenId === "") {
+        saldoAlmacenSeleccionadoAdmin
+            .textContent =
+            "seleccioná un almacén para consultar su fondo";
+
+        if (botonCargarFondoAdmin !== null) {
+            botonCargarFondoAdmin.disabled =
+                true;
+        }
+
+        return;
+    }
+
+    if (botonCargarFondoAdmin !== null) {
+        botonCargarFondoAdmin.disabled =
+            true;
+    }
+
+    saldoAlmacenSeleccionadoAdmin
+        .textContent =
+        "consultando fondo...";
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .consultarFondo(
+                almacenId
+            );
+
+    if (!resultado.correcto) {
+        saldoAlmacenSeleccionadoAdmin
+            .textContent =
+            "no se pudo consultar el fondo";
+
+        mostrarMensajeFondoAdmin(
+            resultado.mensaje ||
+            "no se pudo consultar el fondo",
+            "error"
+        );
+
+        return;
+    }
+
+    const opcionSeleccionada =
+        selectAlmacenFondoAdmin
+            .options[
+        selectAlmacenFondoAdmin
+            .selectedIndex
+        ];
+
+    const nombreAlmacen =
+        resultado.almacenNombre ||
+        opcionSeleccionada?.textContent ||
+        "almacén";
+
+    saldoAlmacenSeleccionadoAdmin
+        .textContent =
+        "fondo disponible en " +
+        nombreAlmacen +
+        ": " +
+        formatearFondoAdmin(
+            resultado.saldo
+        );
+
+    mostrarMensajeFondoAdmin(
+        ""
+    );
+
+    if (botonCargarFondoAdmin !== null) {
+        botonCargarFondoAdmin.disabled =
+            false;
+    }
+}
+
+// =======================================================
+// LISTAR ALMACENES EN EL PANEL
+// =======================================================
+
+async function cargarAlmacenesFondoAdmin() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        typeof window
+            .fondoAlmacenRepository ===
+        "undefined"
+    ) {
+        return;
+    }
+
+    const almacenAnterior =
+        selectAlmacenFondoAdmin.value;
+
+    selectAlmacenFondoAdmin.disabled =
+        true;
+
+    if (
+        botonActualizarAlmacenesAdmin !==
+        null
+    ) {
+        botonActualizarAlmacenesAdmin
+            .disabled =
+            true;
+    }
+
+    const resultado =
+        await window
+            .fondoAlmacenRepository
+            .listarAlmacenes();
+
+    selectAlmacenFondoAdmin.innerHTML =
+        "";
+
+    const opcionInicial =
+        document.createElement(
+            "option"
+        );
+
+    opcionInicial.value =
+        "";
+
+    opcionInicial.textContent =
+        "seleccioná un almacén";
+
+    selectAlmacenFondoAdmin.appendChild(
+        opcionInicial
+    );
+
+    if (!resultado.correcto) {
+        selectAlmacenFondoAdmin.disabled =
+            false;
+
+        if (
+            botonActualizarAlmacenesAdmin !==
+            null
+        ) {
+            botonActualizarAlmacenesAdmin
+                .disabled =
+                false;
+        }
+
+        mostrarMensajeFondoAdmin(
+            resultado.mensaje ||
+            "no se pudieron obtener los almacenes",
+            "error"
+        );
+
+        return;
+    }
+
+    for (
+        let i = 0;
+        i < resultado.almacenes.length;
+        i++
+    ) {
+        const almacen =
+            resultado.almacenes[i];
+
+        const opcion =
+            document.createElement(
+                "option"
+            );
+
+        opcion.value =
+            almacen.id;
+
+        opcion.textContent =
+            almacen.nombre;
+
+        selectAlmacenFondoAdmin.appendChild(
+            opcion
+        );
+    }
+
+    const almacenAnteriorExiste =
+        resultado.almacenes.some(
+            function (almacen) {
+                return (
+                    almacen.id ===
+                    almacenAnterior
+                );
+            }
+        );
+
+    if (almacenAnteriorExiste) {
+        selectAlmacenFondoAdmin.value =
+            almacenAnterior;
+    } else if (
+        resultado.almacenes.length === 1
+    ) {
+        selectAlmacenFondoAdmin.value =
+            resultado.almacenes[0].id;
+    }
+
+    selectAlmacenFondoAdmin.disabled =
+        false;
+
+    if (
+        botonActualizarAlmacenesAdmin !==
+        null
+    ) {
+        botonActualizarAlmacenesAdmin
+            .disabled =
+            false;
+    }
+
+    if (
+        resultado.almacenes.length === 0
+    ) {
+        mostrarMensajeFondoAdmin(
+            "no hay almacenes disponibles",
+            "error"
+        );
+    } else {
+        mostrarMensajeFondoAdmin(
+            ""
+        );
+    }
+
+    await consultarFondoSeleccionadoAdmin();
+}
+
+// =======================================================
+// CARGAR DINERO AL ALMACÉN
+// =======================================================
+
+async function cargarFondoDesdeAdministrador() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        inputMontoFondoAdmin === null ||
+        botonCargarFondoAdmin === null ||
+        botonRetirarFondoAdmin === null
+    ) {
+        return;
+    }
+
+    const almacenId =
+        selectAlmacenFondoAdmin
+            .value
+            .trim();
+
+    const monto =
+        Number(
+            inputMontoFondoAdmin.value
+        );
+
+    if (almacenId === "") {
+        mostrarMensajeFondoAdmin(
+            "seleccioná un almacén",
+            "error"
+        );
+
+        return;
+    }
+
+    if (
+        !Number.isFinite(monto) ||
+        monto <= 0
+    ) {
+        mostrarMensajeFondoAdmin(
+            "ingresá un monto mayor que cero",
+            "error"
+        );
+
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Confirmás la carga de " +
+            formatearFondoAdmin(monto) +
+            " al almacén seleccionado?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    botonCargarFondoAdmin.disabled =
+        true;
+
+    botonRetirarFondoAdmin.disabled =
+        true;
+
+    mostrarMensajeFondoAdmin(
+        "cargando fondo..."
+    );
+
+    try {
+        const resultado =
+            await window
+                .fondoAlmacenRepository
+                .cargarFondo(
+                    monto,
+                    almacenId
+                );
+
+        if (!resultado.correcto) {
+            let mensaje =
+                resultado.mensaje ||
+                "no se pudo cargar el fondo";
+
+            if (
+                resultado.resultado ===
+                "sin_permiso"
+            ) {
+                mensaje =
+                    "solo un administrador común puede cargar fondos";
+            }
+
+            if (
+                resultado.resultado ===
+                "almacen_no_encontrado"
+            ) {
+                mensaje =
+                    "el almacén seleccionado no está disponible";
+            }
+
+            mostrarMensajeFondoAdmin(
+                mensaje,
+                "error"
+            );
+
+            return;
+        }
+
+        inputMontoFondoAdmin.value =
+            "";
+
+        await consultarFondoSeleccionadoAdmin();
+
+        mostrarMensajeFondoAdmin(
+            "fondo cargado correctamente",
+            "exito"
+        );
+    } catch (error) {
+        console.error(
+            "Error al cargar fondo:",
+            error
+        );
+
+        mostrarMensajeFondoAdmin(
+            "no se pudo cargar el fondo",
+            "error"
+        );
+    } finally {
+        botonCargarFondoAdmin.disabled =
+            false;
+
+        botonRetirarFondoAdmin.disabled =
+            false;
+    }
+}
+
+
+
+
+async function retirarFondoDesdeAdministrador() {
+    if (
+        selectAlmacenFondoAdmin === null ||
+        inputMontoFondoAdmin === null ||
+        botonCargarFondoAdmin === null ||
+        botonRetirarFondoAdmin === null
+    ) {
+        return;
+    }
+
+    const almacenId =
+        selectAlmacenFondoAdmin
+            .value
+            .trim();
+
+    const monto =
+        Number(
+            inputMontoFondoAdmin.value
+        );
+
+    if (almacenId === "") {
+        mostrarMensajeFondoAdmin(
+            "seleccioná un almacén",
+            "error"
+        );
+
+        return;
+    }
+
+    if (
+        !Number.isFinite(monto) ||
+        monto <= 0
+    ) {
+        mostrarMensajeFondoAdmin(
+            "ingresá un monto mayor que cero",
+            "error"
+        );
+
+        return;
+    }
+
+    const confirmado =
+        confirm(
+            "¿Confirmás el retiro de " +
+            formatearFondoAdmin(monto) +
+            " del almacén seleccionado?"
+        );
+
+    if (!confirmado) {
+        return;
+    }
+
+    botonCargarFondoAdmin.disabled =
+        true;
+
+    botonRetirarFondoAdmin.disabled =
+        true;
+
+    mostrarMensajeFondoAdmin(
+        "retirando fondo..."
+    );
+
+    try {
+        const resultado =
+            await window
+                .fondoAlmacenRepository
+                .retirarFondo(
+                    monto,
+                    almacenId
+                );
+
+        if (!resultado.correcto) {
+            let mensaje =
+                resultado.mensaje ||
+                "no se pudo retirar el fondo";
+
+            if (
+                resultado.resultado ===
+                "sin_permiso"
+            ) {
+                mensaje =
+                    "solo un administrador común puede retirar fondos";
+            } else if (
+                resultado.resultado ===
+                "almacen_no_encontrado"
+            ) {
+                mensaje =
+                    "el almacén seleccionado no está disponible";
+            } else if (
+                resultado.resultado ===
+                "fondo_comprometido"
+            ) {
+                mensaje =
+                    "no se puede retirar ese monto. Disponible: " +
+                    formatearFondoAdmin(
+                        resultado.saldoDisponible
+                    ) +
+                    ". Reservado para vales pendientes: " +
+                    formatearFondoAdmin(
+                        resultado.saldoReservado
+                    );
+            }
+
+            mostrarMensajeFondoAdmin(
+                mensaje,
+                "error"
+            );
+
+            return;
+        }
+
+        inputMontoFondoAdmin.value =
+            "";
+
+        await consultarFondoSeleccionadoAdmin();
+
+        mostrarMensajeFondoAdmin(
+            "fondo retirado correctamente",
+            "exito"
+        );
+    } catch (error) {
+        console.error(
+            "Error al retirar fondo:",
+            error
+        );
+
+        mostrarMensajeFondoAdmin(
+            "no se pudo retirar el fondo",
+            "error"
+        );
+    } finally {
+        botonCargarFondoAdmin.disabled =
+            false;
+
+        botonRetirarFondoAdmin.disabled =
+            false;
+    }
+}
+
+
+
+
+
+
+
 // =======================================================
 // RENDER DEL ADMINISTRADOR
 // =======================================================
@@ -4334,10 +6761,10 @@ function renderizarAdministradorActivo() {
         admin === null
             ? "sin administrador activo"
             : "Hola!! Bienvenido!!! administrador activo: " +
-              admin.nombre +
-              " (" +
-              admin.usuario +
-              ")";
+            admin.nombre +
+            " (" +
+            admin.usuario +
+            ")";
 }
 
 function renderizarUsuariosAdmin() {
@@ -4542,10 +6969,10 @@ function renderizarAdminSuperiorActivo() {
         admin === null
             ? "sin admin superior activo"
             : "admin superior activo: " +
-              admin.nombre +
-              " (" +
-              admin.usuario +
-              ")";
+            admin.nombre +
+            " (" +
+            admin.usuario +
+            ")";
 }
 
 function obtenerTodasLasCuentasDelSistema() {
@@ -4665,11 +7092,10 @@ function renderizarCuentasAdminSuperior() {
                         class="boton boton-advertencia boton-chico"
                         onclick="alternarBloqueoDesdeAdminSuperior(${idCuentaSeguro})"
                     >
-                        ${
-                            cuenta.bloqueado
-                                ? "desbloquear"
-                                : "bloquear"
-                        }
+                        ${cuenta.bloqueado
+                    ? "desbloquear"
+                    : "bloquear"
+                }
                     </button>
 
                     <button
@@ -4690,9 +7116,9 @@ function renderizarCuentasAdminSuperior() {
             `;
         } else if (
             cuenta.tipo ===
-                "admin" ||
+            "admin" ||
             cuenta.tipo ===
-                "operadorVales"
+            "operadorVales"
         ) {
             acciones = `
                 <div class="acciones-usuario-admin">
@@ -4741,7 +7167,7 @@ function renderizarCuentasAdminSuperior() {
 
         const tipoVisible =
             cuenta.tipo ===
-            "operadorVales"
+                "operadorVales"
                 ? "almacenero"
                 : cuenta.tipo;
 
@@ -4769,24 +7195,22 @@ function renderizarCuentasAdminSuperior() {
 
                 <p class="admin-superior-dato">
                     saldo:
-                    ${
-                        cuenta.tipo === "titular"
-                            ? formatearMoneda(
-                                cuenta.saldo
-                            )
-                            : "-"
-                    }
+                    ${cuenta.tipo === "titular"
+                ? formatearMoneda(
+                    cuenta.saldo
+                )
+                : "-"
+            }
                 </p>
 
                 <p class="admin-superior-dato">
                     estado:
-                    ${
-                        cuenta.tipo ===
-                            "titular" &&
-                        cuenta.bloqueado
-                            ? "bloqueado"
-                            : "activo"
-                    }
+                    ${cuenta.tipo ===
+                "titular" &&
+                cuenta.bloqueado
+                ? "bloqueado"
+                : "activo"
+            }
                 </p>
 
                 ${acciones}
@@ -5243,8 +7667,8 @@ async function enviarAyudaAlumno() {
             mostrarMensaje(
                 mensajeAyudaAlumno,
                 resultado.mensaje ||
-                    resultado.devolucion ||
-                    "no se pudo evaluar la consulta",
+                resultado.devolucion ||
+                "no se pudo evaluar la consulta",
                 "var(--color-error)"
             );
 
@@ -5258,7 +7682,7 @@ async function enviarAyudaAlumno() {
             mostrarMensaje(
                 mensajeAyudaAlumno,
                 resultado.devolucion ||
-                    "la consulta necesita más información antes de enviarse",
+                "la consulta necesita más información antes de enviarse",
                 "var(--color-error)"
             );
 
@@ -5812,9 +8236,7 @@ function guardarConfiguracionValesDesdePanel() {
         !Number.isInteger(
             vigencia
         ) ||
-        vigencia < 1 ||
-
-        !Number.isInteger(
+        vigencia < 1 || !Number.isInteger(
             pendientes
         ) ||
         pendientes < 1
@@ -5926,7 +8348,7 @@ async function agregarSaldoDesdeAdminSuperior(
             mostrarMensaje(
                 mensajeAccionesAdminSuperior,
                 resultado.mensaje ||
-                    resultado.resultado,
+                resultado.resultado,
                 "var(--color-error)"
             );
 
@@ -5955,7 +8377,7 @@ async function agregarSaldoDesdeAdminSuperior(
         usuario.id,
         "agregar_saldo_admin_superior",
         "el admin superior agregó " +
-            formatearMoneda(monto),
+        formatearMoneda(monto),
         monto,
         usuario.saldo
     );
@@ -6016,10 +8438,10 @@ async function descontarSaldoDesdeAdminSuperior(
         if (!resultado.correcto) {
             const mensaje =
                 resultado.resultado ===
-                "saldo_insuficiente"
+                    "saldo_insuficiente"
                     ? "monto superior al saldo disponible"
                     : resultado.mensaje ||
-                      resultado.resultado;
+                    resultado.resultado;
 
             mostrarMensaje(
                 mensajeAccionesAdminSuperior,
@@ -6062,7 +8484,7 @@ async function descontarSaldoDesdeAdminSuperior(
         usuario.id,
         "descuento_saldo_admin_superior",
         "el admin superior descontó " +
-            formatearMoneda(monto),
+        formatearMoneda(monto),
         -monto,
         usuario.saldo
     );
@@ -6103,7 +8525,7 @@ async function alternarBloqueoDesdeAdminSuperior(
             mostrarMensaje(
                 mensajeAccionesAdminSuperior,
                 resultado.mensaje ||
-                    resultado.resultado,
+                resultado.resultado,
                 "var(--color-error)"
             );
 
@@ -6277,7 +8699,7 @@ async function resetearContrasenaDesdeAdminSuperior(
                 mostrarMensaje(
                     mensajeAccionesAdminSuperior,
                     resultado.mensaje ||
-                        "no se pudo resetear la contraseña",
+                    "no se pudo resetear la contraseña",
                     "var(--color-error)"
                 );
 
@@ -6370,9 +8792,9 @@ async function eliminarCuentaDesdeAdminSuperior(
 
     if (
         origen ===
-            "administradores" &&
+        "administradores" &&
         cuenta.tipo ===
-            "adminSuperior"
+        "adminSuperior"
     ) {
         mostrarMensaje(
             mensajeAccionesAdminSuperior,
@@ -6655,7 +9077,7 @@ async function crearAdministradorDesdePanelSuperior() {
             mostrarMensaje(
                 mensaje,
                 resultado.mensaje ||
-                    "no se pudo crear el administrador",
+                "no se pudo crear el administrador",
                 "var(--color-error)"
             );
 
@@ -6706,15 +9128,15 @@ async function crearAdministradorDesdePanelSuperior() {
 async function crearAlmaceneroDesdePanelSuperior() {
     if (
         inputUsuarioNuevoAlmacenero ===
-            null ||
+        null ||
         inputNombreNuevoAlmacenero ===
-            null ||
+        null ||
         inputContrasenaNuevoAlmacenero ===
-            null ||
+        null ||
         botonCrearNuevoAlmacenero ===
-            null ||
+        null ||
         mensajeCrearNuevoAlmacenero ===
-            null
+        null
     ) {
         return;
     }
@@ -6841,7 +9263,7 @@ async function crearAlmaceneroDesdePanelSuperior() {
             mostrarMensaje(
                 mensajeCrearNuevoAlmacenero,
                 resultado.mensaje ||
-                    "no se pudo crear el almacenero",
+                "no se pudo crear el almacenero",
                 "var(--color-error)"
             );
 
@@ -6854,7 +9276,7 @@ async function crearAlmaceneroDesdePanelSuperior() {
         if (
             datosAlmacenero !== null &&
             typeof datosAlmacenero ===
-                "object"
+            "object"
         ) {
             let encontrado =
                 false;
@@ -6866,7 +9288,7 @@ async function crearAlmaceneroDesdePanelSuperior() {
             ) {
                 if (
                     administradores[i].id ===
-                        datosAlmacenero.id ||
+                    datosAlmacenero.id ||
                     String(
                         administradores[i]
                             .usuario
@@ -6987,6 +9409,13 @@ function mostrarSoporte() {
 // =======================================================
 // EVENTOS
 // =======================================================
+
+escuchar(
+    selectAlmacenTitular,
+    "change",
+    cambiarAlmacenTitular
+);
+
 
 escuchar(
     botonGuardarContrasenaObligatoria,
@@ -7120,6 +9549,49 @@ escuchar(
     crearAlmaceneroDesdePanelSuperior
 );
 
+
+escuchar(
+    selectAlmacenFondoAdmin,
+    "change",
+    consultarFondoSeleccionadoAdmin
+);
+
+escuchar(
+    botonCargarFondoAdmin,
+    "click",
+    cargarFondoDesdeAdministrador
+);
+
+
+escuchar(
+    botonRetirarFondoAdmin,
+    "click",
+    retirarFondoDesdeAdministrador
+);
+
+
+
+escuchar(
+    botonActualizarAlmacenesAdmin,
+    "click",
+    cargarAlmacenesFondoAdmin
+);
+
+
+
+escuchar(
+    botonDescargarQrVale,
+    "click",
+    descargarQrVale
+);
+
+escuchar(
+    botonImprimirQrVale,
+    "click",
+    imprimirQrVale
+);
+
+
 // =======================================================
 // INICIO DE LA APLICACIÓN
 // =======================================================
@@ -7185,3 +9657,400 @@ if (botonCrearNuevoAdmin !== null) {
         crearAdministradorDesdePanelSuperior
     );
 }
+
+
+
+// =======================================================
+// RESTAURAR PANEL DEL ALMACENERO
+// =======================================================
+
+let restauracionAlmaceneroEnCurso =
+    false;
+
+async function aplicarSesionAlmaceneroRestaurada(
+    usuarioSupabase
+) {
+    if (
+        usuarioSupabase === null ||
+        typeof usuarioSupabase !==
+        "object" ||
+        usuarioSupabase.tipo !==
+        "operador_vales"
+    ) {
+        return false;
+    }
+
+    let almacenero =
+        buscarAdministradorPorNombreUsuario(
+            usuarioSupabase.usuario
+        );
+
+    if (almacenero === null) {
+        almacenero = {
+            id:
+                siguienteIdAdmin,
+
+            tipo:
+                "operadorVales",
+
+            usuario:
+                usuarioSupabase.usuario,
+
+            nombre:
+                usuarioSupabase.nombre,
+
+            contrasena:
+                "",
+
+            debeCambiarContrasena:
+                usuarioSupabase
+                    .debeCambiarContrasena ===
+                true,
+
+            autenticacion:
+                "supabase"
+        };
+
+        administradores.push(
+            almacenero
+        );
+
+        siguienteIdAdmin++;
+    } else {
+        almacenero.tipo =
+            "operadorVales";
+
+        almacenero.nombre =
+            usuarioSupabase.nombre;
+
+        almacenero.debeCambiarContrasena =
+            usuarioSupabase
+                .debeCambiarContrasena ===
+            true;
+
+        almacenero.autenticacion =
+            "supabase";
+    }
+
+    sesion.tipo =
+        "operadorVales";
+
+    sesion.adminId =
+        almacenero.id;
+
+    sesion.usuarioId =
+        null;
+
+    sesion.origen =
+        "supabase";
+
+    if (
+        almacenero
+            .debeCambiarContrasena
+    ) {
+        abrirCambioContrasenaObligatorio();
+
+        return true;
+    }
+
+    await abrirPanelAlmacenero();
+
+    return true;
+}
+
+
+
+
+
+
+
+// =======================================================
+// RESTAURAR SESIÓN DEL TITULAR
+// =======================================================
+
+async function aplicarSesionTitularRestaurada(
+    usuarioSupabase
+) {
+    if (
+        usuarioSupabase === null ||
+        typeof usuarioSupabase !==
+            "object" ||
+        usuarioSupabase.tipo !==
+            "titular"
+    ) {
+        return false;
+    }
+
+    if (usuarioSupabase.bloqueado) {
+        await window
+            .usuariosRepository
+            .cerrarSesion();
+
+        mostrarPantalla(
+            "#pantallaInicio"
+        );
+
+        mostrarMensaje(
+            mensajeInicio,
+            "usuario bloqueado",
+            "var(--color-error)"
+        );
+
+        return true;
+    }
+
+    const usuarioAplicacion = {
+        id:
+            usuarioSupabase.id,
+
+        tipo:
+            "titular",
+
+        usuario:
+            usuarioSupabase.usuario,
+
+        nombre:
+            usuarioSupabase.nombre,
+
+        curso:
+            usuarioSupabase.curso ||
+            "",
+
+        contrasena:
+            "",
+
+        saldo:
+            Number(
+                usuarioSupabase.saldo
+            ),
+
+        bloqueado:
+            usuarioSupabase.bloqueado ===
+            true,
+
+        historial:
+            Array.isArray(
+                usuarioSupabase.historial
+            )
+                ? usuarioSupabase.historial
+                : [],
+
+        debeCambiarContrasena:
+            usuarioSupabase
+                .debeCambiarContrasena ===
+            true,
+
+        autenticacion:
+            "supabase"
+    };
+
+    let indiceUsuario =
+        -1;
+
+    for (
+        let i = 0;
+        i < usuarios.length;
+        i++
+    ) {
+        if (
+            usuarios[i].id ===
+                usuarioAplicacion.id ||
+            String(
+                usuarios[i].usuario
+            ).toLowerCase() ===
+                String(
+                    usuarioAplicacion.usuario
+                ).toLowerCase()
+        ) {
+            indiceUsuario =
+                i;
+
+            break;
+        }
+    }
+
+    if (indiceUsuario === -1) {
+        usuarios.push(
+            usuarioAplicacion
+        );
+    } else {
+        usuarios[indiceUsuario] =
+            usuarioAplicacion;
+    }
+
+    sesion.tipo =
+        "titular";
+
+    sesion.usuarioId =
+        usuarioAplicacion.id;
+
+    sesion.adminId =
+        null;
+
+    sesion.origen =
+        "supabase";
+
+    carrito = [];
+
+    if (
+        usuarioAplicacion
+            .debeCambiarContrasena
+    ) {
+        abrirCambioContrasenaObligatorio();
+
+        return true;
+    }
+
+    await abrirBilletera();
+
+    return true;
+}
+
+
+
+
+
+async function restaurarAlmaceneroAlVolver() {
+    if (restauracionAlmaceneroEnCurso) {
+        return;
+    }
+
+    if (
+        typeof window.usuariosRepository ===
+            "undefined" ||
+        typeof window
+            .usuariosRepository
+            .restaurarSesion !==
+            "function"
+    ) {
+        await ocultarPantallaCarga();
+
+        return;
+    }
+
+    restauracionAlmaceneroEnCurso =
+        true;
+
+    try {
+        const resultado =
+            await window
+                .usuariosRepository
+                .restaurarSesion();
+
+        if (
+            !resultado.correcto ||
+            !resultado.sesionEncontrada
+        ) {
+            return;
+        }
+
+        const usuarioSupabase =
+            resultado.usuario;
+
+        if (
+            sesion.origen ===
+                "supabase" &&
+            sesion.tipo ===
+                "titular" &&
+            usuarioSupabase.tipo ===
+                "titular" &&
+            sesion.usuarioId ===
+                usuarioSupabase.id
+        ) {
+            return;
+        }
+
+        if (
+            sesion.origen ===
+                "supabase" &&
+            sesion.tipo ===
+                "operadorVales" &&
+            usuarioSupabase.tipo ===
+                "operador_vales"
+        ) {
+            return;
+        }
+
+        const titularRestaurado =
+            await aplicarSesionTitularRestaurada(
+                usuarioSupabase
+            );
+
+        if (titularRestaurado) {
+            return;
+        }
+
+        await aplicarSesionAlmaceneroRestaurada(
+            usuarioSupabase
+        );
+    } catch (error) {
+        console.error(
+            "Error al recuperar la sesión:",
+            error
+        );
+    } finally {
+        restauracionAlmaceneroEnCurso =
+            false;
+
+        await ocultarPantallaCarga();
+    }
+}
+// =======================================================
+// RECUPERAR SESIÓN AL VOLVER DESDE EL VALE EN CELULAR
+// =======================================================
+
+let temporizadorRestauracionAlmacenero =
+    null;
+
+function programarRestauracionAlmacenero() {
+    if (
+        document.visibilityState ===
+        "hidden"
+    ) {
+        return;
+    }
+
+    if (
+        temporizadorRestauracionAlmacenero !==
+        null
+    ) {
+        clearTimeout(
+            temporizadorRestauracionAlmacenero
+        );
+    }
+
+    temporizadorRestauracionAlmacenero =
+        setTimeout(
+            function () {
+                temporizadorRestauracionAlmacenero =
+                    null;
+
+                restaurarAlmaceneroAlVolver();
+            },
+            150
+        );
+}
+
+window.addEventListener(
+    "pageshow",
+    programarRestauracionAlmacenero
+);
+
+window.addEventListener(
+    "focus",
+    programarRestauracionAlmacenero
+);
+
+document.addEventListener(
+    "visibilitychange",
+    function () {
+        if (
+            document.visibilityState ===
+            "visible"
+        ) {
+            programarRestauracionAlmacenero();
+        }
+    }
+);
+
+programarRestauracionAlmacenero();

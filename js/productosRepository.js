@@ -30,6 +30,24 @@ async function listarProductosRepositorio(
     );
 }
 
+
+
+// =======================================================
+// LISTAR PRODUCTOS POR ALMACÉN
+// =======================================================
+
+async function listarProductosPorAlmacenRepositorio(
+    almacenId
+) {
+    const adaptador =
+        obtenerAdaptadorProductos();
+
+    return await adaptador
+        .listarProductosPorAlmacen(
+            almacenId
+        );
+}
+
 // =======================================================
 // CREAR PRODUCTO
 // =======================================================
@@ -90,6 +108,9 @@ async function eliminarProductoRepositorio(
 window.productosRepository = {
     listarProductos:
         listarProductosRepositorio,
+
+    listarProductosPorAlmacen:
+        listarProductosPorAlmacenRepositorio,
 
     crearProducto:
         crearProductoRepositorio,

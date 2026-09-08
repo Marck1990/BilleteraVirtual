@@ -46,17 +46,22 @@ function normalizarProductoSupabase(
         activo:
             producto.activo !== false,
 
+        almacenId:
+            producto.almacen_id ||
+            null,
+
         creadoEn:
-            producto.creado_en || null,
+            producto.creado_en ||
+            null,
 
         actualizadoEn:
-            producto.actualizado_en || null,
+            producto.actualizado_en ||
+            null,
 
         almacenamiento:
             "supabase"
     };
 }
-
 // =======================================================
 // LISTAR PRODUCTOS
 // =======================================================
@@ -149,6 +154,132 @@ async function listarProductosSupabase(
     } catch (error) {
         console.error(
             "Error inesperado al listar productos:",
+            error
+        );
+
+        return {
+            correcto: false,
+
+            mensaje:
+                "no se pudo conectar con Supabase",
+
+            productos: []
+        };
+    }
+}
+
+// =======================================================
+// LISTAR PRODUCTOS DEL ALMACÉN SELECCIONADO
+// =======================================================
+
+async function listarProductosPorAlmacenSupabase(
+    almacenId
+) {
+    if (
+        typeof almacenId !== "string" ||
+        almacenId.trim() === ""
+    ) {
+        return {
+            correcto: false,
+
+            resultado:
+                "almacen_invalido",
+
+            mensaje:
+                "seleccioná un almacén",
+
+            productos: []
+        };
+    }
+
+    try {
+        const cliente =
+            obtenerClienteProductosSupabase();
+
+        const respuesta =
+            await cliente.rpc(
+                "listar_productos_por_almacen",
+                {
+                    p_almacen_id:
+                        almacenId
+                }
+            );
+
+        if (respuesta.error) {
+            console.error(
+                "Error al listar productos del almacén:",
+                respuesta.error
+            );
+
+            return {
+                correcto: false,
+
+                mensaje:
+                    respuesta.error.message,
+
+                productos: []
+            };
+        }
+
+        if (
+            respuesta.data === null ||
+            respuesta.data.resultado !==
+                "correcto"
+        ) {
+            return {
+                correcto: false,
+
+                resultado:
+                    respuesta.data
+                        ?.resultado ||
+                    "respuesta_invalida",
+
+                mensaje:
+                    "no se pudieron obtener los productos del almacén",
+
+                productos: []
+            };
+        }
+
+        const listaOriginal =
+            Array.isArray(
+                respuesta.data.productos
+            )
+                ? respuesta.data.productos
+                : [];
+
+        const productos = [];
+
+        for (
+            let i = 0;
+            i < listaOriginal.length;
+            i++
+        ) {
+            const producto =
+                normalizarProductoSupabase(
+                    listaOriginal[i]
+                );
+
+            if (producto !== null) {
+                productos.push(
+                    producto
+                );
+            }
+        }
+
+        return {
+            correcto: true,
+
+            almacen:
+                respuesta.data.almacen ||
+                null,
+
+            productos:
+                productos
+        };
+    } catch (error) {
+        console.error(
+            "Error inesperado al listar productos del almacén:",
             error
         );
 
@@ -417,6 +548,9 @@ async function eliminarProductoSupabase(
 window.productosSupabaseAdapter = {
     listarProductos:
         listarProductosSupabase,
+
+    listarProductosPorAlmacen:
+        listarProductosPorAlmacenSupabase,
 
     crearProducto:
         crearProductoSupabase,
