@@ -6890,60 +6890,167 @@ function renderizarHistorialEnContenedor(
         return;
     }
 
-    contenedor.innerHTML = "";
+    contenedor.innerHTML =
+        "";
 
-    let hayMovimientos = false;
+    const movimientosGlobales =
+        [];
 
     for (
         let i = 0;
         i < usuarios.length;
         i++
     ) {
+        const historial =
+            Array.isArray(
+                usuarios[i].historial
+            )
+                ? usuarios[i].historial
+                : [];
+
         for (
             let j = 0;
-            j < usuarios[i].historial.length;
+            j < historial.length;
             j++
         ) {
             const movimiento =
-                usuarios[i].historial[j];
+                historial[j];
 
-            hayMovimientos = true;
+            const textoFecha =
+                String(
+                    movimiento.fecha || ""
+                ).trim();
 
-            contenedor.innerHTML += `
-                <div class="item-historial">
+            let fechaOrden =
+                0;
 
-                    <p class="historial-detalle">
-                        ${usuarios[i].nombre}:
-                        ${movimiento.detalle}
-                    </p>
+            const partesFecha =
+                textoFecha.match(
+                    /^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/
+                );
 
-                    <p class="historial-monto">
-                        tipo:
-                        ${movimiento.tipo}
-                    </p>
+            if (partesFecha !== null) {
+                fechaOrden =
+                    new Date(
+                        Number(partesFecha[3]),
+                        Number(partesFecha[2]) - 1,
+                        Number(partesFecha[1]),
+                        Number(partesFecha[4]),
+                        Number(partesFecha[5]),
+                        Number(partesFecha[6] || 0)
+                    ).getTime();
+            } else {
+                const fechaConvertida =
+                    new Date(
+                        textoFecha
+                    ).getTime();
 
-                    <p class="historial-monto">
-                        monto:
-                        ${formatearMoneda(movimiento.monto)}
-                    </p>
+                if (
+                    !Number.isNaN(
+                        fechaConvertida
+                    )
+                ) {
+                    fechaOrden =
+                        fechaConvertida;
+                }
+            }
 
-                    <p class="historial-monto">
-                        saldo resultante:
-                        ${formatearMoneda(movimiento.saldoResultante)}
-                    </p>
+            movimientosGlobales.push({
+                nombreUsuario:
+                    usuarios[i].nombre,
 
-                    <p class="historial-fecha">
-                        ${movimiento.fecha}
-                    </p>
+                movimiento:
+                    movimiento,
 
-                </div>
-            `;
+                fechaOrden:
+                    fechaOrden,
+
+                posicionOriginal:
+                    movimientosGlobales.length
+            });
         }
     }
 
-    if (!hayMovimientos) {
+    if (
+        movimientosGlobales.length ===
+        0
+    ) {
         contenedor.innerHTML =
             '<p class="lista-vacia">todavía no hay movimientos registrados</p>';
+
+        return;
+    }
+
+    movimientosGlobales.sort(
+        function (
+            movimientoA,
+            movimientoB
+        ) {
+            if (
+                movimientoA.fechaOrden ===
+                movimientoB.fechaOrden
+            ) {
+                return (
+                    movimientoA
+                        .posicionOriginal -
+                    movimientoB
+                        .posicionOriginal
+                );
+            }
+
+            return (
+                movimientoB.fechaOrden -
+                movimientoA.fechaOrden
+            );
+        }
+    );
+
+    const movimientosVisibles =
+        movimientosGlobales.slice(
+            0,
+            5
+        );
+
+    for (
+        let i = 0;
+        i < movimientosVisibles.length;
+        i++
+    ) {
+        const registro =
+            movimientosVisibles[i];
+
+        const movimiento =
+            registro.movimiento;
+
+        contenedor.innerHTML += `
+            <div class="item-historial">
+
+                <p class="historial-detalle">
+                    ${registro.nombreUsuario}:
+                    ${movimiento.detalle}
+                </p>
+
+                <p class="historial-monto">
+                    tipo:
+                    ${movimiento.tipo}
+                </p>
+
+                <p class="historial-monto">
+                    monto:
+                    ${formatearMoneda(movimiento.monto)}
+                </p>
+
+                <p class="historial-monto">
+                    saldo resultante:
+                    ${formatearMoneda(movimiento.saldoResultante)}
+                </p>
+
+                <p class="historial-fecha">
+                    ${movimiento.fecha}
+                </p>
+
+            </div>
+        `;
     }
 }
 
