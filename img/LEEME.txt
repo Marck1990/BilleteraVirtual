@@ -1,0 +1,11 @@
+Archivos para Billetera Virtual
+================================
+
+Copiá estos archivos dentro de la carpeta img del proyecto:
+
+- icono-billetera.svg
+- icono-billetera-512.png
+- icono-billetera-180.png
+- vista-previa-billetera.png
+
+Después agregá las etiquetas indicadas por Codex dentro del <head> de index.html.
